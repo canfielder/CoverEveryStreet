@@ -1,0 +1,56 @@
+---
+title: "Exploration"
+author: "Evan Canfield"
+date: "3/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Download and locally save OpenStreetMap files.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  OpenStreetMap,
+  osmdata,
+  tidyverse
+)
+```
+
+# Download Map
+```{r}
+# Define latitude/longitude bounding box
+clt_bb <- osmdata::getbb("Charlotte North Carolina")
+print(clt_bb)
+
+# Download Map
+osm_map_clt <- openmap(
+  upperLeft = c(clt_bb[2], clt_bb[1]), 
+  lowerRight = c(clt_bb[4], clt_bb[3]),
+  zoom = NULL,
+  type = c("osm"),
+  mergeTiles = TRUE
+  )
+
+# Convert map format
+clt_map <- OpenStreetMap::openproj(clt_map)
+
+# Plot to verify
+OpenStreetMap::autoplot.OpenStreetMap(clt_map)
+```
+
+# Export Map
+```{r}
+file_name <- paste("charlotte_nc_streets_", Sys.Date(),".RDS", sep = "")
+file_path <- file.path(".", "..", "data", "open_streets_map_tiles", file_name)
+
+saveRDS(clt_map, file_path)
+```
+
+

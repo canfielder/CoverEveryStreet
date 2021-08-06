@@ -1,0 +1,348 @@
+---
+title: "Exploration"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Determine how to use GPS tracking data files to determine where has been walked.
+
+This notebook will walk through the processing of a single GPS event, but will be set expect to iterate over multiple events
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  sf,
+  tidyverse
+)
+```
+
+## Data
+### Street Map
+```{r import_data}
+# Street network data.frame
+network.df <- readRDS("./../data/dodgr_network_charlotte_nc_2021-03-17.RDS")
+
+# Define column type to avoid messages
+col_type <- c(
+  "edge_id" = "character",
+  "to_id" = "character",
+  "from_id" = "character",
+  "status" = "character"
+)
+```
+
+### GPS Tracking Files
+```{r}
+# Define file directory
+file_dir <- "./../data/gps_tracking_files/test_case"
+
+# List all possible files
+available_files <- list.files(file_dir)
+print(available_files)
+
+# Select file
+file_name <- available_files[2]
+
+# Define file path
+file_path <- file.path(file_dir, file_name)
+print(file_path)
+
+# Show all possible file layers
+print(sf::st_layers(file_path))
+
+# Load required layers
+tracks.sf <- sf::st_read(dsn = file_path, layer = "tracks")
+track_points.sf <- sf::st_read(dsn = file_path, layer = "track_points")
+```
+
+# Processing
+## Extract Activity Metadata
+### Property 1: Activity Occurred with Kelsey
+```{r}
+# Extract note
+activity_note <- tolower(tracks.sf$desc)
+
+# Test if property requirement is met
+## Property 1: Activity occurred with Kelsey
+property_1_test <- grepl(
+  pattern = 'kelsey', 
+  activity_note, 
+  fixed=TRUE
+  )
+
+# Output property 1 condition
+property_1_text <- "Property 1 (Activity Occurred With Kelesy): "
+glue("{property_1_text} {property_1_test}")
+```
+
+### Starting Time of Event
+```{r}
+activity_timestamp_start <- track_points.sf$time[1]
+print(timestamp_start)
+```
+
+### Activity Type
+```{r}
+activity_type <- tracks.sf$type
+```
+
+## Initialize Tracking Columns in Street Network
+```{r}
+network.df <- network.df %>% 
+  mutate(
+    activity = NA,
+    timestamp_start = NA,
+    property_1 = FALSE
+  )
+```
+
+
+## Reduce Street Network Size
+* Start out with subset of the street network
+* Use zip code 28205 due to it's relatively small geographic size and personal familiarity with the area
+```{r}
+# Select zip codes to subset data with
+select_zip_codes <- c("28205")
+
+# Subset to selected zip codes
+network_demo.df <- network.df %>% 
+  filter(
+    from_zip %in% select_zip_codes | 
+      to_zip %in% select_zip_codes,
+    highway != "path"
+    )
+
+# network_demo.df %>% glimpse()
+```
+
+## Create SF LINSTRING object from Street Segment Latitude/Longitude
+* We will us SF object for each street and each gps object. 
+* Utilizing SF objects will all us to use SF specific functions to see if a GSP track overlaps with an existing street object.
+* We convert the tabular latitude/longitude data into a new column for a LINESTRING object.
+```{r}
+# LINESTRING Function
+make_linestring <- function (from_lon, from_lat, to_lon, to_lat) {
+  st_linestring(
+    matrix(
+      data = c(from_lon, to_lon, from_lat, to_lat), 
+      nrow = 2, 
+      ncol =  2
+      )
+    )
+}
+
+# Make LINESTRING and convert df to sf object
+network_demo.sf <- network_demo.df %>% 
+  select(from_lon, from_lat, to_lon, to_lat) %>% 
+  pmap(make_linestring) %>% 
+  st_as_sfc(crs = 4326) %>% 
+  {tibble(
+    edge_id = network_demo.df$edge_id, 
+    geometry = .)
+    }%>% 
+  left_join(
+    y = network_demo.df,
+    by = "edge_id"
+  ) %>% 
+  st_sf()
+
+network_demo.sf %>% glimpse()
+```
+
+# GPS/Street Overlap
+## Define Bounding Box of GPS
+```{r}
+# Extract bounding box
+bbox_activity <- sf::st_bbox(tracks.sf$geometry)
+bbox_activity
+```
+
+## Filter Street Network by Bounding Box
+Filter street network dataframe by using the bounding box of the GPS track to limit the street network to only streets within the box.
+```{r}
+n_streets <- length(network_demo.sf$edge_id)
+
+# Crop network to only streets within the activity bounding box 
+# Unsure if this includes streets which are partially in the bounding box
+# I expect they are not included. 
+network_bbox.sf <- st_crop(
+  x = network_demo.sf, 
+  y = bbox_activity
+  )
+
+# Determine number in subset - total
+n_bbox_streets <- length(network_bbox.sf$edge_id)
+
+# Remove streets that have already been assigned an activity
+# Not an issue for first activity
+network_bbox.sf <- network_bbox.sf %>% filter(is.na(activity))
+
+# Determine number in subset - available
+n_bbox_streets_avail <- length(network_bbox.sf$edge_id)
+
+# Generate street count totals, pre and post
+n_streets <- length(network_demo.sf$edge_id)
+n_bbox_streets <- length(network_bbox.sf$edge_id)
+
+data_reduction <- round(1 - (n_streets - n_bbox_streets_avail) / n_streets, 3 )
+data_reduction <- data_reduction
+
+# Print statements to show effect of subset
+print(" ")
+glue("Streets in Network - Total: {n_streets}")
+glue("Streets in Network - Subset - All: {n_bbox_streets}")
+glue("Streets in Network - Subset - Available: {n_bbox_streets_avail}")
+glue("Effective street network reduced to {data_reduction*100}% of total.")
+```
+
+## Check if Activity is in Within Distance of Street Network
+### Function
+```{r}
+within_test <- function(street_linestring, activity_geometry, distance_thresh = 1e-5) {
+  
+  # Check if LINESTRING is within distance of activity gps track
+  st_within_test <- sf::st_is_within_distance(
+    x = street_linestring, 
+    y = activity_geometry, 
+    dist = distance_thresh
+  )
+  
+  # Convert response to binary (Within threshold = 1)
+  if (length(st_within_test[[1]]) != 0) {
+    response = 1
+  } else {
+    response = 0
+  }
+  
+  # Export results
+  response
+}
+```
+
+
+### Test Function
+#### Loop
+* Execute function in a loop, one observation at a time.
+```{r}
+# Define distance threshold 
+distance_thresh <- 1e-4
+
+# Initialize
+sf_within_count <- 0
+
+# Execute loop across bounding box subsetted data
+for (geom in network_bbox.sf$geometry){
+  
+  response <- within_test(
+    street_linestring = geom, 
+    activity_geometry = tracks.sf$geometry, 
+    distance_thresh   = distance_thresh
+  )
+  
+  sf_within_count <- sf_within_count + response
+}
+
+# Print statements to show effect of function
+n_streets <- length(network_bbox.sf$edge_id)
+glue("Total streets in subset: {n_streets}")
+glue("Total streets identified within distance threshold: {sf_within_count}")
+```
+
+#### Vectorize
+* Execute vectorized form of function.
+```{r}
+# Vectorize function
+within_test_v <- Vectorize(within_test, SIMPLIFY = FALSE)
+
+# Modify column with new function
+network_bbox.sf <- network_bbox.sf %>% 
+  mutate(
+    covered = within_test_v(
+        street_linestring = geometry,
+        activity_geometry = tracks.sf$geometry,
+        distance_thresh   = distance_thresh
+      )
+  ) %>% 
+  tidyr::unnest(covered)
+
+# Print statements to show effect of function
+street_segments_covered <- sum(network_bbox.sf$covered)
+glue("Total streets in subset: {n_streets}")
+glue("Total streets identified within distance threshold: {street_segments_covered}")
+```
+
+## Apply Metadata
+```{r}
+# Assign activity metadata for streets identified
+network_bbox.sf <- network_bbox.sf %>% 
+  mutate(
+        activity        = case_when(covered == 1 ~ activity_type),
+        timestamp_start = case_when(covered == 1 ~ activity_timestamp_start),
+        property_1      = case_when(covered == 1 ~ property_1_test)
+  ) %>% 
+  select(-covered)
+```
+
+```{r}
+network_bbox.sf %>% glimpse()
+```
+
+
+## Rejoin with Complete Street Network
+```{r}
+# Reduce data to only edge ids where an activity was identified
+network_activity_id.sf <- network_bbox.sf %>% 
+  filter(!is.na(activity)) 
+
+# Extract edge ids
+egde_ids_activity <- network_activity_id.sf %>% pull(edge_id)
+
+# Remove edges where the activity was identified
+network_demo.sf <- network_demo.sf %>% 
+  filter(!(edge_id %in% egde_ids_activity))
+
+# Rebind edges where activities were identified, now with metadata
+network_demo_post.sf <- network_demo.sf %>% 
+  bind_rows(network_activity_id.sf)
+```
+
+
+# Visualization
+## Color Only
+```{r}
+p <- ggplot(data = network_demo_post.sf) +
+  geom_segment(
+    mapping = aes(
+      x = from_lon,
+      xend = to_lon,
+      y = from_lat,
+      yend = to_lat,
+      color = activity, 
+      text_1 = highway, 
+      text_2 = tiger.name_base,
+      text_3 = edge_id,
+      text_4 = from_id,
+      text_5 = to_id,
+      text_6 = geom_num
+      )
+  ) + coord_map()
+
+p
+```
+
+
+## Plotly Conversion
+
+```{r}
+ggplotly(p, tooltip = c("color","text_1", "text_2", "text_3",
+                      "text_4", "text_5", "text_6"))
+```

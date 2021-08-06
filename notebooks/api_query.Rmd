@@ -1,0 +1,43 @@
+---
+title: "OpenStreetMap API Query"
+author: "Evan Canfield"
+date: "3/14/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+The following notebook executes a query of the OpenStreetsMap API. Query results are then saved locally. This step is separated from the rest of the project due to API queries only needing to be run once, not ever time, and the amount of time large queries can take.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  osmdata,
+  sf,
+  tidyverse
+)
+```
+
+# Query API 
+```{r query_api}
+clt_streets <- getbb("Charlotte North Carolina") %>%
+  opq()%>%
+  add_osm_feature(
+    key   = key
+    ) %>%
+  osmdata_sf(quiet = TRUE) %>% 
+  osm_poly2line ()
+```
+
+# Export 
+```{r export_osmdata}
+file_name <- paste("osm_streets_charlotte_nc_", Sys.Date(),".RDS", sep = "")
+file_path <- file.path(".", "..", "data", file_name)
+
+saveRDS(clt_streets, file_path)
+```

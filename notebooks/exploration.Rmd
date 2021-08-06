@@ -1,0 +1,42 @@
+---
+title: "Exploration"
+author: "Evan Canfield"
+date: "3/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+General exploration of how to implement osmdata and dodgr.
+
+# Import
+## Packages
+```{r}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  dodgr,
+  tidyverse
+)
+```
+
+
+## Data
+```{r}
+clt <- readRDS("./../data/streets_charlotte_nc_2021-03-15.RDS")
+```
+
+# Convert OSM to DODGR
+Create weighted streetnet.
+```{r}
+clt_weighted <- weight_streetnet(x = clt$osm_lines)
+```
+
+Create contract graph
+```{r}
+clt_contract <- dodgr_contract_graph(clt_weighted)
+clt_contract
+```
+

@@ -1,0 +1,229 @@
+---
+title: "Exploration"
+author: "Evan Canfield"
+date: "3/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Exploration of data visualization.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  data.table,
+  leaflet,
+  OpenStreetMap,
+  osmdata,
+  plotly,
+  sf,
+  tidyverse
+)
+```
+
+## Data
+### Street Map w/ Tracking
+```{r import_data}
+# Street network data.frame
+clt_network.df <- readRDS("./../data/dodgr_network_charlotte_nc_2021-03-17.RDS")
+
+# Define column type to avoid messages
+col_type <- c(
+  "edge_id" = "character",
+  "to_id" = "character",
+  "from_id" = "character",
+  "status" = "character"
+)
+
+# Status tracking data.frame
+tracking.df <- fread(
+  file = "./../data/tracking_charlotte_nc_active_2021-03-17.CSV", 
+  stringsAsFactors = FALSE,
+  colClasses = col_type
+  ) 
+```
+
+```{r}
+clt_network.df
+```
+
+```{r}
+tracking.df
+```
+
+### OpenStreetsMap Background
+
+```{r}
+clt_bb <- getbb("Charlotte North Carolina")
+
+clt_bb
+clt_bb[1]
+clt_bb[2]
+clt_bb[3]
+clt_bb[4]
+```
+
+
+
+```{r}
+
+# Download Map
+clt_map <- openmap(
+  upperLeft = c(clt_bb[2], clt_bb[1]), 
+  lowerRight = c(clt_bb[4], clt_bb[3]),
+  zoom = NULL,
+  type = c("osm"),
+  mergeTiles = TRUE
+  )
+
+# Convert
+clt_map <- openproj(clt_map)
+
+# Plot
+OpenStreetMap::autoplot.OpenStreetMap(clt_map)
+```
+
+
+# Processing
+We need to join our street network with the tracking status table.
+```{r}
+# Reduce to essential columns
+tracking.df <- tracking.df %>% 
+  select(edge_id, status)
+
+# Join status with street network
+clt_network.df <- clt_network.df %>% 
+  left_join(
+    tracking.df,
+    by = "edge_id"
+    )
+```
+
+To verify our join is working correctly we'll check to make sure there are no missing status values post-join.
+```{r}
+Hmisc::describe(clt_network.df$status)
+```
+
+# EDA
+```{r}
+Hmisc::describe(clt_network.df$highway)
+```
+
+```{r}
+Hmisc::describe(clt_network.df$to_zip)
+
+clt_network.df %>% 
+  group_by(to_zip) %>% 
+  summarise(
+    freq = round( 100 * n() / nrow(clt_network.df), 2)
+    ) %>%
+  mutate(
+    to_zip = as.numeric(to_zip)
+  ) %>% 
+  arrange(to_zip)
+```
+
+# Data Processing
+We'll start out with a simple plot of the 28205 ZIP code. We pick this area due to it's relatively small geographic size and I am familiar with its street layout.
+```{r}
+
+select_zip_codes <- c("28201", "28202", "28203", "28204", "28205")
+
+clt_network_demo.df <- clt_network.df %>% 
+  filter(
+    from_zip %in% select_zip_codes | 
+      to_zip %in% select_zip_codes,
+    highway != "path"
+    )
+
+clt_network_demo.df %>% glimpse()
+```
+
+We also need to create a **sf** object for the leaflet visual. We can use **sf** in ggplot as well, so it is easier to just convert the data before all visualization. We'll use the **pmap** function from **purrr** to apply a function which will convert the line segments into LINESTRING objects. Once the geometry is created, we will then join the LINESTRING back to the dataset, and then convert to an **Sf_object**.
+
+```{r}
+# Make LINESTRING and convert df to sf object
+clt_network_demo.sf <- clt_network_demo.df %>% 
+  select(from_lon, from_lat, to_lon, to_lat) %>% 
+  pmap(makeLinestring) %>% 
+  st_as_sfc(crs = 4326) %>% 
+  {tibble(
+    edge_id = clt_network_demo.df$edge_id, 
+    geometry = .)
+    }%>% 
+  left_join(
+    y = clt_network_demo.df,
+    by = "edge_id"
+  ) %>% 
+  st_sf()
+
+
+clt_network_demo.sf %>% glimpse()
+```
+
+# Visualization
+## Static
+We'll start out with a simple plot of the 28205 ZIP code. We pick this area due to it's relatively small geographic size and I am familiar with its street layout.
+
+### Color Only
+```{r}
+
+df <- clt_network_demo.df
+
+# Subset
+street_name = 'Club'
+df <- df %>% 
+  # filter(tiger.name_base == street_name) %>% 
+  filter(edge_id %in% c(213073, 213074, 213075, 213076))
+
+p <- ggplot(data = df) +
+  geom_segment(
+    mapping = aes(
+      x = from_lon,
+      xend = to_lon,
+      y = from_lat,
+      yend = to_lat,
+      color = edge_id, 
+      text_1 = highway, 
+      text_2 = tiger.name_base,
+      text_3 = edge_id,
+      text_4 = from_id,
+      text_5 = to_id
+      )
+  ) + coord_map()
+
+p
+```
+
+```{r}
+df
+```
+
+
+### Plotly Conversion
+
+```{r}
+ggplotly(p, tooltip = c("color","text_1", "text_2", "text_3",
+                      "text_4", "text_5"))
+```
+
+
+## Iteractive
+
+```{r}
+m <- leaflet(data = clt_network_demo.sf) %>% 
+  addTiles() %>% 
+  addPolylines(
+    color = status
+    ) %>% 
+  setView(-80.7912262, 35.245896, zoom = 17)
+
+m
+```
+
