@@ -1,0 +1,71 @@
+---
+title: "Generate Network - OpenStreetsMap API Query"
+author: "Evan Canfield"
+date: "8/24/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+The following notebook executes a query of the OpenStreetsMap API. Query results are then saved locally. This step is separated from the rest of the project due to API queries only needing to be run once, not every time, and the amount of time large queries can take.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  osmdata,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files("./../R/", full.names = TRUE)
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+# Query API 
+```{r query_api}
+start_time <- Sys.time()
+
+# Define location to query OSM
+location_label <- "Charlotte North Carolina"
+
+# Define key for pulling street data from OSM
+osm_key = "highway"
+
+# Pull data from OSM
+osm_street_network <- osmdata::getbb(location_label) %>%
+  osmdata::opq() %>%
+  osmdata::add_osm_feature(
+    key   = osm_key,
+    value = osmdata::available_tags(osm_key)
+    ) %>%
+  osmdata::osmdata_sf(quiet = TRUE) %>% 
+  osmdata::osm_poly2line()
+
+end_time <- Sys.time()
+time_elapsed <- secondsToPeriodTime(start_time, end_time)
+print(glue::glue('Time Elapsed:\t{time_elapsed}'))
+```
+
+# Export 
+```{r export_osmdata_network}
+start_time <- Sys.time()
+
+file_name <- paste("network_00_osm_api_query_", Sys.Date(),".RDS", sep = "")
+file_path <- file.path(".", "..", "data", file_name)
+saveRDS(osm_street_network, file_path)
+
+end_time <- Sys.time()
+time_elapsed <- secondsToPeriodTime(start_time, end_time)
+print(glue::glue('Time Elapsed:\t{time_elapsed}'))
+```

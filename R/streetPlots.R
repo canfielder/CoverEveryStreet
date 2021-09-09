@@ -38,10 +38,17 @@ plotStreets <- function(df, color_feature) {
         text_1 = highway, 
         text_2 = tiger.name_base,
         text_3 = edge_id,
-        text_4 = from_id,
-        text_5 = to_id
+        text_4 = segment_id,
+        text_5 = from_id,
+        text_6 = to_id
       )
     ) + 
       coord_map() +
-      theme(legend.position = "none")
+      theme(
+        legend.position = "none",
+        plot.background = element_rect(fill = "white"),
+        panel.background = element_rect(fill = "white",
+                                        colour = "white")
+        )
+  
   }

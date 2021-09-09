@@ -1,0 +1,1234 @@
+---
+title: "Exploration"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Determine how to ensure roads represented as two parallel lines have the same segment intersections on both sides of the line.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  sf,
+  stringi,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files("./../R/", full.names = TRUE)
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+# Street network data.frame
+network_raw.df <- readRDS("./../data/dodgr_network_charlotte_nc_2021-03-17.RDS")
+
+# Define column type to avoid messages
+col_type <- c(
+  "edge_id" = "character",
+  "to_id" = "character",
+  "from_id" = "character",
+  "status" = "character"
+)
+```
+
+# Processing
+## Drop Duplicates
+* There are duplicate rows, with from and to ids swapped
+```{r}
+# Record number of observations before dropping
+n_edge_raw <- length(network_raw.df$edge_id)
+
+# Drop duplicate observations
+network.df <- network_raw.df %>% 
+    mutate(
+    dup_id = if_else(
+      from_id > to_id, 
+      paste(to_id, from_id, sep = "_"),
+      paste(from_id, to_id,  sep = "_")
+    )
+  )  %>% 
+  group_by(dup_id) %>% 
+  filter(row_number()==1) %>% 
+  ungroup() %>% 
+  select(-dup_id)
+
+# Record number of observations after dropping
+n_edge_post <- length(network.df$edge_id)
+
+glue('Number of observations - original:\t\t\t{n_edge_raw}')
+glue('Number of observations - post duplicate removal:\t{n_edge_post}')
+```
+
+### Spot Check
+```{r}
+network.df %>% 
+  filter(
+    edge_id %in% seq(213042, 213052, 1)
+  )
+```
+
+### Highway Types
+```{r}
+network.df %>% 
+  count(highway) %>% 
+  arrange(desc(n))
+```
+
+### Remove Street Types
+```{r}
+street_types <- c('path', 'primary_link', 'secondary_link', 'tertiary_link', 'trunk_link', 
+                  'living_street')
+network.df <- network.df %>% 
+  filter(!(highway %in% street_types))
+```
+
+
+# Determine Intersections
+* Each **edge_id** is defined by two nodes, and TO and FROM node. 
+* If a node is used by multiple edge_ids as a TO or FROM node then we know this node is an intersection.
+* A case to be careful of is when a node is used only twice, once as a TO and once as a FROM node. While this is multiple total cases, this is a clear indication of the node not being an intersection, and instead just a straight street.
+* We will determine which of the possible node IDS are intersections.
+
+## Raw Counts
+### FROM Nodes
+```{r}
+# Determine which FROM nodes are intersections
+from_node_freq.df <- network.df %>% 
+  group_by(from_id) %>% 
+  summarise(count = n()) %>%
+  ungroup() %>% 
+  filter(count > 1) %>%
+  arrange(desc(count))
+
+from_node_freq.df
+```
+
+### TO Nodes
+```{r}
+# Determine which FROM nodes are intersections
+to_node_freq.df <- network.df %>% 
+  group_by(to_id) %>% 
+  summarise(count = n()) %>%
+  ungroup() %>% 
+  filter(count > 1) %>%
+  arrange(desc(count))
+
+to_node_freq.df
+```
+
+## Consolidate
+```{r}
+# FROM IDs
+from_ids <- from_node_freq.df %>%  pull(from_id) %>% unique()
+glue('Number of unique nodes - TO:\t{length(from_ids)}')
+
+# To IDs
+to_ids <- to_node_freq.df %>%  pull(to_id) %>% unique()
+glue('Number of unique nodes - FROM:\t{length(to_ids)}')
+
+# Combine and reduce to unique
+intersection_ids <- unique(c(from_ids, to_ids))
+
+glue('Number of nodes - intersection:\t{length(intersection_ids)}')
+glue('Number of nodes - all:\t\t{n_edge_post}')
+```
+
+```{r}
+network.df %>% 
+  filter(edge_id %in% seq(213040, 213050, 1))
+```
+
+
+# Subset Street Network
+
+```{r}
+# Define subsetting Parameters
+center_lat <- 35.242974
+center_lon <- -80.794735
+radius <- 1000
+
+# Execute
+network_subset.df <- subset_lat_lon(
+  network    = network.df, 
+  lat_center = center_lat, 
+  lon_center = center_lon,
+  radius     = radius 
+    )
+
+```
+
+# Define Node-to-Node Segments 
+```{r}
+network <- network_subset.df
+
+# Initialize segment id column
+blank_tag <- "<empty>"
+network <- network %>% 
+  mutate(segment_id = blank_tag)
+
+iter_count <- 0
+
+start_time <- Sys.time()
+
+# Execute function while any
+while (any(network$segment_id == blank_tag)) {
+  
+  iter_count <- iter_count + 1
+  # print(glue('Iteration:\t\t{iter_count}'))
+  
+  # Segment ID
+  ## Extract used segment ids
+  utilized_segment_ids <- network %>% 
+    select(segment_id) %>% 
+    drop_na() %>% 
+    pull()
+  
+  ## Generate new segment ID
+  segment_id_random <- randomID(utilized_segment_ids)
+  # print(glue('Segment ID:\t\t{segment_id_random}'))
+    
+  # Randomly select edge_id of row with segment_id == NA
+  select_edge_id <- network %>% 
+    filter(segment_id == blank_tag) %>% 
+    sample_n(1) %>% 
+    pull(edge_id)
+  
+  # Initialize recurse counter
+  recurse_count <- 0
+  
+  # Walk through network
+  network <- walk_streets(
+    network.df        = network, 
+    input_edge_id     = select_edge_id, 
+    segment_id_random = segment_id_random,
+    n_recurse         = recurse_count
+   )
+ 
+ if ((iter_count %% 1e3) == 0) {
+   print(glue('Number of iterations: {iter_count}'))
+ }
+ 
+ if (iter_count > 1e6){
+   print(glue('Maximum iterations reached.'))
+   break
+ }
+  
+  # print(glue(""))
+
+}
+
+end_time <- Sys.time()
+time_elapsed <- round(
+  difftime(
+    end_time, start_time,
+    units = c("secs")
+    ),
+  1)
+
+nodes <- unique(c(network$from_id, network$to_id))
+n_intersections <- length(nodes[nodes %in% intersection_ids])
+n_segments <- length(unique(network$segment_id))
+
+glue('Number of iterations:\t\t\t\t{iter_count}')
+glue('Number of edges - pre-processing:\t\t{length(network$edge_id)}')
+glue('Number of edges - post processing:\t\t{length(network$edge_id)}')
+glue('Number of segments:\t\t\t\t{n_segments}')
+glue('Number of intersections:\t\t\t{n_intersections}')
+glue('Time Elapsed:\t\t\t\t\t{time_elapsed} seconds')
+```
+
+
+# Global Preprocessing
+## Check point
+```{r}
+network_no_processing.df <- network
+network_no_processing.df
+```
+
+## Calculate Edge Centerpoint
+```{r}
+network.df <- network_no_processing.df %>% 
+  mutate(
+    center_lat = (to_lat + from_lat)/2,
+    center_lon = (to_lon + from_lon)/2
+  )
+```
+
+## Calculate Angle of Edge
+* Assume x-axis and y-axis are at zero
+* Radians are expressed in units of pi
+* Angles are relative to the x axis at y = 0
+
+```{r}
+# Calculate Angle of road segment
+network.df <- network.df %>% 
+  mutate(
+    theta_pi_rad = atan2(
+      y = to_lat - from_lat,
+      x = to_lon - from_lon
+      ) / pi ,
+    theta_pi_rad = if_else(
+      theta_pi_rad < 0, 
+      theta_pi_rad + 1,
+      theta_pi_rad
+      )
+  )
+
+angles <- network.df %>% pull(theta_pi_rad)
+print(glue("Maximum angle: {round(max(angles),3)} pi"))
+print(glue("Minimum angle: {min(angles)} pi"))
+```
+
+## Calculate Angle of Orthogonal Projection
+* Shift everything counter clockwise 90 degrees
+```{r}
+network.df <- network.df %>% 
+  mutate(
+    theta_pi_orth = theta_pi_rad + 1/2,
+    theta_pi_orth = if_else(
+      theta_pi_orth >= 2, 
+      theta_pi_orth - 2, 
+      theta_pi_orth
+      )
+  )
+
+angles <- network.df %>% pull(theta_pi_orth)
+print(glue("Maximum angle: {round(max(angles),3)} pi"))
+print(glue("Minimum angle: {min(angles)} pi"))
+```
+### Inspect
+```{r}
+start_edge_id <- 683214
+network.df %>% 
+  filter(edge_id == start_edge_id)
+```
+
+## Calculate Length of Opposite and Adjacent
+```{r}
+## Adjus by 2PI to account for differences in projection direction
+dist_m = 10 * (2 * pi)
+m_to_deg = 111000
+orth_deg <- dist_m/m_to_deg
+
+network.df <- network.df %>% 
+  mutate(
+    orth_x = orth_deg * cos(theta_pi_orth*pi),
+    orth_y = orth_deg * sin(theta_pi_orth*pi),
+    len_check_orth = round(sqrt(orth_y^2 + orth_x^2) - orth_deg, 7) == 0,
+    to_lat_orth = (center_lat + orth_y),
+    to_lon_orth = (center_lon + orth_x),
+    from_lat_orth = (center_lat - orth_y),
+    from_lon_orth = (center_lon - orth_x),
+  )
+```
+
+### Inspect
+```{r}
+start_edge_id <- 683214
+network.df %>% 
+  filter(edge_id == start_edge_id)
+```
+
+```{r}
+network.df %>% 
+  filter(edge_id == start_edge_id) %>% 
+  ggplot() +
+  geom_segment(
+    mapping = aes(
+      x      = from_lon,
+      xend   = to_lon,
+      y      = from_lat,
+      yend   = to_lat
+      ), color = "blue"
+    ) + 
+  geom_segment(
+    mapping = aes(
+      x      = from_lon_orth,
+      xend   = to_lon_orth,
+      y      = from_lat_orth,
+      yend   = to_lat_orth
+      ), color = "red"
+    ) +
+    coord_map() +
+    theme(legend.position = "none")
+```
+
+## Create LINESTRING
+```{r}
+# Normal
+network.sf <- makeLinestringVector(network.df, orthogonal = FALSE)
+
+network.sf %>% head()
+```
+
+## Calculate Slope of Edge
+* Assume x-axis and y-axis are at zero
+```{r}
+# Calculate Angle of road segment
+network.sf <- network.sf %>% 
+  mutate(
+    m_edge = (to_lon - from_lon) / (to_lat - from_lat),
+    m_orth = (to_lon_orth - from_lon_orth) / (to_lat_orth - from_lat_orth),
+    m_check = round(abs(m_edge * m_orth) - 1,5)
+  ) 
+
+network.sf
+```
+
+## Check Line Length
+We need to check that thelat 2D line projection has the correct length, and we can look at how the flat length compares to the projected length.
+```{r eval=FALSE}
+# 
+# network.df <- sf::st_drop_geometry(network.sf)
+# 
+# inspect_length <- network.df %>% 
+#   mutate(
+#       length_flat = purrr::pmap_dbl(
+#         .l = list(
+#           lat_1 = to_lat_orth,
+#           lon_1 = to_lon_orth,
+#           lat_2 = from_lat_orth,
+#           lon_2 = from_lon_orth,
+#           proj  = FALSE
+#           ), 
+#           .f = line_length
+#       ),
+#       length_proj = purrr::pmap_dbl(
+#         .l = list(
+#           lat_1 = to_lat_orth,
+#           lon_1 = to_lon_orth,
+#           lat_2 = from_lat_orth,
+#           lon_2 = from_lon_orth,
+#           proj  = TRUE
+#           ), 
+#           .f = line_length
+#       ),
+#       length_delta = length_flat - length_proj,
+#       length_per_diff = round(100* length_delta/length_proj,2),
+#       length_ratio = round(length_flat/length_proj,2)
+#   ) %>% 
+#   select(
+#     theta_pi_rad, theta_pi_orth, length_flat, length_proj, length_delta, 
+#     length_per_diff, length_ratio
+#     )
+# 
+# inspect_length %>% 
+#   mutate(max_ratio = max(length_ratio)) %>% 
+#   arrange(desc(length_ratio)) %>% 
+#   head(5)
+# 
+# 
+# inspect_length %>% 
+#   mutate(max_ratio = max(length_ratio)) %>% 
+#   arrange(desc(length_ratio)) %>% 
+#   tail(5)
+
+```
+
+Testing for each edge
+1. Select edge
+2. Filter by radius equal to pi*x + safety factor
+3. Filter by edge angle
+4. Convert orthogonal projection into linestring
+5. Check intersection between orthogonal projection and all remaining linestrings
+6. All that intersect add to list of edgeids
+
+# Test Parallel Identification Process
+## Checkpoint
+```{r}
+test.sf <- network.sf
+test.sf
+```
+
+
+## Calculate Edge Length
+```{r}
+test.sf <- test.sf %>% 
+  mutate(
+      edge_length_flat = purrr::pmap_dbl(
+        .l = list(
+          lat_1 = to_lat,
+          lon_1 = to_lon,
+          lat_2 = from_lat,
+          lon_2 = from_lon,
+          proj  = FALSE
+          ), 
+          .f = line_length
+      )
+  )
+
+test.sf
+```
+
+
+```{r}
+test.sf %>% 
+  dplyr::filter(
+    segment_id == "oes2d1nz49"
+  )
+```
+
+
+## Select Edge
+* Longest Segment
+
+### Method for Selecting Longest Segemnt
+```{r}
+# Reduce to longest segment
+segment_id_iter <- test.sf %>% 
+  sf::st_drop_geometry() %>% 
+  group_by(segment_id) %>% 
+  summarise(length = sum (edge_length_flat)) %>% 
+  ungroup() %>% 
+  arrange(desc(length)) %>% 
+  top_n(n = 1, wt = length) %>% 
+  pull(segment_id)
+
+# Reduce to edges
+start_edge_ids <- test.sf %>% 
+  filter(segment_id == segment_id_iter) %>% 
+  pull(edge_id)
+
+# Select Single Edge
+start_edge_id <- start_edge_ids[1]
+```
+
+### Manual Selection
+```{r}
+start_edge_id <- 683214
+segment_id_iter <- test.sf %>% 
+  filter(edge_id == start_edge_id) %>% 
+  pull(segment_id)
+```
+
+### Extract Parameters
+```{r}
+# Extract Edge Parameters
+start_edge_id.sf <- test.sf %>% 
+  filter(edge_id == start_edge_id)
+
+lat_center <- start_edge_id.sf %>% pull(center_lat)
+lon_center <- start_edge_id.sf %>% pull(center_lon)
+angle <- start_edge_id.sf %>% pull(theta_pi_rad)
+
+lat_orth_to <- start_edge_id.sf %>% pull(to_lat_orth)
+lon_orth_to <- start_edge_id.sf %>% pull(to_lon_orth)
+lat_orth_from <- start_edge_id.sf %>% pull(from_lat_orth)
+lon_orth_from <- start_edge_id.sf %>% pull(from_lon_orth)
+
+angle <- start_edge_id.sf %>% pull(theta_pi_rad)
+
+# Highlight Edge
+test.sf <- test.sf %>% mutate(
+  highlight = if_else(edge_id == start_edge_id, "test", "other")
+)
+
+start_edge_id.sf
+```
+
+
+### Visual Check
+```{r}
+df <- test.sf
+
+p <- df %>% 
+  ggplot() +
+  geom_segment(
+    mapping = aes(
+      x      = from_lon,
+      xend   = to_lon,
+      y      = from_lat,
+      yend   = to_lat,
+      color  = highlight,
+      text_1 = edge_id,
+      text_2 = segment_id,
+      text_3 = to_id,
+      text_4 = from_id
+      )
+    ) + 
+    coord_map() +
+    theme(legend.position = "none")
+
+plotly::ggplotly(p)
+```
+
+```{r}
+
+df %>% 
+  filter(
+    edge_id == 677563
+  ) 
+
+df %>% 
+  filter(
+    segment_id == "oes2d1nz49"
+  ) 
+
+
+inspect_node <- 5514326164
+
+df %>% 
+  filter(
+    (to_id == inspect_node) | 
+    (from_id == inspect_node)
+  ) 
+```
+
+
+* For each edge ID: 
+* Look for nodes directly orthogonal +- error
+* See if that node is an intersection
+* if so, split segment
+
+## Subset by Radius
+```{r}
+# Define Radius
+radius_m = 10
+safety_buffer = 0.10
+radius_adj <- radius_m * 2 * pi * (1 + safety_buffer)
+
+
+test_subset_radius.sf <- subset_lat_lon(
+  network    = test.sf, 
+  lat_center = lat_center, 
+  lon_center = lon_center,
+  radius     = radius_adj 
+    )
+
+print(glue('Number of Edges - Total:\t{length(test.sf$edge_id)}'))
+print(glue('Number of Edges - Subset:\t{length(test_subset_radius.sf$edge_id)}'))
+```
+
+### Visual Check
+```{r}
+df <- test_subset_radius.sf
+
+p <- df %>% 
+  ggplot() +
+  geom_segment(
+    mapping = aes(
+      x      = from_lon,
+      xend   = to_lon,
+      y      = from_lat,
+      yend   = to_lat,
+      color  = highlight, 
+      text_1 = edge_id,
+      text_2 = segment_id,
+      )
+    ) + 
+    coord_map() +
+    theme(legend.position = "none")
+
+plotly::ggplotly(p)
+```
+
+## Subset by Angle
+```{r}
+# Define Angle and buffer
+angle_inverse <- angle - 2
+angle_inverse
+angle_buffer <- 0.005
+angle_max <- angle + angle_buffer
+angle_min <- angle - angle_buffer
+angle_inv_max <- angle_inverse + angle_buffer
+angle_inv_min <- angle_inverse - angle_buffer
+
+test_subset_radius_angle.sf <- test_subset_radius.sf %>% 
+  filter(
+    (
+      between(
+        x     = theta_pi_rad,
+        left  = angle_min, 
+        right =  angle_max
+        ) 
+      ) | 
+      between(
+        x     = theta_pi_rad,
+        left  = angle_inv_min, 
+        right =  angle_inv_max
+      )
+      
+  )
+
+print(glue('Number of Edges - Total:\t{length(test_subset_radius.sf$edge_id)}'))
+print(glue('Number of Edges - Subset:\t{length(test_subset_radius_angle.sf$edge_id)}'))
+```
+
+### Visual Check
+```{r}
+df <- test_subset_radius_angle.sf
+
+p <- df %>% 
+  ggplot() +
+  geom_segment(
+    mapping = aes(
+      x      = from_lon,
+      xend   = to_lon,
+      y      = from_lat,
+      yend   = to_lat,
+      color  = highlight, 
+      )
+    ) + 
+    coord_map() +
+    theme(legend.position = "none")
+
+plotly::ggplotly(p)
+```
+
+## Remove Same Segment Pieces
+```{r}
+test_subset_radius_angle_seg.sf <- test_subset_radius_angle.sf %>% 
+  filter(segment_id != segment_id_iter)
+
+test_subset_radius_angle_seg.sf
+```
+
+### Visual Check
+```{r}
+df <- test_subset_radius_angle_seg.sf
+
+p <- df %>% 
+  ggplot() +
+  geom_segment(
+    mapping = aes(
+      x      = from_lon,
+      xend   = to_lon,
+      y      = from_lat,
+      yend   = to_lat,
+      color  = highlight, 
+      )
+    ) + 
+    coord_map() +
+    theme(legend.position = "none")
+
+plotly::ggplotly(p)
+```
+
+## Create Orthogonal LINESTRING
+```{r}
+# Create orthogonal linestring
+ls_orth <- start_edge_id.sf %>%
+  sf::st_drop_geometry() %>% 
+    select(from_lon_orth, from_lat_orth, to_lon_orth, to_lat_orth) %>% 
+    rename_with(~gsub("_orth", "", .x)) %>% 
+      purrr::pmap(makeLinestring) %>% 
+      sf::st_as_sfc(crs = 4326) %>% 
+      {
+        tibble(
+          edge_id = start_edge_id.sf$edge_id, 
+          geometry = .)
+      } %>% 
+  pull(geometry)
+
+# Pull Normal linestring for verification
+ls_norm <- start_edge_id.sf %>%
+  pull(ls_norm)
+start_edge_id.sf
+
+sf::st_intersects(ls_orth, ls_norm, sparse = FALSE)[[1]]
+```
+
+```{r}
+ggplot() +
+  geom_sf(
+    data = ls_norm, color = "red"
+    ) + 
+  geom_sf(
+    data = ls_orth, color = "blue"
+    ) + 
+    coord_sf() +
+    theme(legend.position = "none")
+```
+
+
+## Test Intersection
+```{r}
+ls_set <- test_subset_radius_angle_seg.sf %>% pull(ls_norm)
+
+edge_parallel_iter <- c()
+segment_parallel_iter <- c()
+
+test.sf$parallel_segments <- list(c("<EMPTY>"))
+test.sf$parallel_edges <- list(c("<EMPTY>"))
+test.sf$n_parallel_segments <- as.integer(-1)
+
+
+for (i in seq_along(test_subset_radius_angle_seg.sf$edge_id)){
+  df <- test_subset_radius_angle_seg.sf %>% slice(i)
+  
+  ls_test <- df %>% pull(ls_norm)
+  edge_id_test <- df %>% pull(edge_id)
+  segment_id_test <- df %>% pull(segment_id)
+  
+  bool_intersect <- sf::st_intersects(
+    ls_orth, ls_test, sparse = FALSE)[[1]]
+
+  if (bool_intersect) {
+    edge_parallel_iter    <- c(edge_parallel_iter, edge_id_test)
+    segment_parallel_iter <- c(segment_parallel_iter, segment_id_test)
+  }
+  
+}
+
+test.sf <- test.sf %>% 
+  mutate(
+    parallel_segments = if_else(
+      edge_id == start_edge_id, 
+      list(segment_parallel_iter), 
+      parallel_segments
+    ),
+    n_parallel_segments = if_else(
+      edge_id == start_edge_id, 
+      length(segment_parallel_iter),
+      n_parallel_segments
+    ),
+    parallel_edges = if_else(
+      edge_id == start_edge_id, 
+      list(edge_parallel_iter),
+      parallel_edges
+    )
+  )
+
+test.sf %>% 
+  filter(edge_id == start_edge_id) %>% 
+  pull(parallel_segments) %>% 
+  unlist()
+
+test.sf
+```
+
+# Consolidate Process
+## Exit Function
+```{r}
+exit_parallel_check <- function(
+  network, select_edge_id, fail = FALSE, 
+  parallel_edges_input = NA, 
+  parallel_segments_input = NA
+  ) {
+  if(fail) {
+    
+    network %>% 
+      mutate(
+        n_parallel_segments = dplyr::if_else(
+          condition = (edge_id == select_edge_id),
+          true      = 0, 
+          false     = n_parallel_segments
+          )
+        )
+  } else {
+    
+    network %>% 
+      mutate(
+        parallel_segments = dplyr::if_else(
+          condition = (edge_id == select_edge_id),
+          true      = list(parallel_segments_input),
+          false     = parallel_segments
+        ),
+        n_parallel_segments = dplyr::if_else(
+          condition = (edge_id == select_edge_id),
+          true      = as.double(length(parallel_segments_input)),
+          false     = n_parallel_segments
+        ),
+        parallel_edges = dplyr::if_else(
+          condition = (edge_id == select_edge_id),
+          true      = list(parallel_edges_input),
+          false     = parallel_edges
+        )
+      )
+  }
+}
+
+```
+
+
+
+## Pre-process Data
+```{r}
+network.df <- network_no_processing.df
+
+# Subset
+subset_segment_ids <- c("vw0cr0qcv8", "e6pqpcid6a", "ujs01f68lg")
+
+network.df <- network.df %>% 
+  filter(segment_id %in% subset_segment_ids)
+
+# PROCESSING ##################################################################
+
+# Calculate edge centerpoint
+network.df <- network.df %>% 
+  dplyr::mutate(
+    center_lat = (to_lat + from_lat)/2,
+    center_lon = (to_lon + from_lon)/2
+  )
+
+# Calculate edge angle to normal x,y axis. Angle is reported in units of pi 
+# radians. Invert all negative angles.
+network.df <- network.df %>% 
+  dplyr::mutate(
+    theta = atan2(
+      y = to_lat - from_lat,
+      x = to_lon - from_lon
+      ) / pi ,
+    theta = if_else(
+      theta < 0, 
+      theta + 1,
+      theta
+      )
+  )
+
+# Calculate angle of orthogonal projection to the edge. This is done by shifting
+# the edge angle clockwise by by 1/2.
+network.df <- network.df %>% 
+  dplyr::mutate(
+    theta_orth = theta + 1/2,
+    theta_orth = if_else(
+      theta_orth >= 2, 
+      theta_orth - 2, 
+      theta_orth
+      )
+  )
+
+# Determine points of orthogonal projection. Because our data is representing
+# a real world area, a 2D rendering is only a approximation. This affects the 
+# implementation of length, which we need to determine the start and end 
+# points of the orthogonal projection. Depending on the angle of the orthogonal 
+# projection, length in the 2D space could be off by as much as a factor of 
+# 2 PI. Therefore, in order for the length calculation to be conservative, we 
+# will use a 2 PI factor to adjust the 2D length.
+
+dist_adj_factor <- 2 * pi
+dist_m = 15 
+dist_adj <- dist_m * dist_adj_factor
+m_to_deg = 111000
+orth_deg <- dist_m/m_to_deg
+
+network.df <- network.df %>% 
+  dplyr::mutate(
+    orth_x        = orth_deg * cos(theta_orth*pi),
+    orth_y        = orth_deg * sin(theta_orth*pi),
+    to_lat_orth   = (center_lat + orth_y),
+    to_lon_orth   = (center_lon + orth_x),
+    from_lat_orth = (center_lat - orth_y),
+    from_lon_orth = (center_lon - orth_x),
+  )
+
+# Create Edge LINESTRING
+network.sf <- makeLinestringVector(df = network.df, orthogonal = FALSE) %>% 
+  select(ls_norm, everything())
+
+# Determine Edge Length
+network.sf <- network.sf %>% 
+  dplyr::mutate(
+    edge_length_m = as.vector(sf::st_length(ls_norm))
+  )
+
+# Initialize Parallel Process columns
+network.sf <- network.sf %>% 
+  dplyr::mutate(
+    parallel_edges      = list(c("<EMPTY>")),
+    parallel_segments   = list(c("<EMPTY>")),
+    n_parallel_segments = -1,
+  )
+
+# Create Orthogonal Projection linestrings
+network_orth.sf <- makeLinestringVector(
+  df = network.df, 
+  orthogonal = TRUE
+  ) %>% 
+  select(edge_id)
+```
+
+## Define Constants and Initial Values
+```{r}
+# Constants
+## Radius
+radius_m <- 10
+safety_buffer <- 0.10
+radius_adj <- radius_m * 2 * pi * (1 + safety_buffer)
+
+## Angle
+angle_buffer <- 0.005
+angle_max <- angle + angle_buffer
+angle_min <- angle - angle_buffer
+
+# Initial
+while_check.sf <- network.sf %>% filter(n_parallel_segments == -1)
+n_remaining <- length(while_check.sf$edge_id)
+```
+
+
+## Execute Loop
+```{r}
+start_time <- Sys.time()
+i <- 1
+
+while (n_remaining > 0){
+  
+  # Escape Valve
+  if(i %% 1e2 == 0) {
+    end_time <- Sys.time()
+
+    time_elapsed <- round(
+      difftime(
+        end_time, start_time,
+        units = c("secs")
+        ),
+      1)
+    print(glue(paste0(rep(x = "_", 80), collapse = "")))
+    print(glue('Iteration:\t\t\t\t{i}'))
+    print(glue('Time Elapsed:\t\t\t\t{time_elapsed} seconds'))
+  }
+  
+  if(i %% 1e5 == 0) {
+    break
+  }
+  
+  print(glue(paste0(rep(x = "_", 80), collapse = "")))
+  print(glue('Iteration:\t\t\t\t{i}'))
+  
+  # Select random row
+  iter.df <- network.sf %>% 
+    filter(n_parallel_segments == -1) %>% 
+    dplyr::slice_sample(n = 1)
+  
+  # Extract Inputs
+  edge_id_iter    = iter.df %>% pull(edge_id)
+  center_lat      = iter.df %>% pull(center_lat)
+  center_lon      = iter.df %>% pull(center_lon)
+  segment_id_iter = iter.df %>% pull(segment_id)
+  
+  print(glue('Edge ID:\t\t\t\t{edge_id_iter}'))
+  print(glue('Number of Edges - Total:\t\t{length(network.sf$edge_id)}'))
+  
+  # Subset Network
+  ## Radius
+  network_subset.sf <- subset_lat_lon(
+    network    = network.sf, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius_adj 
+      )
+  
+  n_subset <- length(network_subset.sf$edge_id)
+  print(glue('Number of Edges - Subset - Radius:\t{n_subset}'))
+  
+  if (n_subset == 0) {
+    network.sf <- exit_parallel_check(
+      network        = network.sf,
+      select_edge_id = edge_id_iter, 
+      fail           = TRUE
+      )
+    i <- i + 1
+    
+    while_check.sf <- network.sf %>% filter(n_parallel_segments == -1)
+    n_remaining <- length(while_check.sf$edge_id)
+    
+    next
+  }
+  
+  ## Subset Angle
+  network_subset.sf <- network_subset.sf %>% 
+    filter(
+      between(
+        x     = theta,
+        left  = angle_min, 
+        right = angle_max
+        )
+    )
+  
+  n_subset <- length(network_subset.sf$edge_id)
+  print(glue('Number of Edges - Subset - Angle:\t{length(network_subset.sf$edge_id)}'))
+  
+  if (n_subset == 0) {
+    network.sf <- exit_parallel_check(
+      network        = network.sf,
+      select_edge_id = edge_id_iter, 
+      fail           = TRUE
+      )
+    
+    while_check.sf <- network.sf %>% filter(n_parallel_segments == -1)
+    n_remaining <- length(while_check.sf$edge_id)
+    
+    i <- i + 1 
+    
+    while_check.sf <- network.sf %>% filter(n_parallel_segments == -1)
+    n_remaining <- length(while_check.sf$edge_id)
+    next
+  }
+  
+  ## Remove edges in the same segment
+  network_subset.sf <- network_subset.sf %>% 
+    filter(segment_id != segment_id_iter)  
+    
+  n_subset <- length(network_subset.sf$edge_id)
+  print(glue('Number of Edges - Subset - Segment ID:\t{length(network_subset.sf$edge_id)}'))
+  
+  if (n_subset == 0) {
+    network.sf <- exit_parallel_check(
+      network        = network.sf,
+      select_edge_id = edge_id_iter, 
+      fail           = TRUE
+      )
+    i <- i + 1 
+    next
+  }
+  
+  # PARALLEL CHECK ############################################################
+  # Initialize
+  parallel_edges_iter <- c()
+  parallel_segments_iter <- c()
+  
+  for (comparison_edge_idx in seq_along(network_subset.sf$edge_id)){
+    
+    # Select orthogonal linestring to check intersection
+    ls_orth <- network_orth.sf %>% 
+      filter(edge_id == edge_id_iter) %>% 
+      pull(ls_orth)
+    
+    # Select Row to compare
+    row_comp <- network_subset.sf %>% slice(comparison_edge_idx)
+    
+    # Extract parameters for comparison  
+    ls_comp         <- row_comp %>% pull(ls_norm)
+    edge_id_comp    <- row_comp %>% pull(edge_id)
+    segment_id_comp <- row_comp %>% pull(segment_id)
+    
+    # Check if the orthogonal projection and edge intersect
+    ls_intersect <- sf::st_intersects(
+      ls_orth, ls_comp, 
+      sparse = FALSE
+      )[[1]]
+    
+    # Document edge and segment if they did intersect
+    if (ls_intersect) {
+      parallel_edges_iter    <- c(parallel_edges_iter, edge_id_comp)
+      parallel_segments_iter <- c(parallel_segments_iter, segment_id_comp)
+    
+    }
+    
+    print(glue(paste0(rep(x = "-", 80), collapse = "")))
+    print(glue("Edge ID:\t\t\t\t{edge_id_iter}"))
+    print(glue("Edge ID - Comparison:\t\t\t{edge_id_comp}"))
+    print(glue("Segment ID:\t\t\t\t{segment_id_iter}"))
+    print(glue("Segment ID - Comparison:\t\t{segment_id_comp}"))
+    print(glue("Intersect:\t\t\t\t{ls_intersect}"))
+    print(glue(paste0(rep(x = "-", 80), collapse = "")))
+    
+  }
+  
+  # Check if any edges were found to be parallel
+  if (length(segment_parallel_iter) > 0){
+    network.sf <- exit_parallel_check(
+      network                 = network.sf, 
+      select_edge_id          = edge_id_iter, 
+      fail                    = FALSE, 
+      parallel_edges_input    = edge_parallel_iter,
+      parallel_segments_input = segment_parallel_iter
+      
+      )
+  } else{
+    network.sf <- exit_parallel_check(
+      network        = network.sf,
+      select_edge_id = edge_id_iter, 
+      fail           = TRUE
+      )
+  }
+  
+  
+  while_check.sf <- network.sf %>% filter(n_parallel_segments == -1)
+  n_remaining <- length(while_check.sf$edge_id)
+  
+  i <- i + 1
+}
+
+```
+
+
+
+## Check Segments with Multiple Edges
+```{r}
+unique_parallel_segments <- network.sf %>% 
+  sf::st_drop_geometry() %>% 
+  select(edge_id, segment_id, parallel_segments, parallel_edges) %>% 
+  unnest(cols = parallel_segments) %>% 
+  unnest(cols = parallel_edges) %>% 
+  filter(parallel_segments != "<EMPTY>") 
+
+network.sf
+
+# %>% 
+  # group_by(segment_id) %>% 
+  # count(parallel_segments)  %>% 
+  # ungroup() %>% 
+  # group_by(segment_id) %>% 
+  # summarise(unique_parallel_segments = n()) %>% 
+  # arrange(desc(unique_parallel_segments))
+
+unique_parallel_segments
+```
+
+## Known Issue
+* long: vw0cr0qcv8
+* short 1: e6pqpcid6a
+* short 2: usj01f68lg
+```{r}
+
+long <- "vw0cr0qcv8"
+short_1 <- "e6pqpcid6a"
+short_2 <- "ujs01f68lg"
+
+inspect.df <- network.sf %>% 
+  sf::st_drop_geometry() %>% 
+  filter(segment_id == short_2) %>% 
+  unnest(parallel_segments) %>% 
+  unnest(parallel_edges) %>% 
+  select(edge_id, segment_id, center_lat, center_lon, parallel_edges, parallel_segments)
+
+inspect.df
+```
+
+```{r}
+inspect_edges <- inspect.df %>% pull(edge_id)
+
+inspect_edges
+
+orth.sf <- network_orth.sf %>% 
+  filter(edge_id %in% inspect_edges) 
+
+  ggplot(data = orth.sf) + 
+  geom_sf() +
+  coord_sf() +
+  theme(legend.position = "none")
+```
+
+
+    coord_map() +
+    theme(legend.position = "none")# TO DO:
+Consolidate to a list of parallel segment ids for each segment id
+Check that if any list contains multiple
+If multiple, are any of the group connected
+If a segment id is parallel to two connected segment ids, then that segment id will be split
+Split based on where an orthogonal projection at the shared point would intersect
+
+
+
+
+
+

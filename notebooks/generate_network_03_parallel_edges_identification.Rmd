@@ -1,0 +1,117 @@
+---
+title: "Generate Intersection Nodes"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Generate a simple features dataframe identifying the segments parallel to each edge id.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files(
+  path = "./../R/", pattern = "*.R", full.names = TRUE, 
+  recursive = FALSE, include.dirs = FALSE
+  )
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+# Street network data.frame
+file_dir <- "./../data"
+file_name <- "network_02_no_parallel_seperation_complete_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+network_raw.df <- readr::read_rds(file_path)
+print(file_path)
+```
+
+### Extract OSM Query Date
+```{r extract_api_query_date}
+date_regex <- "\\d{4}-\\d{2}-\\d{2}"
+osm_query_date <- stringr::str_extract(file_name, date_regex)
+print(osm_query_date)
+```
+
+# Subset
+```{r subset_network}
+SUBSET_NETWORK <- TRUE
+
+if (SUBSET_NETWORK) {
+  # Define subsetting Parameters
+  center_lat <- 35.242974
+  center_lon <- -80.794735
+  radius     <- 4e3
+
+  # Execute
+  network.df <- subset_lat_lon(
+    network    = network_raw.df, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius 
+    )
+  
+} else{
+  network.df <- network_raw.df
+}
+
+n_edge_sub <- length(network.df$edge_id)
+n_edge_total <- length(network_raw.df$edge_id)
+per_total <- round(100*(1 - ((n_edge_total - n_edge_sub)/n_edge_total)),1)
+
+# Print output
+print(glue::glue("Subset Network:\t\t{SUBSET_NETWORK}"))
+if (SUBSET_NETWORK){
+  print(glue::glue("Percent of Network:\t{per_total}%"))
+}
+```
+
+# Label Parallel Segments for Each Edge ID
+```{r label_parallel_segments}
+network.df <- identifyParallelSegmentsPar(
+  network    = network.df,
+  k          = 6, 
+  start_time = NA, 
+  verbose    = 3
+)
+
+print(glue::glue("Segments labeled: {length(network.df$edge_id)}"))
+```
+
+# Export
+```{r export}
+# Determine input network file date
+date_regex <- "\\d{4}-\\d{2}-\\d{2}"
+osm_query_date <- stringr::str_extract(file_name, date_regex)
+
+# Generate file path
+file_name <- glue::glue("network_03_parallel_edges_identified_{osm_query_date}.RDS")
+file_path <- file.path(file_dir, file_name)
+
+# Export file
+readr::write_rds(
+  x = network.df, 
+  file = file_path
+  )
+
+print(glue::glue("{file_path}"))
+```
+

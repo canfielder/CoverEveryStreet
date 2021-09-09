@@ -1,0 +1,231 @@
+---
+title: "Generate Network - Segments Applied - Pre-Parallel Seperation"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+The purpose of this notebook is to test a random walk structure for labeling segments which uses a more efficient, directional approach, rather than a purely random walk approach.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  microbenchmark,
+  parallel,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files(
+  path = "./../R/", pattern = "*.R", full.names = TRUE, 
+  recursive = FALSE, include.dirs = FALSE
+  )
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+file_dir <- "./../data"
+file_name <- "network_01_dodgr_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+network_raw.df <- readr::read_rds(file_path)
+```
+
+### Halt Walk Nodes
+```{r}
+network <- network_raw.df
+# Load Intersection Nodes
+file_dir <- "./../data"
+file_name <- "intersection_nodes_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+intersection_nodes <- readr::read_rds(file_path)
+
+# Load Parallel Separation Nodes
+file_name <- "parallel_separation_nodes_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+if (file.exists(file_path)) {
+  parallel_separation_nodes <- readr::read_rds(file_path)
+  
+} else{
+  # Initialize Empty Vector
+  parallel_separation_nodes <- vector(mode = "character", length = 0)
+}
+
+# Define Dead End Nodes
+## Defined, not loaded, because depending on if the street network is
+## the complete network or just a subset will determine change which
+## nodes are dead ends
+to_nodes <-  network %>% 
+  dplyr::select(to_id) %>% 
+  dplyr::rename(id = to_id)
+
+from_nodes <-  network %>% 
+  dplyr::select(from_id) %>% 
+  dplyr::rename(id = from_id)
+
+dead_end_nodes <- dplyr::bind_rows(
+  from_nodes,
+  to_nodes
+) %>% 
+  dplyr::count(id) %>% 
+  dplyr::filter(n == 1) %>% 
+  dplyr::pull(id)
+
+# Create compiled vector of nodes that will stop the walking function
+halt_walk_nodes_init <- c(
+  intersection_nodes, parallel_separation_nodes, dead_end_nodes
+)
+```
+
+
+# Subset
+```{r}
+SUBSET_NETWORK <- TRUE
+
+if (SUBSET_NETWORK) {
+  # Define subsetting Parameters
+  center_lat <- 35.242974
+  center_lon <- -80.794735
+  radius <- 1e3
+
+  # Execute
+  network.df <- subset_lat_lon(
+    network    = network_raw.df, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius 
+    )
+  
+} else{
+  network.df <- network_raw.df
+}
+
+n_edge_sub <- length(network.df$edge_id)
+n_edge_total <- length(network_raw.df$edge_id)
+per_total <- round(100*(1 - ((n_edge_total - n_edge_sub)/n_edge_total)),1)
+print(glue::glue("Percent of total network:\t{per_total}%"))
+```
+
+# Prepare Dataset
+```{r}
+network.df$segment_id <- NA_character_
+```
+
+
+# Segment Labeling - Standard
+```{r}
+# mbm_results <- microbenchmark::microbenchmark(
+#   standard = labelSegments(network.df, verbose = 1), 
+#   times = 5
+# )
+# 
+# mbm_results.df <- summary(mbm_results)
+```
+
+```{r}
+# time_subset_sec <- mbm_results.df %>% pull(mean)
+# 
+# per_total <- per_total/100
+# 
+# time_total_sec <- time_subset/per_total 
+# 
+# time_total_hr <- time_total_sec/3600
+```
+
+# Segment Labeling - Parallel
+## Split Dataset into Subsets for Parallel 
+```{r}
+network.df <- network.df %>% 
+  mutate(
+    split = case_when(
+      (from_lat >= center_lat) & (from_lon >= center_lon) ~ 1,
+      (from_lat >= center_lat) & (from_lon < center_lon) ~ 2,
+      (from_lat < center_lat) & (from_lon >= center_lon) ~ 3,
+      (from_lat < center_lat) & (from_lon < center_lon) ~ 4
+    )
+  )
+
+network_split.list <- vector(mode = "list", length = 4)
+network_split.list[[1]] <- network.df %>% filter(split == 1)
+network_split.list[[2]] <- network.df %>% filter(split == 2)
+network_split.list[[3]] <- network.df %>% filter(split == 3)
+network_split.list[[4]] <- network.df %>% filter(split == 4)
+```
+
+## Run on Cluster
+```{r}
+export_variables <- c("network_split.list", "randomID", "walkSegment")
+
+cl <- makeCluster(4)
+clusterExport(cl=cl, varlist=export_variables, envir=environment())
+network_w_segments.df <- parallel::parSapply(cl = cl, X = network_split.list, FUN = labelSegmentsPar)
+stopCluster(cl)
+
+network_w_segments.df[,1]
+
+seq_along(network_w_segments.df)
+dim(network_w_segments.df)[2]
+
+seq(1,dim(network_w_segments.df)[2],1)
+
+output.df <- network.df %>% slice(0)
+for (x in seq(1,dim(network_w_segments.df)[2],1)) {
+  temp.df <- as.data.frame(network_w_segments.df[,x])
+  
+  output.df <- bind_rows(temp.df, output.df)
+}
+```
+
+## Visually Inspect
+```{r}
+highlight = "segment_id"
+p <- plotStreets(output.df, color_feature = highlight)
+
+plotly::ggplotly(p)
+```
+
+
+
+```{r}
+to_nodes <- output.df %>% 
+  select(to_id, segment_id) %>% 
+  rename(id = to_id)
+
+from_nodes <- output.df %>% 
+  select(from_id, segment_id) %>% 
+  rename(id = from_id)
+
+
+node_segment.df <- bind_rows(to_nodes,from_nodes)
+node_segment_post_drop.df <- node_segment.df %>% 
+  count(id) %>% 
+  filter(n == 2) %>% 
+  mutate(
+    drop = if_else(
+      id %in% halt_walk_nodes_init,
+      1,0
+    )
+  ) %>% 
+  filter(drop == 1)
+
+output.df
+n_nodes <- length(node_segment.df$id)
+n_nodes_drop <- length(node_segment_post_drop.df$id)
+per_drop = round(100*(1 - (n_nodes - n_nodes_drop)/n_nodes),2)
+per_drop
+```
+

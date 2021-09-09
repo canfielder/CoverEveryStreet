@@ -1,0 +1,271 @@
+---
+title: "Network Subsetting"
+author: "Evan Canfield"
+date: "8/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Test different methods for subsetting street networks based on different criteria. This testing will be used to develop methods and functions which will be used in the final product.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  microbenchmark,
+  sf,
+  stringi,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files("./../R/", full.names = TRUE)
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+# Street network data.frame
+network_raw.df <- readRDS("./../data/dodgr_network_charlotte_nc_2021-03-17.RDS")
+
+# Define column type to avoid messages
+col_type <- c(
+  "edge_id" = "character",
+  "to_id" = "character",
+  "from_id" = "character",
+  "status" = "character"
+)
+```
+
+# Processing
+## Drop Duplicates
+* There are duplicate rows, with from and to ids swapped
+```{r}
+# Record number of observations before dropping
+n_edge_raw <- length(network_raw.df$edge_id)
+
+# Drop duplicate observations
+network.df <- network_raw.df %>% 
+    mutate(
+    dup_id = if_else(
+      from_id > to_id, 
+      paste(to_id, from_id, sep = "_"),
+      paste(from_id, to_id,  sep = "_")
+    )
+  )  %>% 
+  group_by(dup_id) %>% 
+  filter(row_number()==1) %>% 
+  ungroup() %>% 
+  select(-dup_id)
+
+# Record number of observations after dropping
+n_edge_post <- length(network.df$edge_id)
+
+glue('Number of observations - original:\t\t\t{n_edge_raw}')
+glue('Number of observations - post duplicate removal:\t{n_edge_post}')
+```
+
+### Remove Street Types
+```{r}
+street_types <- c('path', 'primary_link', 'secondary_link', 'tertiary_link', 'trunk_link', 
+                  'living_street')
+network.df <- network.df %>% 
+  filter(!(highway %in% street_types))
+```
+
+# Subset Street Network
+## Reduce Network for Benchmarking
+```{r}
+network_n.df <- network.df %>% 
+  sample_n(1000)
+
+```
+
+
+## Method 1: Geographical Location (Latitude / Longitude)
+I will evaluate two different methods for subsetting by geographical location:
+* Precise: Use geographic projections to calculate accurate location and distance values
+* Approximate: Assume a 2D projection with a set value converting latitude/longitude distance into meters. 
+
+The approximate method will not be as accurate, but I expect it to be far faster, and as the intent of this process is only to reduce the dataset to a general area, this trade-off is probably acceptable. But to ensure that it is, we will test both methods.
+
+The approximation for converting latitude/longitude degrees to distance is from here:
+
+[https://www.usna.edu/Users/oceano/pguth/md_help/html/approx_equivalents.htm](https://www.usna.edu/Users/oceano/pguth/md_help/html/approx_equivalents.htm)
+
+### Global Parameters
+```{r}
+# Test location
+test_lat <- 35.242974
+test_lon <- -80.794735
+
+# Degree to Meter Conversion (Approximation)
+m_per_deg <- 111000 
+```
+
+
+### Precise - 3D Projection
+#### Define Distance Function
+```{r}
+# Calculate the distance between two points by converting the points into
+# a sf LINESTRING
+line_dist_3d_m <- function(lat_1, lon_1, lat_2, lon_2, crs = 4326) {
+  #` Convert two points to a line and calculate length, in meters
+  sf::st_sfc(
+    sf::st_linestring(
+      rbind(
+        c(lat_1, lon_1), 
+        c(lat_2, lon_2)
+        )
+      ), 
+    crs = crs
+    ) %>% 
+    sf::st_length() %>% 
+    as.vector()
+}
+```
+
+
+#### Define Subset Function Utilizing Distance Function
+```{r}
+# Subset Network
+subet_geo_3d <- function(network, lat_1, lon_1, radius = 50, crs = 4326){
+  network %>%
+    mutate(
+      dist_to = purrr::map2_dbl(
+        to_lat, to_lon,
+        ~line_dist_m(
+          lat_1 = lat_1,
+          lat_2 =.x,
+          lon_1 = lon_1,
+          lon_2 = .y,
+          crs   = crs
+          )
+        ),
+      dist_from = purrr::map2_dbl(
+        from_lat, from_lon,
+        ~line_dist_m(
+          lat_1 = lat_1,
+          lat_2 =.x,
+          lon_1 = lon_1,
+          lon_2 = .y,
+          crs   = crs
+          )
+        )
+    ) %>% 
+  filter(
+    (dist_to <= radius) | 
+    (dist_from <= radius)
+  )
+  
+}
+```
+
+#### Test
+```{r}
+subet_geo_3d(
+  network = network_n.df,
+  lat_1   = test_lat,
+  lon_1   = test_lon,
+  radius = 1000
+  ) 
+```
+
+### Approximate - 2D Projection
+#### Define Distance FUnction
+```{r}
+line_dist_2d_m <- function(lat_1, lon_1, lat_2, lon_2){
+  # Calculate the length of the vector between points 1 and 2, assuming a 2D projection
+  deg_lat <- abs(lat_2 - lat_1)
+  deg_lon <- abs(lon_2 - lon_1)
+  deg_vect <- sqrt(deg_lat^2 + deg_lon^2)
+  
+  # Convert degrees to meters
+  deg_vect * m_per_deg
+}
+```
+
+#### Define Subset
+```{r}
+# Subset Network
+subet_geo_2d <- function(network, lat_1, lon_1, radius = 50, crs = 4326){
+  network %>%
+    mutate(
+      dist_to = purrr::map2_dbl(
+        to_lat, to_lon,
+        ~line_dist_2d_m(
+          lat_1 = lat_1,
+          lat_2 =.x,
+          lon_1 = lon_1,
+          lon_2 = .y
+          )
+        ),
+      dist_from = purrr::map2_dbl(
+        from_lat, from_lon,
+        ~line_dist_2d_m(
+          lat_1 = lat_1,
+          lat_2 =.x,
+          lon_1 = lon_1,
+          lon_2 = .y
+          )
+        )
+    ) %>% 
+  filter(
+    (dist_to <= radius) | 
+    (dist_from <= radius)
+  )
+  
+}
+```
+
+#### Test
+```{r}
+subet_geo_2d(
+  network = network_n.df,
+  lat_1   = test_lat,
+  lon_1   = test_lon,
+  radius = 1000
+  )
+```
+
+# Benchmark
+
+Results: The 3D method is much slower, and the time it takes to complete increases exponentially with the amount of datapoints
+```{r}
+# # Select Dataset
+# n = 1e3
+# df <- network.df %>% 
+#   sample_n(n)
+# 
+# # Define Radius
+# radius = 1000
+# 
+# # Evaluate
+# results <- microbenchmark::microbenchmark(
+#   precise = subet_geo_3d(
+#     network = df,
+#     lat_1   = test_lat,
+#     lon_1   = test_lon,
+#     radius = radius
+#     ),  
+#   approximate = subet_geo_2d(
+#       network = df,
+#       lat_1   = test_lat,
+#       lon_1   = test_lon,
+#       radius = 1000
+#       ),
+#    times = 10
+# )
+```

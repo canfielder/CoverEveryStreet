@@ -1,0 +1,314 @@
+---
+title: "Generate Street Network - Dodgr Package Represenation"
+author: "Evan Canfield"
+date: "8/24/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Generate and export the street network table for Charlotte, NC.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  data.table,
+  dodgr,
+  glue,
+  rgdal,
+  sf,
+  sp,
+  tidyverse
+)
+```
+
+## Data
+```{r import_data}
+# OSM Data
+file_dir <- "./../data"
+file_name <- "network_00_osm_api_query_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+osm_map_data <- readr::read_rds(file_path)
+streets <- osm_map_data$osm_lines
+
+# Zipcode Shapefile
+zip_shapefile <- readOGR("./../data/tl_2019_us_zcta510/tl_2019_us_zcta510.shp")
+
+# List of ZIP codes
+select_zip_codes <- read.csv(
+  "./../data/zip_code_charlotte.csv", 
+  colClasses = ("zip_code" = "character"),
+  stringsAsFactors = FALSE
+  ) %>% pull()
+```
+
+# Processing
+## Dodgr Conversion
+The form of the final mapping dataframe will be based on the **dodgr** package. This means instead of representing streets as **sf** objects, as they are represented in the **osmdata**, the streets will be a **dodgr_streetnet**, which is represented as a regular data.frame object.
+
+The first step to this conversion is to create a *weighted streetnet* with the **weight_streetnet** function. This function weights an **sf** formatted OSM street network based on a transportation method. For this project, the weighting method does not matter. We only care about the *weighted streetnet's*  structure, so we will stick with the functions default settings.
+```{r weight_streetnet}
+start_time <- Sys.time()
+
+streets_wgt <- dodgr::weight_streetnet(streets)
+
+streets_wgt.df <- streets_wgt %>% data.frame()
+
+# Convert edge_id and geom_num to char
+streets_wgt.df <- streets_wgt.df %>% 
+  mutate(
+    geom_num = as.character(geom_num),
+    edge_id  = as.character(edge_id)
+  )
+
+# Hmisc::describe(streets_wgt.df$edge_id)
+
+end_time <- Sys.time()
+time_elapsed <- secondsToPeriodTime(start_time, end_time)
+print(glue('Time Elapsed:\t{time_elapsed}'))
+```
+
+## Select Highway Tags
+The dataset is very large, and will result in very long processing times. In order to limit this, we will remove street segment associated with highway tags we do not want to keep in the dataset.
+```{r}
+remove_highway_tags <- c(
+  "service", "cycleway", "steps", "bridleway", "track", "path", 
+  "primary_link", "secondary_link", "tertiary_link", "trunk_link", 
+  "living_street"
+  )
+
+streets_wgt.df <- streets_wgt.df %>% 
+  filter(!highway %in% remove_highway_tags)
+```
+
+## ZIP Code Look-Up
+For the visualization process we want to be able to know what ZIP code each segment is located in. To do this we'll need to perform a reverse look-up. We'll do this using the United States ZIP Code Tabulation Area (ZCTA) shapefile, from the US Census Bureau. ZTCAs are approximate area representations of USPS ZIP codes.
+
+[https://catalog.data.gov/dataset/tiger-line-shapefile-2019-2010-nation-u-s-2010-census-5-digit-zip-code-tabulation-area-zcta5-na](https://catalog.data.gov/dataset/tiger-line-shapefile-2019-2010-nation-u-s-2010-census-5-digit-zip-code-tabulation-area-zcta5-na) (Accessed on 3/16/2021)
+
+With the shapefile providing the spatial boundaries of each ZIP code, we can determine the missing ZIP codes by the latitude/longitude data associated with each affected segment.
+
+The method used for reverse geocode look-ups is outlined in the following Stack Overflow post (accessed on 8/24/2021):
+
+[https://stackoverflow.com/questions/42337619/how-to-batch-reverse-geocode-in-r](https://stackoverflow.com/questions/42337619/how-to-batch-reverse-geocode-in-r)
+
+```{r zip_code}
+start_time <- Sys.time()
+
+# Extract latitude/longitude for each segment
+lat_lon_to <- streets_wgt.df %>% select(to_lon:to_lat)
+lat_lon_from <- streets_wgt.df %>% select(from_lon:from_lat)
+
+# Transform to SpatialPointsDataFrame
+CRSobj <- "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
+
+spdf_to <- SpatialPointsDataFrame(
+  coords = lat_lon_to, 
+  data = streets_wgt.df, 
+  proj4string = CRS(CRSobj)
+  )
+
+spdf_from <- SpatialPointsDataFrame(
+  coords = lat_lon_from, 
+  data = streets_wgt.df, 
+  proj4string = CRS(CRSobj)
+  )
+
+end_time <- Sys.time()
+time_elapsed <- secondsToPeriodTime(start_time, end_time)
+print(glue('Time Elapsed - SpatialPointsDataframe Conversion:\t{time_elapsed}'))
+
+# Transform ZIP code shapefile
+zip_xfrm <- spTransform(
+  x = zip_shapefile, 
+  CRSobj = CRSobj
+  )
+
+# Subset to only zipcodes where points are found
+zip_to_subset <- zip_xfrm[spdf_to, ]
+zip_from_subset <- zip_xfrm[spdf_from, ]
+
+# Identify ZIP code if lat/lon exists inside polygon
+to_zip <- over(spdf_to, zip_to_subset[,"ZCTA5CE10"])
+from_zip <- over(spdf_from, zip_from_subset[,"ZCTA5CE10"])
+
+# Convert to dataframe
+to_zip.df <- as.data.frame(to_zip$ZCTA5CE10)
+from_zip.df <- as.data.frame(from_zip$ZCTA5CE10)
+
+# Bind columns to street network
+streets_wgt.df <- streets_wgt.df %>% 
+  cbind(from_zip.df, to_zip.df) %>% 
+  rename(
+    from_zip = "from_zip$ZCTA5CE10",
+    to_zip = "to_zip$ZCTA5CE10"
+    )
+
+end_time <- Sys.time()
+time_elapsed <- secondsToPeriodTime(start_time, end_time)
+print(glue('Time Elapsed - Complete:\t\t\t\t{time_elapsed}'))
+```
+
+### Inspect
+We'll want to see the frequency breakdown by ZIP code for a sanity check.
+```{r}
+streets_wgt.df %>% 
+  dplyr::group_by(to_zip) %>% 
+  dplyr::summarise(
+    freq = round( 100 * n() / nrow(streets_wgt.df), 2)
+    ) %>%
+  dplyr::mutate(
+    to_zip = as.numeric(to_zip)
+  ) %>% 
+  dplyr::arrange(freq)
+```
+
+## Drop Select ZIP Codes
+The process of extracting **osmdata** grabs data within a bounding box around the queried area. This means streets in neighboring counties outside of the Charlotte/Mecklenburg area are also included. For this project we do not care about these areas. In order to reduce our dataset and remove these outlying areas we will define the ZIP codes we want to keep, and filter our data by these codes.
+```{r}
+streets_wgt.df <- streets_wgt.df %>% 
+  dplyr::filter(
+    from_zip %in% select_zip_codes |
+    to_zip %in% select_zip_codes
+    )
+
+streets_wgt.df %>%
+  dplyr::group_by(to_zip) %>% 
+  dplyr::summarise(
+    freq = round( 100 * n() / nrow(streets_wgt.df), 2)
+    ) %>%
+  dplyr::mutate(
+    to_zip = as.numeric(to_zip)
+  ) %>% 
+  dplyr::arrange(desc(freq))
+```
+
+## Street Names
+Edge observation in the weighted streetnet is a straight line. These straight lines are referred to as edges. This is the nomeclature we will use going forward. A collection of edges can then be used to represent streets. As an example, if a city block is perfectly straight, this block mght be represented by a single edge. But if another city block is curved, it may be represented by many edges, with each edge a straight line, and when combined, giving the impression of a curved line.
+
+With the edges now created, we can add back the useful descriptive information for each edge, such as street name. With the descriptive information available, we can now join it to the street network data.frame, using the **osm_id** variable and the joining key.
+```{r add_descriptive_information}
+# Select descriptive columns
+streets_desc <- streets %>%
+  data.frame() %>% 
+  dplyr::select(
+    osm_id, tiger.county, tiger.name_base, 
+    tiger.name_base, tiger.name_type
+    ) 
+
+# Join to street network
+streets_wgt.df <- streets_wgt.df %>%
+  dplyr::rename(osm_id = way_id) %>% 
+  dplyr::left_join(
+    streets_desc, 
+    by = "osm_id"
+  ) 
+```
+
+### Inspect
+```{r}
+streets_wgt.df %>% glimpse()
+```
+
+## Unique Geolocation Identifier
+There is a worry that in the future, when the street network is updated, it will be difficult to connect old edge IDs to new edge IDs. If this is not possible, it will require a lot of rework to re-record the status of each edge Therefore, it would be useful to have a unique identifier for each segment.
+
+To ensure the edge is consistent, we can concatenate the to/from latitude/longitude data. We can surmise if this information does not change, the edge is the same.
+```{r}
+streets_wgt.df <- streets_wgt.df %>% 
+  mutate(
+    edge_id_geo = paste(abs(to_lon), abs(to_lat), abs(from_lon), 
+                       abs(from_lat), sep = "_")
+  )
+
+streets_wgt.df %>% glimpse()
+```
+
+## Drop Columns
+There are several columns we do not need for this project. 
+```{r}
+streets_wgt.df <- streets_wgt.df %>% 
+  select(
+    geom_num:to_lat, highway, osm_id, from_zip:to_zip, 
+    tiger.county:tiger.name_type, edge_id_geo
+    )
+
+streets_wgt.df %>% glimpse()
+```
+
+# Duplicate Processing
+The current street network has effectively duplicate edges, each edge representing a different direction one could travel down each street (if the street is two ways). For this project we do not care about this directional information and it only makes the dataset larger. Therefore, we will remove duplicate edges. 
+
+## Save Checkpoint
+```{r}
+streets_wgt_raw.df <- streets_wgt.df
+```
+
+## Drop Duplicates
+* There are duplicate rows, with from and to ids swapped
+```{r}
+# Record number of observations before dropping
+n_edge_raw <- length(streets_wgt.df$edge_id)
+
+# Drop duplicate observations
+streets_wgt.df <- streets_wgt.df %>% 
+    mutate(
+    dup_id = if_else(
+      from_id > to_id, 
+      paste(to_id, from_id, sep = "_"),
+      paste(from_id, to_id,  sep = "_")
+    )
+  )  %>% 
+  group_by(dup_id) %>% 
+  filter(row_number()==1) %>% 
+  ungroup() %>% 
+  select(-dup_id)
+
+# Record number of observations after dropping
+n_edge_post <- length(streets_wgt.df$edge_id)
+
+glue('Number of observations - original:\t\t\t{n_edge_raw}')
+glue('Number of observations - post duplicate removal:\t{n_edge_post}')
+```
+
+### Spot Check
+```{r}
+streets_wgt.df %>% 
+  filter(
+    edge_id %in% seq(213042, 213052, 1)
+  )
+```
+
+# Export
+We will now export two versions of the street network. One will be the raw network, with no extra processing removing edges. The other version will be the processed street network.
+## Extract OSM Query Date
+```{r}
+date_regex <- "\\d{4}-\\d{2}-\\d{2}"
+osm_query_date <- stringr::str_extract(file_name, date_regex)
+```
+
+## Raw Dataset
+```{r export_network}
+# Street Network - Complete
+## The 00 in the file name is to indicate which step in the street network generation this is.
+file_name_street_raw <- glue::glue("network_01_dodgr_raw_{osm_query_date}.RDS")
+file_path <- file.path(file_dir, file_name_street_raw)
+readr::write_rds(streets_wgt_raw.df, file_path)
+
+print(glue::glue("{file_path}"))
+```
+
+## Duplicates Removed Dataset
+```{r export_network}
+## The 00 in the file name is to indicate which step in the street network generation this is.
+file_name_street <- glue::glue("network_01_dodgr_{osm_query_date}.RDS")
+file_path <- file.path(file_dir, file_name_street)
+readr::write_rds(streets_wgt.df, file_path)
+
+print(glue::glue("{file_path}"))
+```

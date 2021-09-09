@@ -1,0 +1,244 @@
+---
+title: "Exploration"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Currently it does not appear that you can feed a dataframe with a Simple Features column into any of the Parallel package functions, on windows. These Simple Features columns are generated in the pre=processing steps, which themselves are parallel. Therefore, this notebook will explore creating a parallel process for identifying parallel segments, but the pre-processing steps will not be parallel.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  parallel,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files(
+  path = "./../R/", pattern = "*.R", full.names = TRUE, 
+  recursive = FALSE, include.dirs = FALSE
+  )
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+file_dir <- "./../data"
+file_name <- "network_02_no_parallel_seperation_complete_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+network_raw.df <- readr::read_rds(file_path)
+print(file_path)
+```
+
+### Extract OSM Query Date
+```{r extract_api_query_date}
+date_regex <- "\\d{4}-\\d{2}-\\d{2}"
+osm_query_date <- stringr::str_extract(file_name, date_regex)
+print(osm_query_date)
+```
+
+# Subset
+```{r subset_network}
+SUBSET_NETWORK <- TRUE
+
+if (SUBSET_NETWORK) {
+  # Define subsetting Parameters
+  center_lat <- 35.242974
+  center_lon <- -80.794735
+  radius     <- 1e3
+
+  # Execute
+  network.df <- subset_lat_lon(
+    network    = network_raw.df, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius 
+    )
+  
+} else{
+  network.df <- network_raw.df
+}
+
+n_edge_sub <- length(network.df$edge_id)
+n_edge_total <- length(network_raw.df$edge_id)
+per_total <- round(100*(1 - ((n_edge_total - n_edge_sub)/n_edge_total)),1)
+
+# Print output
+print(glue::glue("Subset Network:\t\t{SUBSET_NETWORK}"))
+if (SUBSET_NETWORK){
+  print(glue::glue("Percent of Network:\t{per_total}%"))
+}
+```
+
+# Test Parallel / Non-Parllel Tags
+## Normal / Orthogonal
+### Parallel
+```{r}
+# start_time <- Sys.time()
+# x <- networkLinestringProcessing(
+#   network_raw.df, 
+#   parallel = TRUE,
+#   start_time = NA,
+#   k = 6,
+#   verbose = 2
+# )
+# 
+# time_elapsed <- secondsToPeriodTime(start_time)
+# print(glue::glue("Time Elapsed: {time_elapsed}"))
+```
+
+### Non - Parallel
+```{r}
+# start_time <- Sys.time()
+# y <- networkLinestringProcessing(
+#   network_raw.df, 
+#   parallel = FALSE,
+#   start_time = NA,
+#   k = 6,
+#   verbose = 2
+# )
+# 
+# time_elapsed <- secondsToPeriodTime(start_time)
+# print(glue::glue("Time Elapsed: {time_elapsed}"))
+```
+
+## Complete Network
+### Parallel
+```{r}
+# start_time <- Sys.time()
+# network_par <- networkLinestringProcessingComplete(
+#   network_raw.df, 
+#   parallel = TRUE,
+#   start_time = NA,
+#   k = 6,
+#   verbose = 2
+# )
+# 
+# time_elapsed <- secondsToPeriodTime(start_time)
+# print(glue::glue("Time Elapsed: {time_elapsed}"))
+```
+
+### Non - Parallel
+```{r}
+# start_time <- Sys.time()
+# network_non_par <- networkLinestringProcessingComplete(
+#   network_raw.df, 
+#   parallel = FALSE,
+#   start_time = NA,
+#   k = 6,
+#   verbose = 2
+# )
+# 
+# time_elapsed <- secondsToPeriodTime(start_time)
+# print(glue::glue("Time Elapsed: {time_elapsed}"))
+```
+
+
+# identifyParallelSegmentsClusterLabel
+## Function Inputs
+```{r}
+k <- 6
+start_time <- Sys.time()
+verbose <- 2
+
+print(glue::glue("Function inputs defined."))
+```
+## Assign Cluster Numbers
+```{r}
+# Assign cluster number
+network.list <- networkClusters(network.df, k)
+cluster_labels <- names(network.list)
+network_w_cluster.df <- dplyr::bind_rows(network.list)
+```
+
+## Execute Function
+```{r}
+identifyParallelSegmentsCluster(
+  cluster_label     = 1,
+  network_w_cluster = network_w_cluster.df,
+  start_time        = NA, 
+  verbose           = 1 
+) 
+```
+
+# Implement Parallel Methods
+## Set up Cluster
+```{r}
+# Define dataset variables and required sub-functions for export to cluster
+cluster_data <- c("network.list", "k")
+cluster_functions <- c(
+  "exportParallelEdgeResults", "preProcessingParallelIdentification", 
+  "makeLinestring", "makeLinestringVector", "networkClusters",
+  "secondsToPeriodTime", "compareParallelEdges", 
+  "networkLinestringProcessing", "lineStringLength", "subset_lat_lon", 
+  "line_length"
+)
+cluster_variables <- c(cluster_data, cluster_functions)
+
+# Create Cluster
+cl <- parallel::makeCluster(k)
+
+# Export required variables to cluster
+parallel::clusterExport(
+  cl      = cl, 
+  varlist = cluster_variables, 
+  envir   = environment()
+)
+
+print(glue::glue("Cluster created and values exported."))
+```
+
+## Run Parallel Action
+```{r}
+# Execute parallel implementation of segment labeling
+network.mtx <- parallel::parSapply(
+  cl               = cl, 
+  X                = cluster_labels, 
+  FUN              = identifyParallelSegmentsCluster,
+  network          = network_w_cluster.df,
+  start_time       = start_time,
+  verbose          = verbose
+)
+
+# Convert each matrix column to dataframe and store in list
+network_compile.list <- vector(mode = "list", length = k)
+
+for (i in seq(1,k,1)){
+  network_compile.list[[i]] <- dplyr::as_tibble(network.mtx[,i])
+}
+
+# Bind all subset network dataframes in the list
+network <- bind_rows(network_compile.list)
+
+# Remove cluster label
+network <- network %>% select(-.cluster)
+
+network %>% 
+  arrange(desc(n_parallel_segments))
+```
+
+## Function
+```{r}
+identifyParallelSegmentsPar(
+  network    = network.df, 
+  k          = 6, 
+  start_time = NA, 
+  verbose    = verbose
+)
+```
+

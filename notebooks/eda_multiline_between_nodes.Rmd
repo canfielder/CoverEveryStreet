@@ -48,6 +48,12 @@ col_type <- c(
 )
 ```
 
+### Intersection Node Ids
+Nodes which are an intersection between segments. This means they are used as a To or From node at least 2 times.
+```{r}
+intersection_ids <- readRDS(file = "./../data/intersection_nodes.RDS")
+```
+
 # Processing
 ## Drop Duplicates
 * There are duplicate rows, with from and to ids swapped
@@ -99,63 +105,6 @@ network.df <- network.df %>%
   filter(!(highway %in% street_types))
 ```
 
-
-# Determine Intersections
-* Each **edge_id** is defined by two nodes, and TO and FROM node. 
-* If a node is used by multiple edge_ids as a TO or FROM node then we know this node is an intersection.
-* A case to be careful of is when a node is used only twice, once as a TO and once as a FROM node. While this is multiple total cases, this is a clear indication of the node not being an intersection, and instead just a straight street.
-* We will determine which of the possible node IDS are intersections.
-
-## Raw Counts
-### FROM Nodes
-```{r}
-# Determine which FROM nodes are intersections
-from_node_freq.df <- network.df %>% 
-  group_by(from_id) %>% 
-  summarise(count = n()) %>%
-  ungroup() %>% 
-  filter(count > 1) %>%
-  arrange(desc(count))
-
-from_node_freq.df
-```
-
-### TO Nodes
-```{r}
-# Determine which FROM nodes are intersections
-to_node_freq.df <- network.df %>% 
-  group_by(to_id) %>% 
-  summarise(count = n()) %>%
-  ungroup() %>% 
-  filter(count > 1) %>%
-  arrange(desc(count))
-
-to_node_freq.df
-```
-
-## Consolidate
-```{r}
-# FROM IDs
-from_ids <- from_node_freq.df %>%  pull(from_id) %>% unique()
-glue('Number of unique nodes - TO:\t{length(from_ids)}')
-
-# To IDs
-to_ids <- to_node_freq.df %>%  pull(to_id) %>% unique()
-glue('Number of unique nodes - FROM:\t{length(to_ids)}')
-
-# Combine and reduce to unique
-intersection_ids <- unique(c(from_ids, to_ids))
-
-glue('Number of nodes - intersection:\t{length(intersection_ids)}')
-glue('Number of nodes - all:\t\t{n_edge_post}')
-```
-
-```{r}
-network.df %>% 
-  filter(edge_id %in% seq(213040, 213050, 1))
-```
-
-
 # Subset Street Network
 **Zip Code Level**
 * Start out with subset of the street network
@@ -169,7 +118,7 @@ network.df %>%
 subset_method <- c('zip', 'street', 'lat_lon', 'highway_type')
 
 # Select method
-method <- subset_method[1]
+method <- subset_method[3]
 glue('Subset Method: {method}')
 
 if (method == subset_method[1]) {
@@ -212,14 +161,13 @@ if (method == subset_method[1]) {
       )
   }  else if (method == subset_method[3]) {
 
-    center_lat <- 35.25035
-    center_lon <- -80.78195
-    radius <- 1e-2
+    center_lat <- 35.242974
+    center_lon <- -80.794735
+    radius <- 5e-3
     
     print(glue('Center Latitude: {center_lat}'))
     print(glue('Center Longitude: {center_lon}'))
     print(glue('Radius: {radius}'))
-    
     
     network_subset.df <- network.df %>% 
       filter(
@@ -254,7 +202,7 @@ glue('Number of edges: {n_edges}')
 ## Step By Step Scratch Work
 ### Initialize Dataframe for this step
 ```{r}
-step_by_step.df <- network_subset.df
+# step_by_step.df <- network_subset.df
 ```
 
 ### Initialize Segment ID Column
@@ -331,7 +279,6 @@ step_by_step.df <- network_subset.df
 
 ## Pre-Process Visualization
 ```{r}
-
 pre_process.sf <- makeLinestringVector(network_subset.df)
 
 color_feature <- 'highway'
@@ -516,76 +463,72 @@ p <- plotStreets(eval.sf, color_feature)
 plotly::ggplotly(p)
 ```
 
-#### Data Inspect
-```{r}
-eval.sf %>% 
-  filter(tiger.name_base == "Dinglewood")
-```
-
-# Multilinestring
+# Multilinestring / MultiPoint Analysis
 ## Concatenate linestrings
 ```{r}
-test_segment_id <- "h3fmodqyw4"
-
-ls_set <- eval.sf %>% 
-  filter(segment_id == test_segment_id) %>% 
-  pull(geometry)
-
-ls_set
+# test_segment_id <- "h3fmodqyw4"
+# 
+# ls_set <- eval.sf %>% 
+#   filter(segment_id == test_segment_id) %>% 
+#   pull(geometry)
+# 
+# ls_set
+# 
+# # Convert to multistring
+# mls <- sf::st_multilinestring(ls_set) %>% 
+#   sf::st_sfc() %>% 
+#   st_set_crs(4326)
+# 
+# # Calculate multistringline length
+# mls_len <- sf::st_length(mls)
+# mls_len
+# 
+# # Segmentize
+# mls %>% 
+#   sf::st_segmentize(dfMaxLength = mls_len/100)
 ```
 
+## MultiPoint
 ```{r}
-# Convert to multistring
-mls <- sf::st_multilinestring(ls_set) %>% 
-  sf::st_sfc() %>% 
-  st_set_crs(4326)
-
-# Calculate multistring length
-mls_len <- sf::st_length(mls)
-mls_len
+# sf::st_sfc(mls)
+# 
+# # Convert MULTILINESTRING to MULTIPOINT
+# mps <- sf::st_sfc(mls) %>% 
+#   sf::st_cast("POINT") %>% 
+#   st_set_crs(4326)
+# 
+# # Extract single line from set
+# l <- ls_set[2]
+# l
+# 
+# # Test Distance Function
+# ## Multistringline
+# dist_mls <- sf::st_is_within_distance(
+#   x = mls,
+#   y = l,
+#   dist = .05, 
+#   sparse = FALSE
+# )
+# dist_mls
+# 
+# 
+# 
+# ## Multipoint
+# dist__mps <- sf::st_is_within_distance(
+#   x = mps,
+#   y = l,
+#   dist = .05, 
+#   sparse = FALSE
+# ) 
+# 
+# dist_rate_mps <-   sum(dist__mps)/length(dist__mps)
+# dist_rate_mps
 ```
 
+# Dual Parallel Line Road
+* Example road: The Plaza ~36th st
 ```{r}
-# Segmentize
-mls %>% 
-  sf::st_segmentize(dfMaxLength = mls_len/100)
+
 ```
-
-```{r}
-sf::st_sfc(mls)
-
-# Convert MULTILINESTRING to MULTIPOINT
-mps <- sf::st_sfc(mls) %>% 
-  sf::st_cast("POINT") %>% 
-  st_set_crs(4326)
-
-# Extract single line from set
-l <- ls_set[2]
-l
-
-# Test Distance Function
-## Multiline
-dist_mls <- sf::st_is_within_distance(
-  x = mls,
-  y = l,
-  dist = .05, 
-  sparse = FALSE
-)
-dist_mls
-
-
-
-## Multipoint
-dist__mps <- sf::st_is_within_distance(
-  x = mps,
-  y = l,
-  dist = .05, 
-  sparse = FALSE
-) 
-
-dist_rate_mps <-   sum(dist__mps)/length(dist__mps)
-dist_rate_mps
-```
-
 
 

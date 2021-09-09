@@ -1,0 +1,664 @@
+---
+title: "Exploration"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Determine how to ensure roads represented as two parallel lines have the same segment intersections on both sides of the line.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  parallel,
+  sf,
+  stringi,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files(
+  path = "./../R/", pattern = "*.R", full.names = TRUE, 
+  recursive = FALSE, include.dirs = FALSE
+  )
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+file_dir <- "./../data"
+file_name <- "network_03_parallel_edges_identified_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+network_raw.df <- readr::read_rds(file_path)
+print(file_path)
+```
+
+### Extract OSM Query Date
+```{r extract_api_query_date}
+date_regex <- "\\d{4}-\\d{2}-\\d{2}"
+osm_query_date <- stringr::str_extract(file_name, date_regex)
+print(osm_query_date)
+```
+
+### Segment Map
+```{r}
+file_name <- glue::glue("segment_mapping_no_parallel_seperation_{osm_query_date}.RDS")
+file_path <- file.path(file_dir, file_name)
+segment_map <- read_rds(file_path)
+print(file_path)
+```
+
+# Subset
+```{r subset_network}
+SUBSET_NETWORK <- FALSE
+
+if (SUBSET_NETWORK) {
+  # Define subsetting Parameters
+  center_lat <- 35.242974
+  center_lon <- -80.794735
+  radius     <- 1e3
+
+  # Execute
+  network.df <- subset_lat_lon(
+    network    = network_raw.df, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius 
+    )
+  
+} else{
+  network.df <- network_raw.df
+}
+
+n_edge_sub <- length(network.df$edge_id)
+n_edge_total <- length(network_raw.df$edge_id)
+per_total <- round(100*(1 - ((n_edge_total - n_edge_sub)/n_edge_total)),1)
+
+# Print output
+print(glue::glue("Subset Network:\t\t{SUBSET_NETWORK}"))
+if (SUBSET_NETWORK){
+  print(glue::glue("Percent of Network:\t{per_total}%"))
+}
+```
+
+# Check Segments with Multiple Edges
+## Generate Parallel Edge Pairs 
+```{r}
+parallel_edge_pairs <- network.df %>% 
+  select(edge_id, segment_id, parallel_edges, parallel_segments) %>% 
+  unnest(cols = parallel_segments) %>% 
+  unnest(cols = parallel_edges) %>% 
+  filter(parallel_segments != "<EMPTY>")
+
+parallel_edge_pairs
+```
+
+## Create Table of All Segments Containing Parallel Edges
+```{r}
+segment_breakdown <- parallel_edge_pairs %>% 
+  group_by(segment_id) %>%
+  count(parallel_segments) %>% 
+  ungroup() %>% 
+  rename(
+    parallel_segment = parallel_segments,
+    n_parallel_edges = n
+    ) %>% 
+  arrange(segment_id, parallel_segment)
+
+segment_breakdown %>% arrange(desc(n_parallel_edges))
+```
+
+## Summary Statistics - Unique Segments
+```{r}
+# Summary table of the number of 
+unique_parallel_segments <- segment_breakdown %>% 
+  group_by(segment_id) %>%
+  summarise(unique_parallel_segments = n()) %>%
+  arrange(desc(unique_parallel_segments))
+
+unique_parallel_segments
+```
+
+# Generate All Sets of  Parallel Segment Pairs
+## Wrap All Parallel Segments into List Column
+```{r}
+# Reduce to segments with two or more segment matches
+parallel_segments.v <- unique_parallel_segments %>% 
+  filter(unique_parallel_segments > 1) %>% 
+  pull(segment_id)
+
+parallel_segments.df <- segment_breakdown %>% 
+  select(-n_parallel_edges) %>% 
+  filter(segment_id %in% parallel_segments.v) %>% 
+  group_by(segment_id) %>% 
+  summarise(parallel_segments = list(unique(parallel_segment)))
+
+parallel_segments.df %>% head(2)
+```
+
+### Scratch Work
+```{r}
+df_test <- x %>%
+  filter(segment_id == "l0sztiy7lq")
+
+df_test
+
+long_id <- df_test %>% pull(segment_id)
+
+short_segments <- df_test %>% pull(parallel_segments) %>% unlist()
+
+short_segments
+
+segment_sets.df <- as.data.frame(
+  x = t(combn(short_segments, 2)) 
+  ) %>% 
+  mutate(long_segment = long_id) %>%
+  rename(
+    short_segment_1 = V1,
+    short_segment_2 = V2
+    ) %>% 
+  select(long_segment, everything())
+
+
+segment_sets.df
+```
+
+### Function - List All Possible Short Segment Pairs
+```{r}
+shortSegmentPairs <- function(segments.lst){
+  as.data.frame(
+    x = t(combn(unlist(segments.lst), 2)) 
+  ) %>% 
+  rename(
+    short_segment_1 = V1,
+    short_segment_2 = V2
+    )
+}
+
+short_segments <- df_test %>% pull(parallel_segments)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Visual
+## Process Dataset
+```{r}
+# Table of all segments with parallel segments, long form
+segment_breakdown <- network.df %>% 
+  select(edge_id, segment_id, parallel_segments, parallel_edges) %>% 
+  unnest(cols = parallel_segments) %>% 
+  unnest(cols = parallel_edges) %>% 
+  filter(parallel_segments != "<EMPTY>") %>% 
+  group_by(segment_id) %>%
+  count(parallel_segments) %>% 
+  ungroup() %>% 
+  rename(
+    parallel_segment = parallel_segments,
+    n_parallel_edges = n
+    ) %>% 
+  arrange(segment_id, parallel_segment)
+
+# Summary table of the number of unique parallel segments
+unique_parallel_segments <- segment_breakdown %>% 
+  group_by(segment_id) %>%
+  summarise(unique_parallel_segments = n()) %>%
+  arrange(desc(unique_parallel_segments))
+
+# Extract Segments to Highlight
+## Long
+long_segments <- unique_parallel_segments %>% 
+  filter(unique_parallel_segments > 1) %>% 
+  pull(segment_id)
+
+## Short
+short_segments_1 <- segment_breakdown %>% 
+  filter(segment_id %in% long_segments) %>% 
+  group_by(segment_id) %>% 
+  mutate(row = row_number()) %>% 
+  filter(row == 1) %>% 
+  pull(parallel_segment)
+
+short_segments_2 <- segment_breakdown %>% 
+  filter(segment_id %in% long_segments) %>% 
+  group_by(segment_id) %>% 
+  mutate(row = row_number()) %>% 
+  filter(row == 2) %>% 
+  pull(parallel_segment)
+```
+
+## Generate Plot
+```{r}
+# Create column for highlighting the plot
+network.df <- network.df %>% 
+  mutate(
+    highlight = dplyr::case_when(
+      segment_id %in% long_segments ~ "long", 
+      segment_id %in% short_segments_1 ~ "short_1",
+      segment_id %in% short_segments_2 ~ "short_2",
+      TRUE ~ "default"
+    )
+  )
+
+print(glue("Number of Cases: {length(long_segments)}"))
+
+# Generate Plot
+p <- plotStreets(network.df, color_feature = "highlight")
+
+# Apply color palette
+color_pal <- c(
+  "short_1" = "#E71D36", 
+  "short_2" = "#FF9F1C",
+  "long"    = "#2EC4B6", 
+  "default" =  "#D6DBDF"
+  )
+
+p <- p + scale_colour_manual(values=color_pal)
+
+# Generate interactive plot
+plotly::ggplotly(p)
+```
+
+# Define Functions
+```{r}
+# Verify segments are adjacent
+verifyAdjacentSegments <- function(segment_1, segment_2){
+  
+  segment_1_adj <- segment_map.v[segment_1][[1]]
+  
+  segment_2 %in% segment_1_adj
+  
+}
+```
+
+# Processing
+## Identify Long/Short/Short Sets
+Identify all possible cases where of parallel lines where there is one long edge parallel to two short edges.
+
+### Wrap All Parallel Segments into List Column
+```{r}
+# Reduce to segments with two or more segment matches
+parallel_segments.v <- unique_parallel_segments %>% 
+  filter(unique_parallel_segments > 1) %>% 
+  pull(segment_id)
+
+# Wrap all short segments into a list column vector
+parallel_segments.df <- segment_breakdown %>% 
+  rename(long_segment = segment_id) %>% 
+  select(-n_parallel_edges) %>% 
+  filter(long_segment %in% parallel_segments.v) %>% 
+  group_by(long_segment) %>% 
+  summarise(parallel_segments = list(unique(parallel_segment))) 
+
+# Explode list column vector of parallel segments into dataframe of all 
+# possible pairs of the values within the vector
+parallel_segments.df <- parallel_segments.df%>% 
+  group_by(long_segment) %>% 
+  summarise(listPairs(parallel_segments)) %>% 
+  rename(
+    short_segment_1 = item_1,
+    short_segment_2 = item_2,
+  )
+
+parallel_segments.df 
+```
+
+### Remove Short Segments Which Are Not Adjacent
+```{r}
+segment_map.v <- deframe(segment_map)
+
+parallel_segments.df <- parallel_segments.df %>% 
+  mutate(
+    short_is_adjacent = purrr::pmap_lgl(
+      .l = list(
+        segment_1 = short_segment_1, 
+        segment_2 = short_segment_2
+      ), 
+      .f = verifyAdjacentSegments
+      )
+  ) %>% 
+  filter(short_is_adjacent)
+```
+
+## Determine Slice Point on Long Segment
+### Define Example Parameters
+Parkwood @ Barry
+```{r}
+# Defined parameters of 
+s1 <- '2dx94g7bo2'
+s2 <- 'heyaz2jzyv'
+l_seg <- 'l0sztiy7lq'
+l_edge_id <- '769046'
+
+s3 <- intersect(segment_map.v[s1][[1]], segment_map.v[s2][[1]])
+```
+
+### Create Node and Edges Databases
+```{r}
+# Nodes
+to_id.df <- network.df %>% 
+  select(segment_id, to_id, to_lon, to_lat) %>% 
+  rename(
+    node_id = to_id,
+    node_lon = to_lon, 
+    node_lat = to_lat
+    )
+
+from_id.df <- network.df %>% 
+  select(segment_id, from_id, from_lon, from_lat) %>% 
+  rename(
+    node_id  = from_id,
+    node_lon = from_lon, 
+    node_lat = from_lat
+    )
+
+nodes.df <- bind_rows(to_id.df, from_id.df) %>% 
+  distinct()
+
+# Edges
+edges.df <- network.df %>% 
+  select(edge_id, segment_id, from_id:to_lat)
+
+edges.df
+```
+
+### Determine Latitude/Longitude at Short Segment Connection
+#### Scratch
+```{r}
+network_seg_1.df <- nodes.df %>% 
+  filter(
+    (segment_id == s1) 
+)
+
+network_seg_2.df <- nodes.df %>% 
+  filter(
+    (segment_id == s2) 
+  )
+
+seg_1_nodes <- network_seg_1.df %>% pull(node_id)
+seg_2_nodes <- network_seg_2.df %>% pull(node_id)
+
+node_intersect <- intersect(seg_1_nodes, seg_2_nodes)
+
+lat_intersect <- nodes.df %>% 
+  filter(node_id == node_intersect) %>% 
+  pull(node_lat) %>% 
+  unique()
+
+
+lon_intersect <- nodes.df %>% 
+  filter(node_id == node_intersect) %>% 
+  pull(node_lon) %>% 
+  unique()
+
+```
+
+
+```{r}
+x <- list(nodes.df)
+
+x[[1]]
+```
+
+
+```{r}
+sharedShortSegmentPoint <- function(segment_id_1, segment_id_2, node_table) {
+
+    # Extract nodes related to segment 1
+  seg_1_nodes <- dataframe %>% 
+    filter(
+      (segment_id == segment_id_1)
+    ) %>% 
+    pull(node_id)
+  
+  # Extract nodes related to segment 1
+  seg_2_nodes <- dataframe %>% 
+    filter(
+      (segment_id == segment_id_2)
+    ) %>% 
+    pull(node_id)
+  
+  # Determine intersection
+  intersect_node <- intersect(seg_1_nodes, seg_2_nodes)
+  
+  # Determine longitude/latitude of intersection point
+  short_intersect_lon <- dataframe %>% 
+    filter(node_id == intersect_node) %>% 
+    pull(node_lon) %>% 
+    unique()
+  
+  short_intersect_lat <- dataframe %>% 
+    filter(node_id == intersect_node) %>% 
+    pull(node_lat) %>% 
+    unique()
+  
+  # Export lon/lat vector
+  short_intersect_point <- c(short_intersect_lon, short_intersect_lat)
+  names(short_intersect_point) <- c('short_intersect_lon', 'short_intersect_lat')
+  short_intersect_point
+}
+```
+
+#### Execute Function
+```{r}
+
+parallel_segments.df <- parallel_segments.df %>% 
+  mutate(
+    short_intersect = 
+         purrr::pmap(
+           .l = list(
+             segment_id_1 = short_segment_1,
+             segment_id_2 = short_segment_2,
+             node_table   = list(nodes.df)
+           ), 
+           .f =  sharedShortSegmentPoint
+         )
+    ) %>%
+  unnest_wider(short_intersect)
+
+parallel_segments.df
+
+parallel_segments_raw.df <- parallel_segments.df
+```
+
+
+## Determine Closest Edge and Point in Long Segment to the Intersection Point
+##### Inspect
+```{r}
+x1 <- 1
+y1 <- -1.738943
+x2 <- 3
+y2 <- 30
+
+
+x.v <- c(x1, x2)
+y.v <- c(y1, y2)
+cbind(x.v, y.v)
+
+dist(cbind(x.v, y.v))[1]
+
+distPointToPoint(x1,y1, x2, y2)
+```
+
+#### Line Slope and Intercept
+```{r}
+lineSlope <- function(x_1, y_1, x_2, y_2) {
+  (y_2 - y_1) / (x_2 - x_1)
+}
+
+yIntercept <- function(x, y, slope){
+  # y = mx + b >>> b = y - mx
+  y - slope * x
+}
+```
+
+
+### Generate Segment Edges w/ Line Parameters
+```{r}
+edges_l_seg.df <- edges.df %>% 
+  filter(
+    segment_id == l_seg
+  ) %>% 
+  mutate(
+
+  )
+
+edges_l_seg.df
+```
+
+
+### Determine Shortest Distance From Edge to Point
+#### Scratch
+```{r}
+# # Determine length of edge
+# l_edge <- distPointToPoint(edge_from_lon, edge_from_lat, edge_to_lon, edge_to_lat)
+# 
+# # Generate sequence of x values
+# x_seq <- seq(from = edge_from_lon, to = edge_to_lon , by = l_edge/100)
+# 
+# # Determine corresponding y values along the edge
+# y_seq <- m * x_seq + b
+
+```
+
+```{r}
+# o = optimize(
+#   f = distLineToPoint, x_seq, lon_intersect, lat_intersect, m , b
+#   )
+# 
+# x_min <- o$minimum
+# y_min <- m * x_min + b
+# 
+# y_min - m*x_min - b
+```
+
+#### Functionize
+```{r}
+intersect_lon <- parallel_segments.df %>% 
+  filter(long_segment == l_seg) %>% 
+  slice(1) %>% 
+  pull(short_intersect_lon)
+
+intersect_lat <- parallel_segments.df %>% 
+  filter(long_segment == l_seg) %>% 
+  slice(1) %>% 
+  pull(short_intersect_lat)
+
+```
+
+##### Execute
+```{r}
+#### Execute Function
+edges_l_seg_obj.df <- edges_l_seg.df %>% 
+  mutate(
+    minimize_distance = 
+      purrr::pmap(
+        .l = list(
+          from_lon      = from_lon,
+          to_lon        = to_lon,
+          slope         = slope, 
+          intercept     = intercept, 
+          edge_length   = edge_length,
+          lon_intersect = intersect_lon, 
+          lat_intersect = intersect_lat,
+          x_points      = 1e3
+           ), 
+        .f =  minimumDistance
+         )
+    ) %>% 
+  unnest_wider(minimize_distance)
+
+edges_l_seg_obj.df %>% 
+  filter(objective == min(objective))
+```
+
+### Combine To Select Edge
+```{r}
+parallel_segments_raw.df
+longSegmentSplitPoint <- function(
+  long_segment, 
+  short_intersect_lon, 
+  short_intersect_lon, 
+  x_points = 1e3
+  ){
+   # Extract longitude and latitude at short segment connection point
+  
+  
+  # Create table of edges associated with the long segment
+  edges_l_seg.df <- edges.df %>% 
+  filter(
+    segment_id == long_segment
+  ) %>% 
+  mutate(
+    slope       = lineSlope(from_lon, from_lat, to_lon, to_lat), 
+    intercept   = yIntercept(from_lon, from_lat, slope),
+    edge_length = distPointToPoint(from_lon, from_lat, to_lon, to_lat)
+  )
+  
+  edges_l_seg_obj.df <- edges_l_seg.df %>% 
+  `  mutate(
+      minimize_distance = 
+        purrr::pmap(
+          .l = list(
+            from_lon      = from_lon,
+            to_lon        = to_lon,
+            slope         = slope, 
+            intercept     = intercept, 
+            edge_length   = edge_length,
+            lon_intersect = short_intersect_lon, 
+            lat_intersect = short_intersect_lon,
+            x_points      = x_points
+             ), 
+          .f =  minimumDistance
+           )
+      ) %>% 
+    unnest_wider(minimize_distance)
+  `
+  edges_l_seg_obj_min.df <- edges_l_seg_obj.df %>% 
+    mutate(
+      min_lat = slope * minimum + intercept
+    )
+    filter(objective == min(objective))
+  
+  # Extract output values
+  split_edge <- edges_l_seg_obj_min.df %>% pull(edge_id)
+  split_lon <- edges_l_seg_obj_min.df %>% pull(minimum)
+  split_lat <- edges_l_seg_obj_min.df %>% pull(min_lat)
+  
+  # Create output list
+  output_list <- vector(mode = 'list', length = 3)
+  output_list[['split_lon']] <- split_lon
+  output_list[['split_lat']] <- split_lat
+  
+  output_list
+  
+}
+```
+
+

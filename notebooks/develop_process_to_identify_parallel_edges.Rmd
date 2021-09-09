@@ -1,0 +1,344 @@
+---
+title: "Exploration"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Determine how to ensure roads represented as two parallel lines have the same segment intersections on both sides of the line.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  parallel,
+  sf,
+  stringi,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files(
+  path = "./../R/", pattern = "*.R", full.names = TRUE, 
+  recursive = FALSE, include.dirs = FALSE
+  )
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+file_dir <- "./../data"
+file_name <- "network_02_no_parallel_seperation_complete_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+network_raw.df <- readr::read_rds(file_path)
+print(file_path)
+```
+
+### Extract OSM Query Date
+```{r extract_api_query_date}
+date_regex <- "\\d{4}-\\d{2}-\\d{2}"
+osm_query_date <- stringr::str_extract(file_name, date_regex)
+print(osm_query_date)
+```
+
+### Segment Map
+```{r}
+file_name <- glue::glue("segment_mapping_no_parallel_seperation_{osm_query_date}.RDS")
+file_path <- file.path(file_dir, file_name)
+segment_map <- read_rds(file_path)
+print(file_path)
+```
+
+# Subset
+```{r subset_network}
+SUBSET_NETWORK <- TRUE
+
+if (SUBSET_NETWORK) {
+  # Define subsetting Parameters
+  center_lat <- 35.242974
+  center_lon <- -80.794735
+  radius     <- 1e3
+
+  # Execute
+  network.df <- subset_lat_lon(
+    network    = network_raw.df, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius 
+    )
+  
+} else{
+  network.df <- network_raw.df
+}
+
+n_edge_sub <- length(network.df$edge_id)
+n_edge_total <- length(network_raw.df$edge_id)
+per_total <- round(100*(1 - ((n_edge_total - n_edge_sub)/n_edge_total)),1)
+
+# Print output
+print(glue::glue("Subset Network:\t\t{SUBSET_NETWORK}"))
+if (SUBSET_NETWORK){
+  print(glue::glue("Percent of Network:\t{per_total}%"))
+}
+```
+
+# identifyParallelSegments - Not Parallel
+## Function Inputs
+```{r}
+start_time <- Sys.time()
+verbose <- 2
+network <- network.df
+network_complete <- network
+
+# Determine cluster count
+core_factor <- 0.75
+k <- trunc(parallel::detectCores() * core_factor)
+print(glue::glue("Number of Cores: {k}"))
+```
+
+## Function - Pre-process datasets
+```{r}
+# x <- networkLinestringProcessing(
+#   network          = network.df, 
+#   network_complete = network.df,
+#   start_time       = NA,
+#   k                = 6,
+#   verbose          = 2
+#   )
+```
+
+## Function - Identify Parallel Segmsents - Not Parallel
+```{r}
+# y <- identifyParallelSegments(
+#   network          = network_raw.df,
+#   k                = 8,
+#   start_time       = NA,
+#   verbose          = 1,
+#   network_complete = NA
+# )
+# 
+# print(glue::glue("identifyParallelSegments Executed"))
+```
+
+# identifyParallelSegments - Parallel
+## Process Normal / Orthogonal Networks
+```{r}
+network_norm_orth <- networkLinestringProcessing(
+  network          = network.df,
+  start_time       = start_time,
+  k                = k,
+  verbose          = verbose
+)
+```
+
+## Define Complete Network
+```{r}
+network_complete <- network_norm_orth[["normal"]]
+```
+
+## Assign Clusters Labels
+```{r}
+# Assign to Network
+network.list <- networkClusters(network_norm_orth[["normal"]], k)
+
+# Apply Same Cluster Labels to Orthogonal
+## Bind Normal network
+network_w_cluster.df <- dplyr::bind_rows(network.list)
+
+## Join Cluster labels
+network_orth_w_cluster.df <- network_norm_orth[["orthogonal"]] %>% 
+  dplyr::left_join(
+    network_w_cluster.df %>% select(edge_id, .cluster), 
+    by = "edge_id"
+  ) %>% 
+  dplyr::select(.cluster, dplyr::everything())
+
+norm_orth_cluster_networks.list <- vector(mode = "list", length = length(network.list)) 
+names(norm_orth_cluster_networks.list) <- names(network.list)
+
+for (cluster_label in names(network.list)){
+  # Initialize temporary named list
+  tmp.list <- vector(mode = "list", length = 2)
+  names(tmp.list) <- c("normal", "orthogonal")
+  
+  # Subset networks by cluster label and assign to temporary list
+  tmp.list[["normal"]] <- network_w_cluster.df %>% 
+    filter(
+      .cluster == cluster_label 
+    ) %>% 
+    arrange(edge_id)
+  
+  tmp.list[["orthogonal"]] <- network_orth_w_cluster.df %>% 
+    filter(
+      .cluster == cluster_label 
+    ) %>% 
+    arrange(edge_id)
+  
+  
+  # Assign temporary list to output list
+  norm_orth_cluster_networks.list[[cluster_label]] <- tmp.list
+}
+```
+
+## Parallel Test
+### MCAPPLY
+```{r}
+start_time <- Sys.time()
+
+network_norm_orth <- networkLinestringProcessing(
+  network          = network.df,
+  start_time       = start_time,
+  k                = k,
+  verbose          = 0
+)
+
+network_complete <- network_norm_orth[["normal"]]
+
+# Assign to Network
+network.list <- networkClusters(network_norm_orth[["normal"]], k)
+
+# Apply Same Cluster Labels to Orthogonal
+## Bind Normal network
+network_w_cluster.df <- dplyr::bind_rows(network.list)
+
+## Join Cluster labels
+network_orth_w_cluster.df <- network_norm_orth[["orthogonal"]] %>% 
+  dplyr::left_join(
+    network_w_cluster.df %>% select(edge_id, .cluster), 
+    by = "edge_id"
+  ) %>% 
+  dplyr::select(.cluster, dplyr::everything())
+
+norm_orth_cluster_networks.list <- vector(mode = "list", length = length(network.list)) 
+names(norm_orth_cluster_networks.list) <- names(network.list)
+
+for (cluster_label in names(network.list)){
+  # Initialize temporary named list
+  tmp.list <- vector(mode = "list", length = 2)
+  names(tmp.list) <- c("normal", "orthogonal")
+  
+  # Subset networks by cluster label and assign to temporary list
+  tmp.list[["normal"]] <- network_w_cluster.df %>% 
+    filter(
+      .cluster == cluster_label 
+    ) %>% 
+    arrange(edge_id)
+  
+  tmp.list[["orthogonal"]] <- network_orth_w_cluster.df %>% 
+    filter(
+      .cluster == cluster_label 
+    ) %>% 
+    arrange(edge_id)
+  
+  
+  # Assign temporary list to output list
+  norm_orth_cluster_networks.list[[cluster_label]] <- tmp.list
+}
+
+network_w_parallel.list <- parallel::mclapply(
+  X                = norm_orth_cluster_networks.list, 
+  FUN              = compareParallelEdgesListWrapper,
+  network_complete = network_complete,
+  verbose          = 0
+  )
+
+network <- dplyr::bind_rows(network_w_parallel.list)
+
+time_elapsed <- secondsToPeriodTime(start_time)
+print(glue::glue("Time Elapsed - Parallel: {time_elapsed}"))
+```
+
+### Non - Parallel
+```{r}
+start_time <- Sys.time()
+
+y <- identifyParallelSegments(
+  network          = network.df,
+  k                = k,
+  start_time       = NA,
+  verbose          = 0,
+  network_complete = NA
+)
+
+time_elapsed <- secondsToPeriodTime(start_time)
+print(glue::glue("Time Elapsed - Parallel: {time_elapsed}"))
+```
+
+
+## Process Complete Network
+```{r}
+  network_complete <- networkLinestringProcessing(
+    network          = network.df,
+    start_time       = start_time,
+    k                = k,
+    verbose          = verbose
+  )
+```
+
+## Set up Cluster
+```{r}
+# Define dataset variables and required sub-functions for export to cluster
+cluster_data <- c("network.list", "k")
+cluser_functions <- c(
+  "exportParallelEdgeResults", "identifyParallelSegments", "preProcessingParallelIdentification", 
+  "makeLinestring", "makeLinestringVector","makeLinestringVectorPar", "networkClusters", 
+  "secondsToPeriodTime", "compareParallelEdges"
+  )
+cluster_variables <- c(cluster_data, cluser_functions)
+
+# Create Cluster
+cl <- parallel::makeCluster(k)
+
+# Export required variables to cluster
+parallel::clusterExport(
+  cl      = cl, 
+  varlist = cluster_variables, 
+  envir   = environment()
+)
+
+print(glue::glue("Cluster created and values exported."))
+```
+
+
+## Run Function
+```{r}
+# Execute parallel implementation of segment labeling
+network.mtx <- parallel::parSapply(
+  cl               = cl, 
+  X                = norm_orth_cluster_networks.list, 
+  FUN              = compareParallelEdgesListWrapper,
+  network_complete = network_complete,
+  k                = k,
+  start_time       = start_time,
+  verbose          = verbose
+)
+
+network.mtx
+
+# Convert each matrix column to dataframe and store in list
+network_compile.list <- vector(mode = "list", length = k)
+for (i in seq(1,k,1)){
+  network_compile.list[[i]] <- as.data.frame(network.mtx[,i])
+}
+
+# Bind all subset network dataframes in the list
+network <- bind_rows(network_compile.list)
+
+# Remove cluster label
+network <- network %>% select(-.cluster)
+
+network
+```

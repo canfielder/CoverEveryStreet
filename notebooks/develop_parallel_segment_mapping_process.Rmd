@@ -1,0 +1,277 @@
+---
+title: "Generate Segment Connections Map - No Parallel Seperation"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Generate a mapping list of segment IDs to all segments which are adjacent to it.
+
+This segment map documents the segment connections before addressing the separation of parallel segments.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files(
+  path = "./../R/", pattern = "*.R", full.names = TRUE, 
+  recursive = FALSE, include.dirs = FALSE
+  )
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Network w/ Segments - Pre Parallel Street Fixing
+```{r import_data}
+file_dir <- "./../data"
+file_name <- "network_02_no_parallel_seperation_complete_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+network.df <- readr::read_rds(file_path)
+```
+
+### Extract OSM Query Date
+```{r}
+date_regex <- "\\d{4}-\\d{2}-\\d{2}"
+osm_query_date <- stringr::str_extract(file_name, date_regex)
+```
+
+### Intersection Node Ids
+Nodes which are an intersection between segments. This means they are used as a To or From node at least 2 times.
+```{r}
+file_name <- glue::glue("intersection_nodes_{osm_query_date}.RDS")
+file_path <- file.path(file_dir, file_name)
+intersection_ids <- readr::read_rds(file_path)
+```
+
+# Process
+## Step-By-Step: Determine Adjancent Segments
+### Select Sample for Testing
+```{r}
+# Generate vector of all unique segment ids
+all_segments <- network.df %>% 
+  dplyr::pull(segment_id) %>% 
+  unique() 
+
+# Extract one for testing
+n <- sample(1:length(all_segments), size = 1)
+test_segment <- all_segments[n]
+```
+
+## Generate List of Node IDs within Segement
+```{r}
+segment_to_ids <- network.df %>% 
+  dplyr::filter(segment_id == test_segment) %>% 
+  dplyr::pull(to_id)
+
+segment_from_ids <- network.df %>% 
+  dplyr::filter(segment_id == test_segment) %>% 
+  dplyr::pull(from_id)
+
+segment_node_ids <- unique(c(segment_to_ids, segment_from_ids))
+
+### Inspect
+segment_node_ids
+```
+
+### Generate List of Segments Using the Gathered Node IDs
+```{r}
+network.df %>% 
+  dplyr::filter(
+    (to_id %in% segment_node_ids) |
+    (from_id %in% segment_node_ids) 
+  ) %>% 
+  dplyr::filter(
+    segment_id != test_segment
+  ) %>% 
+  dplyr::pull(segment_id)
+```
+
+### Subset network by cluster
+```{r}
+network.list <- networkClusters(network.df, k = 4)
+```
+
+## Define Functions
+### Base Function
+```{r}
+connectedSegments <- function(input_segment_id, network) {
+  
+  # Library loaded for pipe use in parallel processes
+  library(dplyr)
+  
+  # Determine node ids within the segment
+  ## To Node
+  segment_to_ids <- network %>% 
+    dplyr::filter(segment_id == input_segment_id) %>% 
+    dplyr::pull(to_id)
+
+  ## From Node
+  segment_from_ids <- network %>% 
+    dplyr::filter(segment_id == input_segment_id) %>% 
+    dplyr::pull(from_id)
+  
+  ## Compile
+  segment_node_ids <- unique(c(segment_to_ids, segment_from_ids))
+  
+  # Reduce to segment ids which also use those node ids
+  network %>% 
+    dplyr::filter(
+      (to_id %in% segment_node_ids) |
+      (from_id %in% segment_node_ids) 
+    ) %>% 
+    dplyr::filter(
+      segment_id != input_segment_id
+    ) %>% 
+    dplyr::pull(segment_id)
+}
+```
+
+### Apply to Dataframe - Standard/Parallel
+```{r}
+# Standard
+connectedSegmentsApply <- function(network){
+  
+  # Library loaded for pipe use in parallel processes
+  library(dplyr)
+  
+  network <- network %>% 
+  dplyr::mutate(
+      connected_segment_ids = purrr::pmap(
+        .l = list(
+          input_segment_id = segment_id,
+          network          = list(network)
+          ),
+          .f = connectedSegments
+      )
+  ) %>% 
+  dplyr::select(segment_id, connected_segment_ids) %>% 
+  dplyr::distinct() %>% 
+  tibble::deframe()
+}
+
+
+# Parallel
+connectedSegmentsApplyPar <- function(
+  network, k, start_time = Sys.time(), verbose = 0
+  ){
+  library(dplyr)
+  # DEFINE CLUSTERS ###########################################################
+  # Split network into sub-networks based on clusters
+  network.list <- networkClusters(network, k)
+  
+  # PARALLEL PROCESSNG ########################################################
+  if (verbose >= 1){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time, end_time)
+    print(glue::glue("Parallel Processing - Start:\t{elapsed_time}"))
+  }
+  
+  # Define dataset variables and required sub-functions for export to cluster
+  cluster_data <- c("network.list")
+  cluser_functions <- c("connectedSegments", "connectedSegmentsApply")
+  cluster_variables <- c(cluster_data, cluser_functions)
+  
+  # Create Cluster
+  cl <- parallel::makeCluster(k)
+  
+  # Export required variables to cluster
+  parallel::clusterExport(
+    cl      = cl, 
+    varlist = cluster_variables, 
+    envir   = environment()
+    )
+  
+  # Execute parallel implementation of segment labeling
+  network.mtx <- parallel::parSapply(
+    cl  = cl, 
+    X   = network.list, 
+    FUN = connectedSegmentsApply
+    )
+  
+  # Stop cluster
+  parallel::stopCluster(cl)
+  
+  if (verbose >= 1){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time, end_time)
+    print(glue::glue("Parallel Processing - Complete:\t{elapsed_time}"))
+  }
+  
+  # PROCESS OUTPUT ############################################################
+  # Compile parallel subset lists into a single list --------------------------
+
+  # Initialize output list
+  segment_map <- list()
+
+  if (verbose >= 1){
+    print(glue::glue("Compile Segment Maps - Start"))
+    }
+
+  for (i in seq(1,k,1)){
+    # Define subset list
+    tmp.list <- network.mtx[[i]]
+
+    # Extract names from each list
+    segment_ids <- names(segment_map)
+    tmp.list.names <- names(tmp.list)
+
+    # Reduce iteration list to only segment ids not already captured in the
+    # segment map
+    new_segments.bool <- !c(tmp.list.names %in% segment_ids)
+    tmp.list <- tmp.list[new_segments.bool]
+
+    # Add iteration list to final output list
+    segment_map <- c(segment_map, tmp.list)
+
+    if (verbose >= 2){
+      print(glue::glue(strrep("_", 80)))
+      print(glue::glue("Iteration:\t\t\t\t{i}"))
+      print(glue::glue("Entries - iteration:\t\t{length(tmp.list.names)}"))
+      print(glue::glue("New segments:\t\t\t{sum(new_segments.bool)}"))
+      print(glue::glue("Entries - total:\t\t{length(segment_map)}"))
+      }
+  }
+  
+  if (verbose >= 1){
+    print(glue::glue("Compile Segment Maps - Complete"))
+    }
+
+  
+  segment_map
+  
+}
+```
+
+
+### Work Through Parallel Process Output
+#### Execute
+```{r}
+df <- network.df %>% dplyr::slice_sample(prop = 0.01)
+k <- 3
+network.mtx <- connectedSegmentsApplyPar(df, k, verbose = 2)
+```
+
+# Export
+```{r}
+file_name <- glue::glue("segment_mapping_no_parallel_seperation_{osm_query_date}.RDS")
+file_path <- file.path(file_dir, file_name)
+readr::write_rds(x = segment_map, file_path)
+```
+
+

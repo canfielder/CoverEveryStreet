@@ -1,0 +1,119 @@
+---
+title: "Generate Nework - Segments Applied - Pre-Parallel Seperation"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Generate a street network with segment IDs defined (a segment is a collection of edges between two intersection nodes).
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  parallel,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files(
+  path = "./../R/", pattern = "*.R", full.names = TRUE, 
+  recursive = FALSE, include.dirs = FALSE
+  )
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+file_dir <- "./../data"
+file_name <- "network_01_dodgr_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+network_raw.df <- readr::read_rds(file_path)
+
+# Initialize segment id
+network_raw.df$segment_id <- NA_character_
+
+print(file_path)
+```
+
+#### Extract OSM Query Date From File Name
+```{r extract_api_query_date}
+date_regex <- "\\d{4}-\\d{2}-\\d{2}"
+osm_query_date <- stringr::str_extract(file_name, date_regex)
+print(glue::glue("OSM Query Date:\t{osm_query_date}"))
+```
+
+# Subset
+```{r subset_network}
+SUBSET_NETWORK <- FALSE
+
+if (SUBSET_NETWORK) {
+  # Define subsetting Parameters
+  center_lat <- 35.242974
+  center_lon <- -80.794735
+  radius     <- 1e3
+
+  # Execute
+  network.df <- subset_lat_lon(
+    network    = network_raw.df, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius 
+    )
+  
+} else{
+  network.df <- network_raw.df
+}
+
+n_edge_sub <- length(network.df$edge_id)
+n_edge_total <- length(network_raw.df$edge_id)
+per_total <- round(100*(1 - ((n_edge_total - n_edge_sub)/n_edge_total)),1)
+
+# Print output
+print(glue::glue("Subset Network:\t\t{SUBSET_NETWORK}"))
+if (SUBSET_NETWORK){
+  print(glue::glue("Percent of Network:\t{per_total}%"))
+}
+```
+
+# Label Segments
+```{r label_segments}
+# Generate new function ids
+network_w_seg.df <- labelSegmentsParallelExecution(
+  network = network.df, 
+  file_date = osm_query_date, 
+  k = 8, 
+  verbose = 1
+  )
+```
+
+# Export
+```{r export_network}
+# Define subset radius
+if (SUBSET_NETWORK){
+  subset_label <- glue::glue("{round(radius/1e3,0)}km") 
+} else {
+  subset_label <- "complete"
+}
+
+# Define file name and path
+file_name <- glue::glue("network_02_no_parallel_seperation_{subset_label}_{osm_query_date}.RDS")
+file_path <- file.path(file_dir, file_name)
+# Export
+readr::write_rds(x = network_w_seg.df, file = file_path)
+print(file_name)
+```
+   

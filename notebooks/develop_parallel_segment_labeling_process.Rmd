@@ -1,0 +1,472 @@
+---
+title: "Generate Network - Segments Applied - Pre-Parallel Seperation"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+The purpose of this notebook is to test a random walk structure for labeling segments which uses a more efficient, directional approach, rather than a purely random walk approach.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  microbenchmark,
+  parallel,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files(
+  path = "./../R/", pattern = "*.R", full.names = TRUE, 
+  recursive = FALSE, include.dirs = FALSE
+  )
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+file_dir <- "./../data"
+file_name <- "network_01_dodgr_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+network_raw.df <- readr::read_rds(file_path)
+
+# Prepare segment id variable
+network_raw.df$segment_id <- NA_character_
+```
+
+### Extract OSM Query Date
+```{r}
+date_regex <- "\\d{4}-\\d{2}-\\d{2}"
+osm_query_date <- stringr::str_extract(file_name, date_regex)
+```
+
+
+### Halt Walk Nodes
+```{r}
+halt_walk_nodes <- haltSegmentWalkNodes(
+  network   = network_raw.df,
+  file_date = osm_query_date, 
+  verbose   = 1
+  )
+```
+
+# Subset
+```{r}
+SUBSET_NETWORK <- TRUE
+
+if (SUBSET_NETWORK) {
+  # Define subsetting Parameters
+  center_lat <- 35.242974
+  center_lon <- -80.794735
+  radius <- 1e3
+  
+  # Execute
+  network.df <- subset_lat_lon(
+    network    = network_raw.df, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius 
+    )
+  
+} else{
+  network.df <- network_raw.df
+}
+
+n_edge_sub <- length(network.df$edge_id)
+n_edge_total <- length(network_raw.df$edge_id)
+per_total <- round(100*(1 - ((n_edge_total - n_edge_sub)/n_edge_total)),1)
+print(glue::glue("Percent of total network:\t{per_total}%"))
+```
+
+# Kmeans for n clusters
+## Define Number of Clusters
+```{r}
+n_cores <- detectCores()
+core_usage_rate <- 0.75
+k <- trunc(n_cores * core_usage_rate)
+print(glue::glue("Number of Cores / Clusters:\t{k}"))
+```
+
+## Define Number of Clusters
+```{r}
+# Extract clustering points
+points <- network.df %>% 
+  select(from_lon, from_lat)
+
+# Assign clusters to rows
+network_k.df <- points %>%  
+  kmeans(centers = k, nstart = 1) %>% 
+  broom::augment(points) %>% 
+  dplyr::select(.cluster) %>% 
+  dplyr::bind_cols(network.df)
+
+network_k.df %>% glimpse()
+```
+
+## Visually Inspect Clusters
+```{r}
+# highlight <- ".cluster"
+# p_cluster <- plotStreets(network_k.df, color_feature = highlight)
+# plotly::ggplotly(p_cluster)
+```
+
+
+# Segment Labeling - Parallel
+## Split Network Based on Cluster
+```{r}
+network_clusters.list <- split(
+  x = network_k.df , 
+  f = network_k.df$.cluster
+  )
+```
+
+## Execute Function in Parallel on Clusters
+```{r}
+start_time <- Sys.time()
+
+# Export input variables and required sub-functions
+export_variables <- c("network_clusters.list", "randomID", "walkSegment", "secondsToPeriodTime", "haltSegmentWalkNodes")
+
+cl <- makeCluster(k)
+clusterExport(cl=cl, varlist=export_variables, envir=environment())
+network_w_segments.mtx <- parallel::parSapply(
+  cl  = cl, 
+  X   = network_clusters.list, 
+  FUN = labelSegments, 
+  file_date = osm_query_date,
+  verbose = 0
+  )
+stopCluster(cl)
+
+end_time <- Sys.time()
+elapsed_time <- secondsToPeriodTime(start_time, end_time)
+print(glue::glue("Data loaded:\t{elapsed_time}"))
+```
+
+## Recombine Parallel Output
+```{r}
+# Convert each matrix column to dataframe and store in list
+recombine.list <- vector(mode = "list", length = k)
+for (x in seq(1,k,1)){
+  recombine.list[[x]] <- as.data.frame(network_w_segments.mtx[,x])
+}
+
+# Bind all dataframes in a list
+network_w_segments.df <- bind_rows(recombine.list)
+```
+
+## Identify Segments w/ Two Segment IDs across Clusters
+### Define Node / Segment Pairs
+```{r}
+to_node_w_seg.df <- network_w_segments.df %>% 
+  select(to_id, segment_id) %>% 
+  rename(id = to_id)
+
+from_node_w_seg.df <- network_w_segments.df %>% 
+  select(from_id, segment_id)  %>% 
+  rename(id = from_id)
+
+# Table of each node/ segment pair
+nodes_w_seg.df <- bind_rows(to_node_w_seg.df, from_node_w_seg.df)
+```
+
+### Identify Segments Which Are an Issue
+```{r}
+segment_def.df <- nodes_w_seg.df %>% 
+  group_by(id) %>% 
+  mutate(
+    unique_segments = n_distinct(segment_id)
+    ) %>% 
+  ungroup() %>% 
+  mutate(
+    is_halt_node = dplyr::if_else(
+      condition = id %in% halt_walk_nodes, 
+      true = TRUE, false = FALSE
+    ),
+    is_split_segment =
+      dplyr::if_else(
+        condition = (
+          (unique_segments == 2) &
+          !is_halt_node
+        ),
+        true = TRUE, false = FALSE
+      )
+  ) %>% 
+  distinct()
+
+split_segments <- segment_def.df %>% 
+  filter(is_split_segment) %>% 
+  pull(segment_id) %>% 
+  unique()
+
+```
+
+#### Visually Inspect
+```{r}
+# network_inspect.df <- network_w_segments.df %>% 
+#   mutate(
+#     highlight = if_else(segment_id == "t7pqpjy4hi", "a", "b")
+#   )
+# 
+# p_inspect <- plotStreets(network_inspect.df, color_feature = "highlight")
+# plotly::ggplotly(p_inspect)
+```
+
+### Label Problem Segments
+```{r}
+network_w_segments_labeled.df <-network_w_segments.df %>% 
+  mutate(
+    drop_segment = if_else(
+      condition = (segment_id %in% split_segments), 
+      true = "a", 
+      false = "b"
+    )
+  )
+```
+
+### Inspect Visually
+```{r}
+# p_inspect <- plotStreets(network_w_segments_labeled.df, color_feature = "drop_segment")
+# plotly::ggplotly(p_inspect)
+```
+
+
+### Remove Segments Identified As an Issue
+```{r}
+network_w_segments_drop.df <-network_w_segments.df %>% 
+  mutate(
+    segment_id = if_else(
+      condition = (segment_id %in% split_segments), 
+      true = NA_character_, 
+      false = segment_id
+    )
+  )
+
+n_na <- sum(is.na(network_w_segments_drop.df$segment_id))
+n_total <- length(network_w_segments_drop.df$geom_num)
+per_remove <- round((1 - ((n_total - n_na)/n_total))*100,1)
+print(glue::glue("Percentage of Segments Removed:\t{per_remove}%"))
+```
+
+## Reevaluate Segment Ids for Removed Cases
+```{r}
+start_time <- Sys.time()
+
+network_w_segments_r2.df <- labelSegments(
+  network = network_w_segments_drop.df, 
+  file_date = osm_query_date,
+  verbose = 1
+  )
+
+end_time <- Sys.time()
+elapsed_time <- secondsToPeriodTime(start_time, end_time)
+print(glue::glue("Data loaded:\t{elapsed_time}"))
+```
+
+### Inspect
+```{r}
+p_inspect <- plotStreets(network_w_segments_r2.df, color_feature = "segment_id")
+plotly::ggplotly(p_inspect)
+```
+
+# Define Function
+```{r}
+#' @param file_date Date for intersection and parallel file names. Must be in
+#'  the form YYYY-MM-DD (character)
+
+labelSegmentsParallelExecution <- function(
+  network, 
+  file_date, 
+  k, 
+  verbose = 0
+  ) {
+  start_time <- Sys.time()
+  # SETUP ####################################################################
+  # import
+  halt_walk_nodes <- haltSegmentWalkNodes(
+    network   = network, 
+    file_date = file_date, 
+    verbose = verbose
+    )
+  
+  # CLUSTERS ##################################################################
+  # Split network into sub-networks based on clusters
+  network.list <- networkClusters(network, k)
+  
+  # ROUND 1 - PARALLEL PROCESSING #############################################
+  if (verbose >= 1){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time, end_time)
+    print(glue::glue("Parallel Processing - Start:\t{elapsed_time}"))
+  }
+  
+  # Define dataset variables and required sub-functions for export to cluster
+  cluster_data <- c("network.list", "start_time", "file_date", "verbose")
+  cluser_functions <- c("randomID", "walkSegment", "secondsToPeriodTime", "haltSegmentWalkNodes")
+  cluster_variables <- c(cluster_data, cluser_functions)
+  
+  # Create Cluster
+  cl <- makeCluster(k)
+  
+  # Export required variables to cluster
+  clusterExport(
+    cl      = cl, 
+    varlist = cluster_variables, 
+    envir   = environment()
+    )
+  
+  # Execute parallel implementation of segment labeling
+  network.mtx <- parallel::parSapply(
+    cl  = cl, 
+    X   = network.list, 
+    FUN = labelSegments, 
+    file_date = file_date,
+    verbose = verbose, 
+    start_time = start_time
+    )
+  
+  # Stop cluster
+  stopCluster(cl)
+  
+  if (verbose >= 1){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time, end_time)
+    print(glue::glue("Parallel Processing - Complete:\t{elapsed_time}"))
+  }
+  
+  # PROCESSING ################################################################
+  # Convert each matrix column to dataframe and store in list
+  network_compile.list <- vector(mode = "list", length = k)
+  for (i in seq(1,k,1)){
+    network_compile.list[[i]] <- as.data.frame(network.mtx[,i])
+  }
+  
+  # Bind all subset network dataframes in the list
+  network <- bind_rows(network_compile.list)
+  
+  # Define all node/segment pairs
+  ## To Nodes
+  to_node_w_seg <- network %>% 
+    select(to_id, segment_id) %>% 
+    rename(id = to_id)
+  
+  ## From nodes
+  from_node_w_seg <- network %>% 
+    select(from_id, segment_id)  %>% 
+    rename(id = from_id)
+
+  ## All Nodes
+  node_seg_pairs <- bind_rows(to_node_w_seg, from_node_w_seg)
+  
+  # Identify segments that have been assigned two segment ids due to being 
+  # split during parallel processing.
+  multi_labeled_segments <- node_seg_pairs %>% 
+    group_by(id) %>% 
+    mutate(
+      unique_segments = n_distinct(segment_id)
+      ) %>% 
+    ungroup() %>% 
+    mutate(
+      is_halt_node = dplyr::if_else(
+        condition = id %in% halt_walk_nodes, 
+        true = TRUE, false = FALSE
+      ),
+      is_split_segment =
+        dplyr::if_else(
+          condition = (
+            (unique_segments == 2) &
+            !is_halt_node
+          ),
+          true = TRUE, false = FALSE
+        )
+    ) %>% 
+    dplyr::filter(is_split_segment) %>% 
+    dplyr::pull(segment_id) %>% 
+    unique()
+  
+  # Remove all segment ids associated with segments labeled multiple times
+  network <- network %>% 
+    mutate(
+      segment_id = if_else(
+        condition = (segment_id %in% multi_labeled_segments), 
+        true = NA_character_, 
+        false = segment_id
+      )
+    )
+  
+  if (verbose >= 1){
+    # Record / print reduction stats
+    n_total <- length(network$edge_id)
+    n_segments <- sum(!is.na(network$segment_id))
+    per_reduction <- round(100 * ((n_total - n_segments)/n_total), 1)
+    print(glue::glue("Segment Labeling Error Rate\t{per_reduction}%"))
+  }
+  
+  # ROUND 2 - STANDARD ########################################################
+  if (verbose >= 1){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time, end_time)
+    print(glue::glue("Standard Processing - Start:\t{elapsed_time}"))
+  }
+  
+  network <- labelSegments(
+    network = network, 
+    file_date = file_date, 
+    verbose = verbose
+    )
+  
+  if (verbose >= 1){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time, end_time)
+    print(glue::glue("Standard Processing - Complete:\t{elapsed_time}"))
+  }
+  
+  # Remove cluster label
+  network %>% 
+    select(-.cluster)
+  
+  }
+```
+
+## Test 
+### Run Function
+```{r}
+# Reset segment id column
+network.df$segment_id <- NA_character_
+
+# Generate new function ids
+function_test <- labelSegmentsParallelExecution(
+  network = network.df, 
+  file_date = osm_query_date, 
+  k = 3, 
+  verbose = 1
+  )
+```
+
+## Visual Check
+### Pre Function - Edges
+```{r}
+p_inspect <- plotStreets(function_test, color_feature = "edge_id")
+plotly::ggplotly(p_inspect)
+```
+
+### Post Function - Segments
+```{r}
+p_inspect <- plotStreets(function_test, color_feature = "segment_id")
+plotly::ggplotly(p_inspect)
+```
+

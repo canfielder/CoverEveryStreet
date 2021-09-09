@@ -1,0 +1,63 @@
+---
+title: "Generate Intersection Nodes"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Generate a table with all edges in the network with important calculated parameters.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files("./../R/", full.names = TRUE)
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+# Street network data.frame
+network.df <- readRDS("./../data/segmented_street_network_pre_parallel_processing_10km.RDS")
+```
+
+# Determine Edge Table
+```{r}
+# Select essential columsn and generate properties
+edges.df <- network.df %>% 
+  select(edge_id, segment_id, from_id:to_lat) %>% 
+  mutate(
+    length      = distPointToPoint(from_lon, from_lat, to_lon, to_lat),
+    slope       = lineSlope(from_lon, from_lat, to_lon, to_lat), 
+    y_intercept = yIntercept(from_lon, from_lat, slope),
+  )
+```
+
+# Export
+```{r}
+file_dir <- "./../data"
+file_name <- "edge_properties_table.RDS"
+file_path <- file.path(file_dir, file_name)
+saveRDS(
+  object = intersection_ids, 
+  file   = file_path
+    )
+```
+

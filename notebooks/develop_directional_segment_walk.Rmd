@@ -1,0 +1,567 @@
+---
+title: "Generate Network - Segments Applied - Pre-Parallel Seperation"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+The purpose of this notebook is to test a random walk structure for labeling segments which uses a more efficient, directional approach, rather than a purely random walk approach.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  lubridate,
+  parallel,
+  sf,
+  stringi,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files("./../R/", full.names = TRUE)
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+file_dir <- "./../data"
+file_name <- "network_01_dodgr_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+network_raw.df <- readr::read_rds(file_path)
+```
+
+# Subset
+```{r}
+SUBSET_NETWORK <- TRUE
+
+if (SUBSET_NETWORK) {
+  # Define subsetting Parameters
+  center_lat <- 35.242974
+  center_lon <- -80.794735
+  radius <- 1e4
+
+  # Execute
+  network.df <- subset_lat_lon(
+    network    = network_raw.df, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius 
+    )
+} else{
+  network.df <- network_raw.df
+}
+
+```
+
+# Walk - Step by Step Work
+## Before Function Actions
+### Define Segment ID Columns > Empty
+```{r}
+network.df$segment_id <- NA_character_
+```
+
+## Inside Function - Pre Walk Setup
+### Determine Number of NA values in Segment ID Column
+```{r}
+# Extract all segment ids
+utilized_segment_ids <- purrr::discard(network.df$segment_id, is.na)
+
+n_na_segments <- length(network.df$segment_id) - length(utilized_segment_ids)
+print(glue::glue("Number of Total Observations:\t{length(network.df$segment_id)}"))
+print(glue::glue("Number of NA Segment IDs:\t{n_na_segments}"))
+```
+
+### Import / Define Datasets
+#### Intersection Nodes
+```{r}
+file_dir <- "./../data"
+file_name <- "intersection_nodes_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+intersection_nodes <- readr::read_rds(file_path)
+```
+
+#### Dead End Nodes
+```{r}
+# Define Dead-End Nodes
+dead_end_nodes <- bind_rows(
+  network.df %>% select(from_id) %>% rename(id = from_id),
+  network.df %>% select(to_id) %>% rename(id = to_id)
+  ) %>% 
+  count(id) %>% 
+  filter(n == 1) %>% 
+  pull(id)
+
+print(glue::glue("Number of Dead End Nodes:\t{length(dead_end_nodes)}"))
+```
+
+#### Parallel Separation Nodes
+```{r}
+file_dir <- "./../data"
+file_name <- "parallel_separation_nodes_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+if (file.exists(file_path)) {
+  
+  print("File Found")
+  parallel_separation_nodes <- readr::read_rds(file_path)
+  
+} else{
+  print("File Node Found")
+  parallel_separation_nodes <- vector(mode = "character", length = 0)
+}
+```
+
+#### Create Vector of Nodes to Stop Walk
+```{r}
+halt_walk_nodes_init <- c(intersection_nodes, parallel_separation_nodes, dead_end_nodes)
+```
+
+
+## Inside Function - Inside While Loop - Outside Recursive Walk
+### Select Random Edge ID Without Segment
+```{r}
+starting_edge <- network.df %>% 
+  dplyr::slice_sample(n=1) %>% 
+  pull(edge_id)
+
+print(glue::glue("Edge ID:\t{starting_edge}"))
+```
+
+### Initialize Edge Id List
+```{r}
+edges_in_segment <- vector(mode = "character", length = 0)
+```
+
+## Inside Function- Inside While Loop - Inside Recursive Loop
+### Pass Through the following Information
+```{r}
+edge_iter <- starting_edge
+edges_in_segment <- edges_in_segment
+halt_walk_nodes <- halt_walk_nodes_init
+direction <- "to"
+```
+
+### Add Edge to Edges List
+```{r}
+edges_in_segment <- c(edges_in_segment, edge_iter)
+
+edges_in_segment
+```
+
+```{r}
+network.df %>% 
+    filter(edge_id == edge_iter)
+```
+
+### Select Node To Inspect
+```{r}
+if (direction == "to"){
+  node_iter <- network.df %>% 
+    filter(edge_id == edge_iter) %>% 
+    pull(to_id)
+  
+} else {
+    node_iter <- network.df %>% 
+    filter(edge_id == edge_iter) %>% 
+    pull(from_id)
+}
+
+print(glue::glue("Direction:\t{direction}"))
+print(glue::glue("Selected Node:\t{node_iter}"))
+```
+
+### Node Check
+```{r}
+# Intersection
+bool_stop <- node_iter %in% halt_walk_nodes
+
+print(glue::glue("Stop Walk:\t{bool_stop}"))
+```
+
+### If Stop Walk = False
+#### Append Current Node to Stop List
+```{r}
+halt_walk_nodes <- c(halt_walk_nodes,node_iter)
+```
+
+#### Determine Other Edge Where Node Is Used
+```{r}
+if (direction == "to"){
+  edge_iter <- network.df %>% 
+    filter(from_id == node_iter) %>% 
+    pull(edge_id)
+  
+} else {
+  edge_iter <- network.df %>% 
+    filter(to_id == node_iter) %>% 
+    pull(edge_id)
+}
+print(glue::glue("Direction:\t{direction}"))
+print(glue::glue("Selected Node:\t{edge_iter}"))
+```
+
+#### Pass Into Recursive Function
+```{r}
+edge_iter <- edge_iter
+edges_in_segment <- edges_in_segment
+halt_walk_nodes <- halt_walk_nodes
+direction <- "to"
+```
+
+### If Stop Walk = True
+#### Return vector of edge_ids 
+```{r}
+edges_in_segment
+```
+
+## Inside Function- Inside While Loop - After Recursive Loop
+### Generate Segment ID
+```{r}
+segment_id_rdm <- randomID(utilized_segment_ids)
+print(glue::glue("Segment ID:\t{segment_id_rdm}"))
+```
+
+### Apply Segment ID to Edges in Vector
+```{r}
+edges_in_segment <- unique(edges_in_segment)
+
+network.df <- network.df %>% 
+  mutate(
+    segment_id = if_else(
+      condition = (edge_id %in% edges_in_segment),
+      true =  segment_id_rdm, 
+      false = NA_character_
+    )
+  )
+```
+
+### Calculate Number of Missing Segment Ids
+```{r}
+# Extract all segment ids
+utilized_segment_ids <- purrr::discard(network.df$segment_id, is.na)
+
+n_na_segments <- length(network.df$segment_id) - length(utilized_segment_ids)
+print(glue::glue("Number of Total Observations:\t{length(network.df$segment_id)}"))
+print(glue::glue("Number of NA Segment IDs:\t{n_na_segments}"))
+```
+
+## Inside Function - After While Loop
+```{r}
+# return network dataframe
+```
+
+
+# Define Functions
+## Walk
+```{r}
+walkSegment <- function(
+  network,
+  edge,
+  edges_in_segment,
+  halt_walk_nodes,
+  direction,
+  verbose = 0
+) {
+  # Add edge to vector of edges within segment
+  edges_in_segment <- c(edges_in_segment, edge)
+  
+  # Select Node to walk to 
+  if (direction == "to"){
+    node <- network %>% 
+      filter(edge_id == edge) %>% 
+      pull(to_id)
+    } else {
+      node <- network %>% 
+        dplyr::filter(edge_id == edge) %>% 
+        dplyr::pull(from_id)
+    }
+  
+  if (verbose >= 3) {
+    print(glue::glue("Direction:\t\t\t{direction}"))
+    print(glue::glue("Selected Node:\t\t\t{node}"))
+  }
+  
+  # Check if walk should be halted
+  HALT_WALK <- node %in% halt_walk_nodes
+  
+  if (verbose >= 3) {
+    print(glue::glue("Halt Walk:\t\t\t{HALT_WALK}"))
+  }
+
+    # Recursive choice - act on whether walk should stop
+  if (HALT_WALK){
+    
+    edges_in_segment
+    
+  } else {
+    
+    # Add node to halt walk nodes. This is to prevent getting trapped in a 
+    # loop, like a track or closed-loop walking path.
+    halt_walk_nodes <- c(halt_walk_nodes, node)
+    
+    
+    # Select next edge
+    if (direction == "to"){
+      
+      next_edge <- network %>% 
+        dplyr::filter(from_id == node) %>% 
+        dplyr::pull(edge_id)
+      
+    } else {
+      
+      next_edge <- network %>% 
+        dplyr::filter(to_id == node) %>% 
+        dplyr::pull(edge_id)
+      
+    }
+    
+    if (verbose >= 3) {
+      print(glue::glue("Edge ID - Next:\t\t\t{next_edge}"))
+    }
+    
+    # Verify that next_edge is a single length vector. If it is not, there is an error in the 
+    # properly defining the halt nodes
+    if (length(next_edge) > 1 ) {
+      msg1 <- glue::glue("Next edge selected does not have length of one.")
+      msg2 <- glue::glue("Next Edge Length:\t{length(next_edge)}")
+      msg3 <- glue::glue("Current Edge:\t{edge}")
+      msg4 <- glue::glue("Problem Node:\t{node}")
+      stop_msg <- glue::glue("{msg1}\n{msg2}\n{msg3}\n{msg4}")
+      stop(stop_msg)
+      
+    }
+    
+    # Walk to next edge
+    walkSegment(
+      network          = network,
+      edge             = next_edge,
+      edges_in_segment = edges_in_segment,
+      halt_walk_nodes  = halt_walk_nodes,
+      direction        = direction,
+      verbose          = verbose
+      ) 
+    
+  }
+}
+```
+
+## Struture
+```{r}
+labelSegments <- function(network, verbose = 0){
+  start_time <- Sys.time()
+  
+  # SETUP######################################################################
+  # Load Intersection Nodes
+  file_dir <- "./../data"
+  file_name <- "intersection_nodes_2021-08-24.RDS"
+  file_path <- file.path(file_dir, file_name)
+  intersection_nodes <- readr::read_rds(file_path)
+  
+   # Load Parallel Separation Nodes
+  file_name <- "parallel_separation_nodes_2021-08-24.RDS"
+  file_path <- file.path(file_dir, file_name)
+  if (file.exists(file_path)) {
+    parallel_separation_nodes <- readr::read_rds(file_path)
+    
+    if (verbose >= 1){
+      print(glue::glue("Parallel Separation File Node:\tFound"))
+    }
+    
+  } else{
+    # Initialize Empty Vector
+    parallel_separation_nodes <- vector(mode = "character", length = 0)
+    
+    if (verbose >= 1){
+      print(glue::glue("Parallel Separation File:\tNot Found"))
+    }
+  }
+  
+  # Define Dead End Nodes
+  ## Defined, not loaded, because depenging on if the street network is
+  ## the complete network or just a subset will determine change which
+  ## nodes are dead ends
+  dead_end_nodes <- dplyr::bind_rows(
+    network %>% dplyr::select(from_id) %>% dplyr::rename(id = from_id),
+    network %>% dplyr::select(to_id) %>% dplyr::rename(id = to_id)
+    ) %>% 
+    dplyr::count(id) %>% 
+    dplyr::filter(n == 1) %>% 
+    dplyr::pull(id)
+  
+  if (verbose >= 1){
+    print(glue::glue("Number of Dead End Nodes:\t{length(dead_end_nodes)}"))
+  }
+  
+  # Create compiled vector of nodes that will stop the walking function
+  halt_walk_nodes_init <- c(
+    intersection_nodes, parallel_separation_nodes, dead_end_nodes
+    )
+  
+  # Determine previously used segment ids and the number of cases
+  # where segment ID is NA
+  # Determine status of segment ids used, how many edge ids have been 
+  # assigned a segment id, and how many edges still require a segment id.
+  total_obs <- length(network$edge_id)
+  utilized_segment_ids <- unique(purrr::discard(network$segment_id, is.na))
+  n_segment_ids <- length(utilized_segment_ids)
+  n_edges_labeled <- sum(!is.na(network$segment_id))
+  n_edges_unlabeled <- total_obs - n_edges_labeled
+    
+    if (verbose >= 2){
+      m0 <- glue::glue("--------------------------------------------------")
+      m1 <- glue::glue("Status Counts:")
+      m2 <- glue::glue("Total Observations:\t\t{total_obs}")
+      m3 <- glue::glue("Unique Segment IDs:\t\t{n_segment_ids}")
+      m4 <- glue::glue("Edges w/ a Segment ID:\t\t{n_edges_labeled}")
+      m5 <- glue::glue("Edges w/o a Segment ID:\t\t{n_edges_unlabeled}")
+      print(glue::glue("{m0}\n{m1}\n{m2}\n{m3}\n{m4}\n{m5}\n{m0}"))
+    }
+  
+  # Iteration Loop ############################################################
+  # Initialize loop counter
+  n <- 1
+  while (n_edges_unlabeled > 0){
+    if (verbose >= 2){
+      print(glue::glue("_____________________ NEW LOOP _____________________"))
+    }
+    
+    # Set Up Walk -------------------------------------------------------------
+    # Select starting point edge
+    starting_edge <- network %>% 
+      filter(is.na(segment_id)) %>% 
+      dplyr::slice_sample(n=1) %>% 
+      dplyr::pull(edge_id)
+
+    if (verbose >= 2){
+      print(glue::glue("Edge ID - Start:\t\t{starting_edge}"))
+    }
+    # Initialize vector to capture all edges within a single segment
+    edges_in_segment <- vector(mode = "character", length = 0)
+    
+    # Start Walk - To Direction -----------------------------------------------
+    edges_in_segment<- walkSegment(
+      network = network,
+      edge = starting_edge,
+      edges_in_segment = edges_in_segment,
+      halt_walk_nodes = halt_walk_nodes_init,
+      direction = "to",
+      verbose = verbose
+    )
+    
+    # Start Walk - From Direction ---------------------------------------------
+    edges_in_segment<- walkSegment(
+      network = network,
+      edge = starting_edge,
+      edges_in_segment = edges_in_segment,
+      halt_walk_nodes = halt_walk_nodes_init,
+      direction = "from",
+      verbose = verbose
+    )
+    
+    # Update Network Table ---------------------------------------------------
+    ## Generate Random Segment ID
+    segment_id_rdm <- randomID(unique(utilized_segment_ids))
+    
+    if (verbose >= 2){
+      print(glue::glue("Segment ID:\t\t\t{segment_id_rdm}"))
+    }
+    
+    ## Reduce to unique values in case of double counting
+    edges_in_segment <- unique(edges_in_segment)
+    
+    ## Label edges in network table with segment id
+    network <- network %>% 
+      mutate(
+        segment_id = dplyr::if_else(
+          condition = (edge_id %in% edges_in_segment),
+          true =  segment_id_rdm, 
+          false = segment_id
+        )
+      )
+    
+    # Recalculate while loop parameters ---------------------------------------
+    # Determine previously used segment ids and the number of cases
+    # where segment ID is NA
+    # Determine status of segment ids used, how many edge ids have been 
+    # assigned a segment id, and how many edges still require a segment id.
+    utilized_segment_ids <- unique(purrr::discard(network$segment_id, is.na))
+    n_segment_ids <- length(utilized_segment_ids)
+    n_edges_labeled <- sum(!is.na(network$segment_id))
+    n_edges_unlabeled <- total_obs - n_edges_labeled
+      
+      if (verbose >= 2){
+        m0 <- glue::glue("--------------------------------------------------")
+        m1 <- glue::glue("Status Counts:")
+        m2 <- glue::glue("Total Observations:\t\t{total_obs}")
+        m3 <- glue::glue("Unique Segment IDs:\t\t{n_segment_ids}")
+        m4 <- glue::glue("Edges w/ a Segment ID:\t\t{n_edges_labeled}")
+        m5 <- glue::glue("Edges w/o a Segment ID:\t\t{n_edges_unlabeled}")
+        print(glue::glue("{m0}\n{m1}\n{m2}\n{m3}\n{m4}\n{m5}\n{m0}"))
+      }
+    
+    # Print Updates -----------------------------------------------------------
+    if ((n %% 1e2 == 0) & verbose >= 1) {
+      end_time <- Sys.time()
+      elapsed_time <- secondsToPeriodTime(start_time, end_time)
+      print(glue::glue("Elapsed Time:\t\t\t{elapsed_time}"))
+      
+      percent_rem <- round(100 * (total_obs - n_edges_unlabeled)/total_obs,1)
+      print(glue::glue("Percent Edges Remaining:\t{percent_rem}%"))
+    }
+    
+    # Safety Valve -----------------------------------------------------------
+    if ((n > 1e5) & verbose >= 1){
+      stop(glue::glue("Maximum iterations reached:\t{n}"))
+    }
+    
+    n <- n + 1
+    
+  }
+  
+  if (verbose >= 1){
+    m0 <- glue::glue("--------------------------------------------------")
+    m1 <- glue::glue("Status Counts:")
+    m2 <- glue::glue("Total Observations:\t\t{total_obs}")
+    m3 <- glue::glue("Unique Segment IDs:\t\t{n_segment_ids}")
+    m4 <- glue::glue("Edges w/ a Segment ID:\t\t{n_edges_labeled}")
+    m5 <- glue::glue("Edges w/o a Segment ID:\t\t{n_edges_unlabeled}")
+    print(glue::glue("{m0}\n{m1}\n{m2}\n{m3}\n{m4}\n{m5}\n{m0}"))
+    }
+  
+  network
+}
+
+
+```
+
+# Test
+## Generate Segment Labels
+```{r}
+network.df$segment_id <- NA_character_
+network_w_segments.df <- labelSegments(network.df, verbose = 1)
+
+network_w_segments.df
+```
+
+## Plot
+```{r}
+highlight <- "segment_id"
+
+p <- plotStreets(df = network_2.df, color_feature = highlight)
+
+plotly::ggplotly(p)
+```
+

@@ -40,3 +40,5 @@ vignettes/*.pdf
 
 # Shapefile
 data/tl_2019_us_zcta510
+
+data/network_*.RDS

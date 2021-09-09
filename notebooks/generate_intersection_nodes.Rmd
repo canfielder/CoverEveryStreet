@@ -1,0 +1,93 @@
+---
+title: "Generate Intersection Nodes"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Generate a vector of all nodes which are street intersections.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files("./../R/", full.names = TRUE)
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+# Street network data.frame
+file_dir <- "./../data"
+file_name <- "network_01_dodgr_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+network.df <- readr::read_rds(file_path)
+```
+
+# Determine Intersection Nodes
+## Determine TO / FROM Intersections
+```{r}
+# Determine node frequency count - TO
+to_node_freq.df <- network.df %>% 
+  count(to_id) %>% 
+  filter(n > 1) %>% 
+  arrange(desc(n))
+
+# Determine node frequency count - FROM
+from_node_freq.df <- network.df %>% 
+  count(from_id) %>% 
+  filter(n > 1) %>% 
+  arrange(desc(n))
+```
+
+## Consolidate
+```{r}
+print(glue('Node Counts'))
+# FROM IDs
+from_ids <- from_node_freq.df %>%  pull(from_id) %>% unique()
+glue('To:\t\t{length(from_ids)}')
+
+# To IDs
+to_ids <- to_node_freq.df %>%  pull(to_id) %>% unique()
+glue('From:\t\t{length(to_ids)}')
+
+# Combine and reduce to unique
+intersection_nodes <- unique(c(from_ids, to_ids))
+
+glue('Intersection:\t{length(intersection_nodes)}')
+glue('All:\t\t{n_edge_post}')
+```
+
+# Export
+```{r}
+# Determine input network file date
+date_regex <- "\\d{4}-\\d{2}-\\d{2}"
+osm_query_date <- stringr::str_extract(file_name, date_regex)
+
+# Generate file path
+file_name <- glue::glue("intersection_nodes_{osm_query_date}.RDS")
+file_path <- file.path(file_dir, file_name)
+
+# Export file
+readr::write_rds(x = intersection_nodes, file = file_path)
+
+print(glue::glue("{file_path}"))
+```
+

@@ -1,0 +1,111 @@
+---
+title: "Generate Segment Connections Map - No Parallel Seperation"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Generate a mapping list of segment IDs to all segments which are adjacent to it.
+
+This segment map documents the segment connections before addressing the separation of parallel segments.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files(
+  path = "./../R/", pattern = "*.R", full.names = TRUE, 
+  recursive = FALSE, include.dirs = FALSE
+  )
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Network w/ Segments - No Parallel Street Adjustment
+```{r import_data}
+file_dir <- "./../data"
+file_name <- "network_02_no_parallel_seperation_complete_2021-08-24.RDS"
+file_path <- file.path(file_dir, file_name)
+network_raw.df <- readr::read_rds(file_path)
+```
+
+### Extract OSM Query Date
+```{r extract_api_query_date}
+date_regex <- "\\d{4}-\\d{2}-\\d{2}"
+osm_query_date <- stringr::str_extract(file_name, date_regex)
+```
+
+# Subset
+```{r subset_network}
+SUBSET_NETWORK <- FALSE
+
+if (SUBSET_NETWORK) {
+  # Define subsetting Parameters
+  center_lat <- 35.242974
+  center_lon <- -80.794735
+  radius     <- 1e3
+
+  # Execute
+  network.df <- subset_lat_lon(
+    network    = network_raw.df, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius 
+    )
+  
+} else{
+  network.df <- network_raw.df
+}
+
+n_edge_sub <- length(network.df$edge_id)
+n_edge_total <- length(network_raw.df$edge_id)
+per_total <- round(100*(1 - ((n_edge_total - n_edge_sub)/n_edge_total)),1)
+
+# Print output
+print(glue::glue("Subset Network:\t\t{SUBSET_NETWORK}"))
+if (SUBSET_NETWORK){
+  print(glue::glue("Percent of Network:\t{per_total}%"))
+}
+```
+
+# Generate Segment Map
+```{r map_segments}
+# Define number of cores to utilize
+core_adj_factor <- 0.75
+n_core_adj <- trunc(parallel::detectCores() * core_adj_factor)
+
+# Generate segment map
+segment_map <- connectedSegmentsApplyPar(
+  network = network.df, 
+  k = n_core_adj, 
+  verbose = 2
+  )
+```
+
+# Export
+```{r export_map}
+file_name <- glue::glue("segment_mapping_no_parallel_seperation_{osm_query_date}.RDS")
+file_path <- file.path(file_dir, file_name)
+readr::write_rds(x = segment_map, file_path)
+
+# Print statement to verify chunk executed
+print(glue::glue("Segment Map Exported: {file_path}"))
+```
+
+

@@ -1,0 +1,638 @@
+---
+title: "Exploration"
+author: "Evan Canfield"
+date: "7/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Purpose
+Determine how to ensure roads represented as two parallel lines have the same segment intersections on both sides of the line.
+
+# Import
+## Packages
+```{r import_packages}
+if (!require(pacman)) {install.packages("pacman")}
+pacman::p_load(
+  glue,
+  parallel,
+  sf,
+  stringi,
+  tidyverse
+)
+
+# Import custom functions
+r_files <- list.files("./../R/", full.names = TRUE)
+for (file in r_files) {
+  source(file)
+}
+
+# Set randomized seed
+set.seed(5590)
+```
+
+## Data
+### Street Map
+```{r import_data}
+# Street network data.frame
+# Network has already been assigned segments, but has not be processed 
+# to split parallel edges
+network_raw.df <- readRDS("./../data/network_02_no_parallel_seperation_complete_2021-08-24.RDS")
+```
+
+# Subset
+```{r subset_network}
+SUBSET_NETWORK <- TRUE
+
+if (SUBSET_NETWORK) {
+  # Define subsetting Parameters
+  center_lat <- 35.242974
+  center_lon <- -80.794735
+  radius     <- 1e3
+
+  # Execute
+  network.df <- subset_lat_lon(
+    network    = network_raw.df, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius 
+    )
+  
+} else{
+  network.df <- network_raw.df
+}
+
+n_edge_sub <- length(network.df$edge_id)
+n_edge_total <- length(network_raw.df$edge_id)
+per_total <- round(100*(1 - ((n_edge_total - n_edge_sub)/n_edge_total)),1)
+
+# Print output
+print(glue::glue("Subset Network:\t\t{SUBSET_NETWORK}"))
+if (SUBSET_NETWORK){
+  print(glue::glue("Percent of Network:\t{per_total}%"))
+}
+```
+
+# Consolidate Process
+## Define Constants and Initial Values
+```{r}
+# Constants
+## Radius
+radius_m <- 10
+safety_buffer <- 0.10
+radius_adj <- radius_m * 2 * pi * (1 + safety_buffer)
+
+## Angle
+angle_buffer <- 0.015
+```
+
+## Define possible subsets
+Input should be the node where there is a t intersection on one side of a parallel edge road.
+```{r}
+t_intersect_cases <- vector(mode = "list")
+t_intersect_cases[['academy_at_the_plaza']] <- 5514326164
+t_intersect_cases[['murdock_at_the_plaza']] <- 172383724
+t_intersect_cases[['pickney_at_matheson']] <- 172250876
+```
+
+## Pre-process Data
+```{r}
+subset_tag <- FALSE
+subset_label <- 'pickney_at_matheson'
+subset_radius <- 100
+
+# Subset
+if (subset_tag) {
+  # Reduce to subset node
+  center_node.df <- network.df %>%
+    filter(
+      from_id == t_intersect_cases[[subset_label]]
+      ) %>% 
+  sample_n(size = 1)
+  
+  # Extract lat/lon
+  subset_lon <- center_node.df %>% pull(from_lon)
+  subset_lat <- center_node.df %>% pull(from_lat)
+  
+  # Subset
+  network.df <- subset_lat_lon(
+    network    = network.df, 
+    lat_center = subset_lat, 
+    lon_center = subset_lon, 
+    radius     = subset_radius
+    )
+  }
+
+# PROCESSING ##################################################################
+# Calculate edge centerpoint
+network.df <- network.df %>% 
+  dplyr::mutate(
+    center_lat = (to_lat + from_lat)/2,
+    center_lon = (to_lon + from_lon)/2
+  )
+
+# Calculate edge angle to normal x,y axis. Angle is reported in units of pi 
+# radians. Invert all negative angles.
+network.df <- network.df %>% 
+  dplyr::mutate(
+    theta = atan2(
+      y = to_lat - from_lat,
+      x = to_lon - from_lon
+      ) / pi ,
+    theta = if_else(
+      theta < 0, 
+      theta + 1,
+      theta
+      )
+  )
+
+# Calculate angle of orthogonal projection to the edge. This is done by shifting
+# the edge angle clockwise by by 1/2.
+network.df <- network.df %>% 
+  dplyr::mutate(
+    theta_orth = theta + 1/2,
+    theta_orth = if_else(
+      theta_orth >= 2, 
+      theta_orth - 2, 
+      theta_orth
+      )
+  )
+
+# Determine points of orthogonal projection. Because our data is representing
+# a real world area, a 2D rendering is only a approximation. This affects the 
+# implementation of length, which we need to determine the start and end 
+# points of the orthogonal projection. Depending on the angle of the orthogonal 
+# projection, length in the 2D space could be off by as much as a factor of 
+# 2 PI. Therefore, in order for the length calculation to be conservative, we 
+# will use a 2 PI factor to adjust the 2D length.
+
+dist_adj_factor <- 2 * pi
+dist_m = 15 
+dist_adj <- dist_m * dist_adj_factor
+m_to_deg = 111000
+orth_deg <- dist_m/m_to_deg
+
+network.df <- network.df %>% 
+  dplyr::mutate(
+    orth_x        = orth_deg * cos(theta_orth*pi),
+    orth_y        = orth_deg * sin(theta_orth*pi),
+    to_lat_orth   = (center_lat + orth_y),
+    to_lon_orth   = (center_lon + orth_x),
+    from_lat_orth = (center_lat - orth_y),
+    from_lon_orth = (center_lon - orth_x),
+  )
+
+# Create Edge LINESTRING
+network.sf <- makeLinestringVector(df = network.df, orthogonal = FALSE) %>% 
+  select(ls_norm, everything())
+
+# Determine Edge Length
+network.sf <- network.sf %>% 
+  dplyr::mutate(
+    edge_length_m = as.vector(sf::st_length(ls_norm))
+  )
+
+# Initialize Parallel Process columns
+network.sf <- network.sf %>% 
+  dplyr::mutate(
+    parallel_edges      = list(c("<EMPTY>")),
+    parallel_segments   = list(c("<EMPTY>")),
+    n_parallel_segments = -1,
+  )
+
+# Create Orthogonal Projection LINESTRINGs
+network_orth.sf <- makeLinestringVector(
+  df = network.df, 
+  orthogonal = TRUE
+  ) %>% 
+  select(edge_id)
+```
+
+## Execute Loop
+```{r}
+start_time <- Sys.time()
+
+# Define output print levels
+## Time updates
+print_flag_time <- TRUE
+## Granular, step by step, print statements
+print_flag_1 <- FALSE
+## Parallel intersect checks
+print_flag_2 <- FALSE
+
+# Initial
+while_check.sf <- network.sf %>% filter(n_parallel_segments == -1)
+n_remaining <- length(while_check.sf$edge_id)
+i <- 1
+
+print(glue("Number of edges:\t\t\t{length(network.sf$edge_id)}"))
+
+# Execute Loop
+while (n_remaining > 0){
+  
+   # Runaway While Loop escape valve
+  if(i %% 1e5 == 0) {
+    break
+  }
+  
+  # Time Updates
+  if (verbose >= 1){
+    if(i %% 5e2 == 0) {
+      end_time <- Sys.time()
+      time_elapsed <- secondsToPeriodTime(start_time, end_time)
+
+      print(glue(paste0(rep(x = "_", 80), collapse = "")))
+      print(glue('Iteration:\t\t\t\t{i}'))
+      print(glue('Time Elapsed:\t\t\t\t{time_elapsed}'))
+    }
+  }
+  
+  # REDUCE DATASET BEFORE SHAPEFILE PROCESSES #################################
+  # Setup ---------------------------------------------------------------------
+  if (verbose >= 1){
+    print(glue(paste0(rep(x = "_", 80), collapse = "")))
+    print(glue('Iteration:\t\t\t\t{i}'))
+  }
+  
+  # Establish dataframe variable
+  # This reduces errors when the subsetting sequence is rearranged.
+  network_subset.sf <- network.sf 
+  
+  # Select random row
+  iter.df <- network_subset.sf %>% 
+    filter(n_parallel_segments == -1) %>% 
+    dplyr::slice_sample(n = 1)
+  
+  # Extract Inputs
+  edge_id_iter    = iter.df %>% pull(edge_id)
+  center_lat      = iter.df %>% pull(center_lat)
+  center_lon      = iter.df %>% pull(center_lon)
+  segment_id_iter = iter.df %>% pull(segment_id)
+  theta_iter      = iter.df %>% pull(theta)
+  
+  if (print_flag_1){
+    print(glue('Edge ID:\t\t\t\t{edge_id_iter}'))
+    print(glue('Number of Edges - Total:\t\t{length(network.sf$edge_id)}'))
+  }
+  
+  # Subset - Segment -----------------------------------------------------------
+  network_subset.sf <- network_subset.sf %>% 
+    filter(segment_id != segment_id_iter)  
+  
+  n_subset <- length(network_subset.sf$edge_id)
+  
+  if (print_flag_1){  
+    print(glue('Number of Edges - Subset - Segment ID:\t{n_subset}'))
+  }
+  
+  if (n_subset == 0) {
+    network.sf <- exportParallelEdgeResults(
+      network                    = network.sf, 
+      input_edge_id              = edge_id_iter, 
+      parallel_detected          = FALSE, 
+      parallel_edges_detected    = NA, 
+      parallel_segments_detected = NA
+      )
+    
+    # Iteration  actions
+    i <- i + 1
+    while_check.sf <- network.sf %>% filter(n_parallel_segments == -1)
+    n_remaining <- length(while_check.sf$edge_id)
+    next
+  }
+  
+  # Subset - Radius -----------------------------------------------------------
+  network_subset.sf <- subset_lat_lon(
+    network    = network_subset.sf, 
+    lat_center = center_lat, 
+    lon_center = center_lon,
+    radius     = radius_adj 
+    )
+  
+  n_subset <- length(network_subset.sf$edge_id)
+  
+  if (print_flag_1){
+    print(glue('Number of Edges - Subset - Radius:\t{n_subset}'))
+  }
+  
+  if (n_subset == 0) {
+    network.sf <- exportParallelEdgeResults(
+      network                    = network.sf, 
+      input_edge_id              = edge_id_iter, 
+      parallel_detected          = FALSE, 
+      parallel_edges_detected    = NA, 
+      parallel_segments_detected = NA
+      )
+     
+    # Iteration  actions
+    i <- i + 1
+    while_check.sf <- network.sf %>% filter(n_parallel_segments == -1)
+    n_remaining <- length(while_check.sf$edge_id)
+    next
+  }
+  
+  # Subset - Angle ------------------------------------------------------------
+  ### Define max/min angle values
+  theta_max <- theta_iter + angle_buffer
+  theta_min <- theta_iter - angle_buffer
+  
+  ### Execute subset
+  network_subset.sf <- network_subset.sf %>% 
+    filter(
+      between(
+        x     = theta,
+        left  = theta_min, 
+        right = theta_max
+        )
+    )
+  
+  n_subset <- length(network_subset.sf$edge_id)
+  
+  if (print_flag_1){
+    print(glue('Number of Edges - Subset - Angle:\t{n_subset}'))
+  }
+  
+  if (n_subset == 0) {
+    network.sf <- exportParallelEdgeResults(
+      network                    = network.sf, 
+      input_edge_id              = edge_id_iter, 
+      parallel_detected          = FALSE, 
+      parallel_edges_detected    = NA, 
+      parallel_segments_detected = NA
+      )
+    
+    # Iteration  actions
+    i <- i + 1
+    while_check.sf <- network.sf %>% filter(n_parallel_segments == -1)
+    n_remaining <- length(while_check.sf$edge_id)
+    next
+  }
+  
+  # PARALLEL INTERSECTION CHECK ###############################################
+  # Initialize
+  parallel_edges_iter <- c()
+  parallel_segments_iter <- c()
+  
+  for (comparison_edge_idx in seq_along(network_subset.sf$edge_id)){
+    
+    # Select orthogonal linestring to check intersection
+    ls_orth <- network_orth.sf %>% 
+      filter(edge_id == edge_id_iter) %>% 
+      pull(ls_orth)
+    
+    # Select Row to compare
+    row_comp <- network_subset.sf %>% slice(comparison_edge_idx)
+    
+    # Extract parameters for comparison  
+    ls_comp         <- row_comp %>% pull(ls_norm)
+    edge_id_comp    <- row_comp %>% pull(edge_id)
+    segment_id_comp <- row_comp %>% pull(segment_id)
+    
+    # Check if the orthogonal projection and edge intersect
+    ls_intersect <- sf::st_intersects(
+      ls_orth, ls_comp, 
+      sparse = FALSE
+      )[[1]]
+    
+    how_close <- NA
+    
+    # Document edge and segment if they did intersect
+    if (ls_intersect) {
+      parallel_edges_iter    <- c(parallel_edges_iter, edge_id_comp)
+      parallel_segments_iter <- c(parallel_segments_iter, segment_id_comp)
+    
+    } else {
+      how_close <- sf::st_distance(ls_orth, ls_comp)
+    }
+    
+    if (print_flag_2) {
+      print(glue(paste0(rep(x = "-", 80), collapse = "")))
+      print(glue("Edge ID:\t\t\t\t{edge_id_iter}"))
+      print(glue("Edge ID - Comparison:\t\t\t{edge_id_comp}"))
+      print(glue("Segment ID:\t\t\t\t{segment_id_iter}"))
+      print(glue("Segment ID - Comparison:\t\t{segment_id_comp}"))
+      print(glue("Intersect:\t\t\t\t{ls_intersect}"))
+      
+      if (!is.na(how_close)){
+        print(glue("Distance:\t\t\t\t{how_close}"))
+      }
+      print(glue(paste0(rep(x = "-", 80), collapse = "")))
+    }
+    
+  }
+  
+  # Check if any edges were found to be parallel
+  if (length(parallel_segments_iter) > 0){
+    
+    network.sf <- exportParallelEdgeResults(
+      network                    = network.sf, 
+      input_edge_id              = edge_id_iter, 
+      parallel_detected          = TRUE, 
+      parallel_edges_detected    = parallel_edges_iter, 
+      parallel_segments_detected = parallel_segments_iter
+      )
+    
+  } else{
+    
+    network.sf <- exportParallelEdgeResults(
+      network                    = network.sf, 
+      input_edge_id              = edge_id_iter, 
+      parallel_detected          = FALSE, 
+      parallel_edges_detected    = NA, 
+      parallel_segments_detected = NA
+      )
+    
+  }
+  
+  # Iteration Actions
+  while_check.sf <- network.sf %>% filter(n_parallel_segments == -1)
+  n_remaining <- length(while_check.sf$edge_id)
+  i <- i + 1
+  next
+}
+
+end_time <- Sys.time()
+time_elapsed <- secondsToPeriodTime(start_time, end_time)
+
+print(glue(paste0(rep(x = "_", 80), collapse = "")))
+print(glue('Time Elapsed - Final:\t\t\t{time_elapsed}'))
+```
+
+# Export
+```{r}
+file_dir <- "./../data/"
+file_name <- "segmented_street_network_parallel_cases_labeled_10km.RDS"
+file_path <- file.path(file_dir, file_name)
+saveRDS(object = network.sf, file = file_path)
+```
+
+## Check Segments with Multiple Edges
+```{r}
+parallel_edge_pairs <- network.sf %>% 
+  sf::st_drop_geometry() %>% 
+  select(edge_id, segment_id, parallel_edges, parallel_segments) %>% 
+  unnest(cols = parallel_segments) %>% 
+  unnest(cols = parallel_edges) %>% 
+  filter(parallel_segments != "<EMPTY>")
+```
+
+```{r}
+# Table of all segments with parallel segments, long form
+segment_breakdown <- network.sf %>% 
+  sf::st_drop_geometry() %>% 
+  select(edge_id, segment_id, parallel_segments, parallel_edges) %>% 
+  unnest(cols = parallel_segments) %>% 
+  unnest(cols = parallel_edges) %>% 
+  filter(parallel_segments != "<EMPTY>") %>% 
+  group_by(segment_id) %>%
+  count(parallel_segments) %>% 
+  ungroup() %>% 
+  rename(
+    parallel_segment = parallel_segments,
+    n_parallel_edges = n
+    ) %>% 
+  arrange(segment_id, parallel_segment)
+
+segment_breakdown %>% arrange(segment_id)
+```
+
+```{r}
+# Summary table of the number of 
+unique_parallel_segments <- segment_breakdown %>% 
+  group_by(segment_id) %>%
+  summarise(unique_parallel_segments = n()) %>%
+  arrange(desc(unique_parallel_segments))
+
+unique_parallel_segments
+```
+
+## Create Parallel Segment Pairs
+### Wrap All Parallel Segments into List Column
+```{r}
+# Reduce to segments with two or more segment matches
+parallel_segments.v <- unique_parallel_segments %>% 
+  filter(unique_parallel_segments > 1) %>% 
+  pull(segment_id)
+
+parallel_segments.df <- segment_breakdown %>% 
+  select(-n_parallel_edges) %>% 
+  filter(segment_id %in% parallel_segments.v) %>% 
+  group_by(segment_id) %>% 
+  summarise(parallel_segments = list(unique(parallel_segment)))
+
+parallel_segments.df %>% head(2)
+```
+
+### Scratch Work
+```{r}
+df_test <- x %>%
+  filter(segment_id == "l0sztiy7lq")
+
+df_test
+
+long_id <- df_test %>% pull(segment_id)
+
+short_segments <- df_test %>% pull(parallel_segments) %>% unlist()
+
+short_segments
+
+segment_sets.df <- as.data.frame(
+  x = t(combn(short_segments, 2)) 
+  ) %>% 
+  mutate(long_segment = long_id) %>%
+  rename(
+    short_segment_1 = V1,
+    short_segment_2 = V2
+    ) %>% 
+  select(long_segment, everything())
+
+
+segment_sets.df
+```
+
+### Function - List All Possible Short Segment Pairs
+```{r}
+shortSegmentPairs <- function(segments.lst){
+  as.data.frame(
+    x = t(combn(unlist(segments.lst), 2)) 
+  ) %>% 
+  rename(
+    short_segment_1 = V1,
+    short_segment_2 = V2
+    )
+}
+
+short_segments <- df_test %>% pull(parallel_segments)
+```
+
+
+## Visualize
+Visually inspect what identified parallel segments look like.
+```{r}
+# Extract Segments to Highlight
+long_segments <- unique_parallel_segments %>% 
+  filter(unique_parallel_segments > 1) %>% 
+  pull(segment_id)
+
+short_segments_1 <- segment_breakdown %>% 
+  filter(segment_id %in% long_segments) %>% 
+  group_by(segment_id) %>% 
+  mutate(row = row_number()) %>% 
+  filter(row == 1) %>% 
+  pull(parallel_segment)
+
+short_segments_2 <- segment_breakdown %>% 
+  filter(segment_id %in% long_segments) %>% 
+  group_by(segment_id) %>% 
+  mutate(row = row_number()) %>% 
+  filter(row == 2) %>% 
+  pull(parallel_segment)
+
+# Create column for highlighting the plot
+network.sf <- network.sf %>% 
+  mutate(
+    highlight = dplyr::case_when(
+      segment_id %in% long_segments ~ "long", 
+      segment_id %in% short_segments_1 ~ "short_1",
+      segment_id %in% short_segments_2 ~ "short_2",
+      TRUE ~ "default"
+    )
+  )
+
+print(glue("Number of Cases: {length(long_segments)}"))
+
+# Generate Plot
+p <- plotStreets(network.sf, color_feature = "highlight")
+
+# Apply color palette
+color_pal <- c(
+  "short_1" = "#E71D36", 
+  "short_2" = "#FF9F1C",
+  "long"    = "#2EC4B6", 
+  "default" =  "#D6DBDF"
+  )
+
+p <- p + scale_colour_manual(values=color_pal)
+
+# Generate interactive plot
+plotly::ggplotly(p)
+```
+
+# Check if Short Parallel Segments Are Contiguous
+
+
+# TO DO:
+Consolidate to a list of parallel segment ids for each segment id
+Check that if any list contains multiple
+If multiple, are any of the group connected
+If a segment id is parallel to two connected segment ids, then that segment id will be split
+Split based on where an orthogonal projection at the shared point would intersect
+
+
+
+
+
+
