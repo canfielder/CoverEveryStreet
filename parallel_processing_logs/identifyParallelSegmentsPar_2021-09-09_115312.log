@@ -1,0 +1,3021 @@
+starting worker pid=16108 on localhost:11147 at 11:53:12.635
+starting worker pid=17740 on localhost:11147 at 11:53:12.664
+starting worker pid=22000 on localhost:11147 at 11:53:12.720
+starting worker pid=5012 on localhost:11147 at 11:53:12.746
+starting worker pid=20928 on localhost:11147 at 11:53:12.806
+starting worker pid=20652 on localhost:11147 at 11:53:12.829
+starting worker pid=22580 on localhost:11147 at 11:53:12.870
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Compare Parallel Segments: Start
+Compare Parallel Segments: Start
+Number of observations:					48
+Number of observations:					46
+
+
+################################################################################
+
+Iteration:						1
+################################################################################
+Iteration:						1
+Edge ID:						159118
+Number of Edges - Total:				46
+Edge ID:						623341
+Number of Edges - Total:				48
+Compare Parallel Segments: Start
+Number of observations:					41
+
+Number of Edges - Subset - Radius:			4
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Radius:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Iteration:						1Number of Edges - Subset - Angle:			1
+
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						623333
+Number of Edges - Total:				41
+
+################################################################################
+
+Compare Parallel Segments: Start
+Iteration:						2
+################################################################################
+Number of observations:					54
+
+Iteration:						2
+Edge ID:						159120
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			10
+Edge ID:						302161
+
+Number of Edges - Total:				48
+################################################################################
+Iteration:						1
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+Edge ID:						466100
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Radius:			3
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			19
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			5
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			2
+Compare Parallel Segments: Start
+Number of observations:					54
+
+
+################################################################################
+Iteration:						2
+
+
+################################################################################
+################################################################################
+Iteration:						3
+Iteration:						1
+
+################################################################################
+Iteration:						3
+Edge ID:						83648
+Number of Edges - Total:				41
+Edge ID:						579313
+Edge ID:						667784
+Number of Edges - Total:				54
+Number of Edges - Total:				48
+Edge ID:						374416
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			4
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			6
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			6
+Number of Edges - Subset - Segment ID:			2
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Radius:			13
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						3
+
+################################################################################
+
+Compare Parallel Segments: Start
+Iteration:						4
+################################################################################
+Number of observations:					40
+Iteration:						2
+
+Compare Parallel Segments: Start
+Edge ID:						667858
+Number of observations:					47
+Number of Edges - Total:				41
+
+Edge ID:						466099
+Edge ID:						159126
+Number of Edges - Total:				54
+Number of Edges - Total:				46
+
+################################################################################
+Iteration:						1
+
+Number of Edges - Subset - Radius:			11
+################################################################################
+Iteration:						1
+Edge ID:						667853
+Number of Edges - Subset - Radius:			18
+Number of Edges - Total:				40
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			10
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			8
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						125768
+
+Number of Edges - Subset - Segment ID:			5
+
+################################################################################
+################################################################################
+Iteration:						4
+Iteration:						5
+
+################################################################################
+Iteration:						4
+Edge ID:						288248
+
+Number of Edges - Total:				46
+################################################################################
+Edge ID:						100887
+Edge ID:						125526
+Number of Edges - Total:				48
+Iteration:						3 Total:				41
+
+Number of Edges - Subset - Radius:			6
+Edge ID:						83644
+Number of Edges - Subset - Angle:			2
+Number of Edges - Total:				54
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			10
+Number of Edges - Subset - Radius:			2
+
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Radius:			11
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+################################################################################
+Iteration:						2
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						667844
+
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						6
+Iteration:						2
+
+################################################################################
+
+################################################################################
+Iteration:						5
+Number of Edges - Subset - Radius:			15
+Iteration:						5
+Edge ID:						667802
+Edge ID:						374396
+Number of Edges - Total:				46
+Number of Edges - Total:				47
+Number of Edges - Subset - Angle:			6
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			15
+Edge ID:						353742
+Number of Edges - Total:				41
+Edge ID:						100877
+Number of Edges - Total:				48
+Number of Edges - Subset - Angle:			9
+Number of Edges - Subset - Segment ID:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			6
+Number of Edges - Subset - Radius:			6
+Number of Edges - Subset - Radius:			10
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Segment ID:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+
+################################################################################
+Iteration:						3
+Edge ID:						271715
+Number of Edges - Total:				47
+
+################################################################################
+Iteration:						7
+Number of Edges - Subset - Radius:			9
+
+################################################################################
+Iteration:						6
+Edge ID:						623939
+Number of Edges - Subset - Angle:			4
+Number of Edges - Total:				46
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						366198
+Number of Edges - Total:				48
+Number of Edges - Subset - Segment ID:			2
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						6
+
+
+################################################################################
+################################################################################
+Iteration:						2
+Iteration:						7
+Edge ID:						87256
+Edge ID:						331925
+Number of Edges - Total:				41
+Edge ID:						366196
+Number of Edges - Total:				40
+Number of Edges - Total:				48
+
+################################################################################
+Iteration:						4
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Radius:			9
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Edge ID:						466124
+################################################################################
+Number of Edges - Total:				54
+Iteration:						8 Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0Number of Edges - Subset - Angle:			2
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						87202
+Number of Edges - Total:				46
+
+################################################################################
+Iteration:						7
+Number of Edges - Subset - Radius:			15
+
+Number of Edges - Subset - Angle:			7
+
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+################################################################################
+Iteration:						8
+Iteration:						4
+Edge ID:						757323
+Number of Edges - Subset - Radius:			7
+Number of Edges - Subset - Segment ID:			4
+Number of Edges - Total:				41
+
+################################################################################
+Number of Edges - Subset - Angle:			3
+Iteration:						3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						623937
+Edge ID:						159128
+Number of Edges - Total:				47
+Number of Edges - Total:				48
+Number of Edges - Subset - Segment ID:			2
+Edge ID:						87200
+Number of Edges - Total:				40
+Number of Edges - Subset - Radius:			4
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Radius:			0
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			0
+
+################################################################################
+
+Number of Edges - Subset - Segment ID:			0
+################################################################################
+Iteration:						5
+Iteration:						8
+
+Edge ID:						374392
+
+Edge ID:						353732############################################################
+Number of Edges - Total:				47
+################################################################################
+Number of Edges - Total:				41
+Iteration:						4
+Iteration:						9
+Edge ID:						667848
+
+Edge ID:						100895
+Number of Edges - Total:				40
+Number of Edges - Total:				48################################################################################
+
+Iteration:						3
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+Edge ID:						217268
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				54
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Radius:			3
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Angle:			10
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Iteration:						6
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			4
+Number of Edges - Subset - Radius:			0
+
+################################################################################
+
+Iteration:						10
+Edge ID:						271711################################################################################
+Iteration:						4 Total:				47
+
+
+Edge ID:						623345
+################################################################################
+Number of Edges - Total:				48
+Edge ID:						448536
+Iteration:						9
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			8
+Edge ID:						267003
+Number of Edges - Subset - Angle:			4
+Number of Edges - Total:				46
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Number of Edges - Subset - Segment ID:			1
+Iteration:						9
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Angle:			3
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						667782
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Total:				41
+
+################################################################################
+
+################################################################################
+
+Iteration:						10
+################################################################################
+Iteration:						5
+Number of Edges - Subset - Radius:			6
+Edge ID:						623947
+Number of Edges - Total:				46
+Edge ID:						466108
+Number of Edges - Total:				54
+Iteration:						5
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						448534
+Number of Edges - Subset - Radius:			8
+
+Number of Edges - Total:				54
+################################################################################
+Iteration:						11
+
+Number of Edges - Subset - Segment ID:			1
+################################################################################
+Iteration:						7
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						366222
+Number of Edges - Subset - Radius:			5
+Number of Edges - Total:				48
+Edge ID:						374386Number of Edges - Subset - Angle:			1
+
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				47
+################################################################################
+Iteration:						11
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						667794
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			5
+
+################################################################################
+Iteration:						6
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Radius:			11
+################################################################################
+Iteration:						6
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			12
+Edge ID:						623964
+Number of Edges - Total:				54
+
+
+################################################################################
+################################################################################
+Iteration:						10
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Iteration:						5
+Edge ID:						466096
+Number of Edges - Total:				54
+Number of Edges - Subset - Segment ID:			0
+
+Edge ID:						667822
+################################################################################
+Number of Edges - Total:				40
+Iteration:						8
+Edge ID:						757327
+
+Number of Edges - Total:				41
+################################################################################
+Iteration:						12
+Edge ID:						53571
+Number of Edges - Subset - Radius:			16
+Number of Edges - Total:				47
+Number of Edges - Subset - Radius:			10
+Edge ID:						667804
+Number of Edges - Total:				46ius:			8
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			7
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			5
+Number of Edges - Subset - Radius:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+Number of Edges - Subset - Segment ID:			4######################################
+Iteration:						12
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Radius:			9
+
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						100875
+Number of Edges - Total:				48
+Iteration:						7
+Number of Edges - Subset - Radius:			0
+Number of Edges - Subset - Segment ID:			2
+
+################################################################################
+Iteration:						11
+Edge ID:						466076
+Number of Edges - Total:				54
+Edge ID:						623337
+Number of Edges - Total:				41
+Number of Edges - Subset - Radius:			7
+
+################################################################################
+Iteration:						13
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Radius:			14
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						667798
+Number of Edges - Subset - Angle:			1
+Number of Edges - Total:				46
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1:			1
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						6
+
+################################################################################
+Iteration:						8
+
+################################################################################
+Iteration:						12
+Number of Edges - Subset - Radius:			12
+Edge ID:						623965
+Number of Edges - Total:				40
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						353734
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Total:				41
+Edge ID:						466097
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						14
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Radius:			15
+
+Edge ID:						667796
+################################################################################
+Number of Edges - Total:				46
+Number of Edges - Subset - Angle:			8
+Iteration:						13
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						9
+Number of Edges - Subset - Segment ID:			5
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			4
+Edge ID:						100885
+Number of Edges - Total:				48
+Edge ID:						53577
+Number of Edges - Total:				47
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			12
+
+################################################################################
+mber of Edges - Subset - Segment ID:			1
+Iteration:						9
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			9
+Edge ID:						466050
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			3
+Number of Edges - Subset - Segment ID:			1
+
+################################################################################
+Iteration:						15
+Number of Edges - Subset - Radius:			12
+Edge ID:						623953
+Number of Edges - Subset - Angle:			1
+Number of Edges - Total:				46
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Iteration:						7
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						448532
+Number of Edges - Total:				54
+
+
+Number of Edges - Subset - Radius:			8
+################################################################################
+################################################################################
+Iteration:						10
+Iteration:						13
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						353740
+Number of Edges - Total:				41
+
+
+################################################################################
+Number of Edges - Subset - Radius:			7
+################################################################################
+Iteration:						10
+Iteration:						16
+Edge ID:						448522
+Number of Edges - Total:				54
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						374384
+Edge ID:						374412
+Number of Edges - Subset - Radius:			11
+Number of Edges - Total:				47
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Total:				46
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+
+Number of Edges - Subset - Radius:			3
+################################################################################
+Iteration:						8
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			3
+Number of Edges - Subset - Radius:			15
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						125760
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						11
+
+
+################################################################################
+################################################################################
+Iteration:						17
+Iteration:						11
+Number of Edges - Subset - Radius:			6
+Edge ID:						466126
+Number of Edges - Total:				54
+Edge ID:						374400
+Number of Edges - Subset - Angle:			2
+Edge ID:						623949
+Number of Edges - Total:				47
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				46
+Number of Edges - Subset - Segment ID:			0
+
+
+################################################################################
+################################################################################
+Number of Edges - Subset - Radius:			15
+Iteration:						14
+
+################################################################################
+Iteration:						9
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						366208
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Total:				48
+Number of Edges - Subset - Angle:			1
+Edge ID:						137812
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				41
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						667845
+Number of Edges - Total:				54Iteration:						7
+Number of Edges - Subset - Segment ID:			0
+
+Edge ID:						667812
+Number of Edges - Subset - Radius:			10
+################################################################################
+Number of Edges - Total:				40
+Iteration:						18
+Number of Edges - Subset - Radius:			10
+
+Number of Edges - Subset - Angle:			2
+################################################################################
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						12
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						374422
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Total:				46
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			13
+Edge ID:						374378
+Number of Edges - Subset - Radius:			11
+Number of Edges - Total:				47
+Number of Edges - Subset - Angle:			8
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Segment ID:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Segment ID:			0
+Iteration:						15
+
+Number of Edges - Subset - Angle:			1
+################################################################################
+Edge ID:						623335
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			13
+Iteration:						12
+Number of Edges - Total:				41
+
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			2
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						8
+Edge ID:						100883
+Number of Edges - Total:				48
+Edge ID:						466054
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Total:				54
+
+################################################################################
+Edge ID:						667850
+Iteration:						19
+
+################################################################################
+Number of Edges - Subset - Radius:			5
+Iteration:						13
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Radius:			10
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				40
+Edge ID:						667800
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			11
+Edge ID:						271717
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Angle:			4
+Number of Edges - Total:				47
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			15
+Number of Edges - Subset - Radius:			12
+
+Number of Edges - Subset - Radius:			2
+Number of Edges - Subset - Angle:			11Number of Edges - Subset - Angle:			1##
+############################################################################
+Iteration:						13<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Segment ID:			0Number of Edges - Subset - Segment ID:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						448528
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						20
+
+################################################################################
+Iteration:						14
+
+Edge ID:						623941
+################################################################################
+Number of Edges - Subset - Radius:			6
+Number of Edges - Total:				46
+Iteration:						16
+Number of Edges - Subset - Angle:			1
+Edge ID:						125784
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				47
+Edge ID:						757313
+
+Number of Edges - Total:				41
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Iteration:						16
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Radius:			9
+################################################################################
+Edge ID:						366218
+Iteration:						14
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Total:				48
+Number of Edges - Subset - Radius:			7Number of Edges - Subset - Angle:			1
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						448530
+
+Number of Edges - Total:				54
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Iteration:						21
+
+################################################################################
+Iteration:						15
+
+################################################################################
+Number of Edges - Subset - Radius:			13
+Iteration:						17
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			2
+Edge ID:						288242
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						374374
+Number of Edges - Total:				46
+Number of Edges - Total:				47
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Segment ID:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						125534
+Number of Edges - Total:				41Number of Edges - Subset - Segment ID:			0
+
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Radius:			14
+################################################################################
+Iteration:						15
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+mber of Edges - Subset - Radius:			12
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						448524
+Number of Edges - Total:				54
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+
+################################################################################
+
+################################################################################
+Iteration:						10
+################################################################################Number of Edges - Subset - Segment ID:			0
+
+Iteration:						16
+Iteration:						22
+
+Number of Edges - Subset - Radius:			7
+Edge ID:						588679
+################################################################################
+Number of Edges - Total:				54
+Iteration:						18
+Edge ID:						374408############################################################
+
+Number of Edges - Subset - Angle:			3
+Edge ID:						374388tal:				46
+Iteration:						17
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				47
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						757315
+Number of Edges - Total:				41
+Edge ID:						100879
+Number of Edges - Total:				48
+Number of Edges - Subset - Radius:			17
+Number of Edges - Subset - Radius:			13
+
+mber of Edges - Subset - Radius:			11
+################################################################################
+Iteration:						16
+Number of Edges - Subset - Angle:			8
+
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			7
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			7
+Number of Edges - Subset - Angle:			5
+mber of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						353730
+Number of Edges - Subset - Angle:			2
+Number of Edges - Total:				54
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+
+Number of Edges - Subset - Segment ID:			0
+################################################################################
+Iteration:						23
+
+################################################################################
+Iteration:						17
+
+################################################################################
+Edge ID:						288250
+Iteration:						18
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			2
+Edge ID:						374380
+Number of Edges - Total:				47
+Number of Edges - Subset - Angle:			0
+
+################################################################################
+Iteration:						9
+Edge ID:						623349
+Number of Edges - Total:				48
+
+################################################################################
+Iteration:						17
+Edge ID:						667816
+Number of Edges - Total:				40
+Number of Edges - Subset - Radius:			11
+mber of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						87254
+Number of Edges - Total:				54
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			2
+
+################################################################################
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Radius:			14
+Iteration:						19
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Angle:			5
+
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Iteration:						18##############################################################<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Iteration:						24
+Number of Edges - Subset - Radius:			4
+Number of Edges - Subset - Segment ID:			0Edge ID:						667780
+Number of Edges - Total:				41
+
+################################################################################
+Number of Edges - Subset - Angle:			2
+Iteration:						19
+Edge ID:						288232
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				46
+Edge ID:						374394
+
+Number of Edges - Total:				47
+Number of Edges - Subset - Segment ID:			1
+################################################################################
+Iteration:						10
+Edge ID:						302159
+Number of Edges - Total:				48
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Angle:			1
+Edge ID:						667846
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			6
+Number of Edges - Total:				40
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			3
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			2
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Iteration:						20
+Number of Edges - Subset - Radius:			12
+################################################################################
+
+################################################################################
+Iteration:						25
+Iteration:						19
+Number of Edges - Subset - Angle:			9
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						87264
+
+Number of Edges - Total:				41
+Number of Edges - Subset - Segment ID:			4
+################################################################################
+Iteration:						20
+Edge ID:						374424
+Number of Edges - Total:				46
+Edge ID:						374390
+Number of Edges - Total:				47
+
+################################################################################
+Iteration:						18
+Edge ID:						366210
+Number of Edges - Total:				48
+Edge ID:						466112
+Number of Edges - Subset - Radius:			8
+mber of Edges - Total:				54
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			3
+Number of Edges - Subset - Radius:			12
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			18
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			6
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+
+################################################################################
+Number of Edges - Subset - Segment ID:			4
+################################################################################################################################################################
+
+Iteration:						26
+Iteration:						20
+Iteration:						21
+
+################################################################################
+Iteration:						21
+Edge ID:						159122
+Edge ID:						757319tal:				46
+Number of Edges - Total:				41
+Edge ID:						125780
+Number of Edges - Total:				47
+Edge ID:						667788
+Number of Edges - Total:				48
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Radius:			7
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1Number of Edges - Subset - Radius:			4
+
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						27
+
+################################################################################
+Iteration:						21
+
+################################################################################
+Edge ID:						374414
+Iteration:						22
+Number of Edges - Total:				46
+Edge ID:						374376
+Number of Edges - Total:				47
+Edge ID:						366204
+Number of Edges - Total:				48
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			1Number of Edges - Subset - Radius:			14
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			10
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Iteration:						22
+Number of Edges - Subset - Angle:			2:			0
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Edge ID:						125530
+################################################################################
+Iteration:						11
+Iteration:						28
+Number of Edges - Total:				41
+
+################################################################################
+Iteration:						22
+
+################################################################################
+Iteration:						11
+
+################################################################################
+Edge ID:						623967
+Iteration:						23
+Number of Edges - Total:				40
+Edge ID:						623951
+Number of Edges - Total:				46
+Edge ID:						217284
+Edge ID:						667854
+Number of Edges - Total:				47
+Number of Edges - Total:				54
+Edge ID:						37445
+Number of Edges - Total:				48
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Radius:			14
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Angle:			8
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			6
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Radius:			7
+Number of Edges - Subset - Radius:			0
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Iteration:						19
+Number of Edges - Subset - Angle:			6
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+################################################################################
+Iteration:						23
+Number of Edges - Subset - Segment ID:			4
+
+Number of Edges - Subset - Segment ID:			0
+################################################################################
+
+Iteration:						23
+################################################################################
+Iteration:						29
+Edge ID:						466114
+Number of Edges - Total:				54
+Edge ID:						87260
+Number of Edges - Total:				41
+
+################################################################################
+Edge ID:						53579
+Iteration:						24
+Number of Edges - Total:				47
+Edge ID:						623945
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			17
+Edge ID:						667790
+Number of Edges - Total:				48
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			7
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			6
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Radius:			8
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			3
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+################################################################################
+Iteration:						24
+Number of Edges - Subset - Segment ID:			1
+
+################################################################################
+Iteration:						30
+Edge ID:						125774
+Number of Edges - Total:				47
+Edge ID:						374410
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			4
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Iteration:						24
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+
+Edge ID:						125532
+Iteration:						25
+################################################################################
+Number of Edges - Total:				41
+
+Iteration:						25
+################################################################################
+Iteration:						31
+Edge ID:						623339
+Number of Edges - Total:				48
+Edge ID:						53575
+Edge ID:						374420
+Number of Edges - Total:				47
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			12		0
+Number of Edges - Subset - Segment ID:			1
+
+Number of Edges - Subset - Angle:			1
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						12
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Edge ID:						35153
+Iteration:						26
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						32
+Edge ID:						366202
+Number of Edges - Total:				48
+Edge ID:						374418
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			10
+
+################################################################################
+Iteration:						25
+Number of Edges - Subset - Angle:			3
+Number of Edges - Subset - Radius:			9
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Radius:			12
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				41
+
+Number of Edges - Subset - Segment ID:			0
+################################################################################
+Number of Edges - Subset - Angle:			1
+Iteration:						26
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+################################################################################
+Iteration:						13
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						27
+Edge ID:						217280
+Edge ID:						374402
+Number of Edges - Total:				54
+Number of Edges - Total:				47
+Number of Edges - Subset - Radius:			7
+
+################################################################################
+Iteration:						33
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						623347
+Number of Edges - Total:				48
+Number of Edges - Subset - Segment ID:			1
+Edge ID:						267005
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Radius:			10
+
+################################################################################
+Number of Edges - Subset - Angle:			4
+Number of Edges - Subset - Angle:			1
+Iteration:						12
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			4
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Segment ID:			1
+Edge ID:						667824
+
+Number of Edges - Total:				40
+################################################################################
+
+Number of Edges - Subset - Angle:			2
+Iteration:						27
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Iteration:						14
+################################################################################
+Iteration:						20
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						125788
+Number of Edges - Total:				47
+Edge ID:						579305
+Edge ID:						466116
+Number of Edges - Total:				54
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						34
+Number of Edges - Subset - Radius:			7
+
+################################################################################
+Number of Edges - Subset - Angle:			1
+Iteration:						26
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						288244
+Number of Edges - Subset - Radius:			9
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			18		0Number of Edges - Subset - Radius:			4
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						757321
+Number of Edges - Subset - Angle:			4
+mber of Edges - Subset - Angle:			7
+Number of Edges - Total:				41
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Segment ID:			5
+################################################################################
+Iteration:						13
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+
+################################################################################
+Iteration:						28
+Number of Edges - Subset - Angle:			1
+Iteration:						28
+Number of Edges - Subset - Radius:			6
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						331923
+Number of Edges - Total:				40
+
+Number of Edges - Subset - Angle:			4
+Number of Edges - Subset - Segment ID:			0
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						15
+Edge ID:						100891
+Number of Edges - Total:				48
+Number of Edges - Subset - Segment ID:			2
+Edge ID:						217286
+Number of Edges - Total:				47
+
+################################################################################
+Edge ID:						588678
+Iteration:						35
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			10
+Edge ID:						288238
+Number of Edges - Total:				46
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			5
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			3
+Number of Edges - Subset - Radius:			13		0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Angle:			5
+Number of Edges - Subset - Segment ID:			1
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						14
+Number of Edges - Subset - Segment ID:			3
+
+################################################################################
+Iteration:						29
+Number of Edges - Subset - Radius:			15
+Edge ID:						331937
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						37419
+Number of Edges - Total:				48
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Number of Edges - Subset - Radius:			5
+Iteration:						36
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Segment ID:			0
+ge ID:						288234
+Number of Edges - Total:				46
+
+Number of Edges - Subset - Angle:			1
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						29
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						15
+Edge ID:						125790
+Number of Edges - Total:				47
+Number of Edges - Subset - Radius:			14
+
+
+################################################################################
+################################################################################
+Iteration:						30
+Iteration:						27
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						331935
+Number of Edges - Total:				40
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						366216
+Number of Edges - Total:				48
+Edge ID:						137814
+Number of Edges - Subset - Radius:			9
+Number of Edges - Total:				41
+
+Number of Edges - Subset - Angle:			1
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						37
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Angle:			4
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			14
+Edge ID:						288246
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Segment ID:			1
+################################################################################
+Iteration:						30
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			12
+Edge ID:						245069
+
+Number of Edges - Total:				47
+################################################################################
+Iteration:						28
+
+################################################################################
+Number of Edges - Subset - Angle:			1
+Iteration:						16
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						667840
+Edge ID:						137810
+Number of Edges - Total:				41
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			5
+
+################################################################################
+Number of Edges - Subset - Angle:			2
+Iteration:						38
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Segment ID:			1
+################################################################################
+Iteration:						21
+Edge ID:						87206
+Number of Edges - Subset - Radius:			6
+Number of Edges - Total:				46
+
+################################################################################
+Number of Edges - Subset - Radius:			7
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Edge ID:						466094############################################################
+Iteration:						31
+Number of Edges - Total:				54
+
+Number of Edges - Subset - Angle:			5
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			3
+
+Number of Edges - Subset - Radius:			9
+################################################################################
+Edge ID:						37429
+Iteration:						29
+Number of Edges - Total:				48
+Edge ID:						623933
+Number of Edges - Subset - Angle:			2
+Number of Edges - Total:				40
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						667855
+Number of Edges - Subset - Angle:			3
+Number of Edges - Total:				41
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			2
+
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Iteration:						39
+mber of Edges - Subset - Radius:			10
+
+Number of Edges - Subset - Angle:			2
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						31
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Edge ID:						87204
+Number of Edges - Subset - Segment ID:			2
+Iteration:						22
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			11
+
+Edge ID:						125772
+Number of Edges - Subset - Angle:			1
+Number of Edges - Total:				47
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+################################################################################
+Iteration:						32
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						83638
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			9
+Edge ID:						37447
+Number of Edges - Subset - Angle:			2
+Number of Edges - Total:				48
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Iteration:						30
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Radius:			9
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			4
+Edge ID:						125528
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			11
+Number of Edges - Total:				41
+Number of Edges - Subset - Segment ID:			2
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Iteration:						32
+Number of Edges - Subset - Segment ID:			2
+Edge ID:						217288bset - Radius:			9
+
+Number of Edges - Total:				47
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+
+################################################################################
+Iteration:						17
+
+Number of Edges - Subset - Radius:			5
+################################################################################
+Iteration:						40
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Iteration:						17
+Number of Edges - Subset - Segment ID:			2
+Edge ID:						288236
+Edge ID:						623779
+Number of Edges - Total:				54
+Number of Edges - Total:				46
+Edge ID:						623966
+Number of Edges - Total:				40
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Radius:			15
+Number of Edges - Subset - Angle:			6
+Number of Edges - Subset - Radius:			15
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>Iteration:						23
+
+################################################################################
+Number of Edges - Subset - Angle:			9
+Number of Edges - Subset - Segment ID:			4
+Iteration:						31
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			6
+Edge ID:						466046
+Number of Edges - Total:				54
+Edge ID:						100871
+
+mber of Edges - Total:				41
+################################################################################
+Iteration:						41
+Edge ID:						288230
+Number of Edges - Total:				46
+
+Number of Edges - Subset - Radius:			16
+################################################################################
+Iteration:						33
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Angle:			8
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						667786
+Number of Edges - Subset - Segment ID:			7
+Number of Edges - Total:				48
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Number of Edges - Subset - Radius:			4
+Iteration:						32
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Number of Edges - Subset - Angle:			2
+Iteration:						33
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						353744
+
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Total:				41
+################################################################################
+Iteration:						42
+Edge ID:						374404
+Number of Edges - Total:				47
+
+################################################################################
+Edge ID:						288240
+Iteration:						34
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			4
+Number of Edges - Subset - Angle:			0
+Edge ID:						366200
+Number of Edges - Subset - Radius:			11
+Number of Edges - Total:				48
+Number of Edges - Subset - Angle:			1
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+################################################################################
+Number of Edges - Subset - Radius:			12
+Iteration:						33
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+Number of Edges - Subset - Radius:			11
+Number of Edges - Total:				41
+
+################################################################################
+Number of Edges - Subset - Angle:			1
+Iteration:						34
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Iteration:						43
+Edge ID:						125764
+Number of Edges - Total:				47
+Number of Edges - Subset - Radius:			9
+
+Edge ID:						623943
+################################################################################
+Number of Edges - Total:				46
+Iteration:						35
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			4
+Edge ID:						37427
+Number of Edges - Total:				48
+Number of Edges - Subset - Radius:			3
+Number of Edges - Subset - Angle:			3
+Number of Edges - Subset - Radius:			8<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Number of Edges - Subset - Angle:			1
+Iteration:						18
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			6
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						579323
+################################################################################Number of Edges - Total:				54
+Iteration:						35
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						44
+Edge ID:						374406
+
+Number of Edges - Total:				47
+################################################################################
+Iteration:						36
+Edge ID:						87208
+Number of Edges - Total:				46
+Number of Edges - Subset - Radius:			13
+Edge ID:						366214
+Number of Edges - Subset - Angle:			6
+Number of Edges - Subset - Radius:			13<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				48
+Number of Edges - Subset - Angle:			1Number of Edges - Subset - Segment ID:			1
+
+Number of Edges - Subset - Radius:			8
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			14
+
+################################################################################
+Number of Edges - Subset - Angle:			2
+Iteration:						36
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Iteration:						45
+Number of Edges - Subset - Segment ID:			1
+Edge ID:						374398
+Number of Edges - Total:				47
+Edge ID:						159124
+Number of Edges - Total:				46
+
+################################################################################
+Iteration:						18
+
+################################################################################
+Edge ID:						623968
+Iteration:						19
+Number of Edges - Total:				40
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						125758
+Number of Edges - Total:				54
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+
+Iteration:						37
+Number of Edges - Subset - Radius:			9
+################################################################################
+################################################################################
+Iteration:						37
+Number of Edges - Subset - Radius:			6
+Number of Edges - Subset - Angle:			9
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Edge ID:						125776############################################################
+
+Number of Edges - Subset - Angle:			3
+Number of Edges - Total:				47
+Iteration:						24<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Edge ID:						667792
+################################################################################
+Number of Edges - Subset - Segment ID:			6
+Number of Edges - Total:				46
+Edge ID:						302163
+Iteration:						34
+Number of Edges - Total:				48
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						757329
+Edge ID:						83652
+Number of Edges - Total:				54
+Number of Edges - Total:				41
+
+################################################################################
+Iteration:						20
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			2
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+Edge ID:						579325
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Radius:			3
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+################################################################################
+Iteration:						38
+Iteration:						38
+Number of Edges - Subset - Radius:			14
+
+
+Number of Edges - Subset - Angle:			6
+################################################################################
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						35
+Iteration:						25
+Edge ID:						125782
+Number of Edges - Total:				47
+Number of Edges - Subset - Segment ID:			1
+Edge ID:						623343
+Number of Edges - Total:				48
+Edge ID:						466122
+Number of Edges - Total:				54
+Edge ID:						353736
+Number of Edges - Total:				41
+Number of Edges - Subset - Radius:			7
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			7
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Segment ID:			2
+################################################################################
+Iteration:						39
+
+Number of Edges - Subset - Segment ID:			5
+################################################################################
+Iteration:						39
+
+Edge ID:						100889
+################################################################################
+Number of Edges - Total:				48
+Iteration:						21
+Edge ID:						53573
+Number of Edges - Total:				47
+Edge ID:						125756
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			2
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Segment ID:			0<><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			3
+Number of Edges - Subset - Segment ID:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Iteration:						40
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						37423
+
+################################################################################
+Number of Edges - Total:				48
+Iteration:						22
+Edge ID:						579319
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Angle:			1
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+################################################################################
+Iteration:						36
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Segment ID:			0
+
+Number of Edges - Subset - Angle:			3
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						40
+Edge ID:						83650
+Number of Edges - Total:				41
+Number of Edges - Subset - Segment ID:			1
+
+################################################################################
+Iteration:						41
+Edge ID:						125792
+Number of Edges - Total:				47
+Number of Edges - Subset - Radius:			7
+Edge ID:						37421
+Number of Edges - Total:				48
+################################################################################
+Number of Edges - Subset - Angle:			4
+eration:						19
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			12
+Edge ID:						331933
+Number of Edges - Total:				40
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Radius:			14
+################################################################################
+Iteration:						37
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						87258
+Number of Edges - Total:				41
+
+################################################################################
+Iteration:						23
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Angle:			4
+Edge ID:						217282
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				54
+
+################################################################################
+Number of Edges - Subset - Segment ID:			1
+
+Edge ID:						100893
+Number of Edges - Total:				48
+Number of Edges - Subset - Radius:			9
+
+mber of Edges - Subset - Radius:			0
+################################################################################
+Iteration:						26
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+________________________________________________________________________________
+Iteration:						41
+Compare Parallel Segments:				Complete
+Number of Edges - Subset - Segment ID:			3
+Time Elapsed - Final:					00:00:10
+Edge ID:						466052
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						24
+Edge ID:						271713
+Number of Edges - Subset - Radius:			10
+Number of Edges - Total:				47
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						217278
+Number of Edges - Total:				54
+
+################################################################################
+Number of Edges - Subset - Radius:			9
+Iteration:						20
+
+################################################################################
+Iteration:						43
+Number of Edges - Subset - Angle:			4
+Number of Edges - Subset - Radius:			15
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						667818
+Number of Edges - Subset - Radius:			13
+Number of Edges - Total:				40Edge ID:						366212
+
+Number of Edges - Subset - Segment ID:			2
+Number of Edges - Total:				48
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			1
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+Number of Edges - Subset - Angle:			5
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						27
+Number of Edges - Subset - Segment ID:			0
+################################################################################
+Iteration:						25
+
+################################################################################
+Iteration:						44
+
+################################################################################
+Iteration:						21
+Edge ID:						466048
+Edge ID:						213265
+Number of Edges - Total:				54
+Edge ID:						100881
+Number of Edges - Total:				48
+Edge ID:						667808
+Number of Edges - Total:				40
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			10
+Number of Edges - Subset - Radius:			0
+Number of Edges - Subset - Angle:			4
+Number of Edges - Subset - Radius:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Segment ID:			1
+################################################################################
+Iteration:						26
+
+################################################################################
+Iteration:						22
+Edge ID:						217274
+Number of Edges - Total:				54
+Edge ID:						331927
+Number of Edges - Total:				40
+Number of Edges - Subset - Radius:			18
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Angle:			9
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			8
+
+Number of Edges - Subset - Segment ID:			0
+################################################################################
+Iteration:						42
+Number of Edges - Subset - Segment ID:			0
+
+
+################################################################################
+################################################################################
+Iteration:						45Iteration:						38
+
+
+################################################################################
+
+Iteration:						27
+################################################################################
+Edge ID:						125786
+Iteration:						23
+Edge ID:						366206
+Number of Edges - Total:				47
+Number of Edges - Total:				48
+Edge ID:						353738
+Number of Edges - Total:				41
+Edge ID:						667849
+Edge ID:						579307
+Number of Edges - Total:				40
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Radius:			10
+Number of Edges - Subset - Radius:			9
+mber of Edges - Subset - Radius:			0
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			11
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			6
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+Number of Edges - Subset - Segment ID:			5
+################################################################################
+Number of Edges - Subset - Segment ID:			2
+Iteration:						39
+
+
+################################################################################
+################################################################################
+Iteration:						46
+Iteration:						43
+Edge ID:						757325
+Number of Edges - Total:				41
+Edge ID:						125766
+Number of Edges - Total:				47
+Edge ID:						37425
+Number of Edges - Total:				48
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			2
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						40
+
+################################################################################
+Edge ID:						1008
+
+Number of Edges - Total:				41
+Edge ID:						125770
+Number of Edges - Total:				47
+
+################################################################################
+Iteration:						28
+Edge ID:						579327
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Radius:			6
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			13
+
+################################################################################
+Iteration:						41
+
+Number of Edges - Subset - Angle:			5
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						45
+Edge ID:						87262
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Total:				41
+Edge ID:						125762
+Number of Edges - Total:				47
+
+################################################################################
+Iteration:						47
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			4
+Edge ID:						159130
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				48
+Number of Edges - Subset - Radius:			5
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			10
+
+
+Number of Edges - Subset - Angle:			2
+################################################################################
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Iteration:						24
+Iteration:						29
+################################################################################
+Iteration:						46
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						579315
+Number of Edges - Total:				54
+Edge ID:						331931
+Number of Edges - Total:				40
+
+Edge ID:						374382
+Number of Edges - Total:				47
+################################################################################
+Iteration:						48
+Number of Edges - Subset - Radius:			7
+Number of Edges - Subset - Radius:			7
+Edge ID:						366220
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			5
+Number of Edges - Total:				48
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Segment ID:			0
+
+Number of Edges - Subset - Radius:			12
+################################################################################
+Iteration:						47
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						125778
+Number of Edges - Total:				47
+Number of Edges - Subset - Segment ID:			2
+
+################################################################################
+Iteration:						28
+Number of Edges - Subset - Radius:			9
+Edge ID:						448518
+Number of Edges - Total:				54
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Iteration:						30
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						25
+Number of Edges - Subset - Radius:			5
+Edge ID:						87268
+Edge ID:						757782
+Number of Edges - Total:				40
+Number of Edges - Total:				54
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Radius:			7
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			5
+Number of Edges - Subset - Segment ID:			0
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+mber of Edges - Subset - Segment ID:			4
+################################################################################
+Iteration:						26
+Edge ID:						623935
+Number of Edges - Total:				40
+
+################################################################################
+Iteration:						29
+Number of Edges - Subset - Radius:			6
+Edge ID:						466118
+Number of Edges - Total:				54
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			6
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			4
+
+################################################################################
+Iteration:						27
+Edge ID:						667810
+Number of Edges - Total:				40
+Number of Edges - Subset - Radius:			5
+________________________________________________________________________________
+Compare Parallel Segments:				Complete
+Time Elapsed - Final:					00:00:11
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+
+################################################################################
+Iteration:						31
+Edge ID:						125754
+Number of Edges - Total:				54
+
+################################################################################
+Number of Edges - Subset - Radius:			12
+Iteration:						28
+Number of Edges - Subset - Angle:			5________________________________________________________________________________
+Compare Parallel Segments:				Complete
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Time Elapsed - Final:					00:00:11
+Edge ID:						673480
+Number of Edges - Subset - Segment ID:			3
+Number of Edges - Total:				40
+Number of Edges - Subset - Radius:			10
+Number of Edges - Subset - Angle:			8
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			4
+
+################################################################################
+Iteration:						30
+________________________________________________________________________________
+Edge ID:						466040
+Compare Parallel Segments:				Complete
+Number of Edges - Total:				54
+Time Elapsed - Final:					00:00:11
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						31
+Edge ID:						83634
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			8
+
+Number of Edges - Subset - Angle:			3
+################################################################################
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Iteration:						32
+Number of Edges - Subset - Segment ID:			2
+Edge ID:						588677
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			7
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			4
+
+################################################################################
+Iteration:						29
+
+################################################################################
+Iteration:						32
+Edge ID:						667830
+Number of Edges - Total:				40
+Edge ID:						466110
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Number of Edges - Subset - Segment ID:			3
+Iteration:						30
+Edge ID:						667852
+Number of Edges - Total:				40
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			9
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			7
+
+################################################################################
+Iteration:						33
+Edge ID:						588676
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			2
+
+################################################################################
+Iteration:						33
+Edge ID:						466042
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+
+################################################################################
+################################################################################
+Iteration:						34
+Iteration:						34
+Edge ID:						83640
+Number of Edges - Total:				54
+Edge ID:						667839
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Angle:			7
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			6
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			7
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			5
+
+################################################################################
+Iteration:						31
+Edge ID:						667847
+Number of Edges - Total:				40
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Angle:			9
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			4
+
+################################################################################
+Iteration:						35
+Edge ID:						213261
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			0
+
+################################################################################
+Iteration:						36
+Edge ID:						673481
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						35
+Number of Edges - Subset - Radius:			15
+Number of Edges - Subset - Angle:			9
+Edge ID:						466078
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				54
+Number of Edges - Subset - Segment ID:			7
+Number of Edges - Subset - Radius:			4
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Iteration:						32
+
+################################################################################
+Edge ID:						623969
+Iteration:						36
+Number of Edges - Total:				40
+Edge ID:						353728
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			12
+Number of Edges - Subset - Angle:			9
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			3
+Number of Edges - Subset - Segment ID:			6
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						37
+Edge ID:						448526
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			6
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						38
+Edge ID:						466044
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			11
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						39
+Edge ID:						83636
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			2
+
+################################################################################
+Iteration:						37
+Edge ID:						271707
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						33
+Number of Edges - Subset - Radius:			7
+Edge ID:						667828
+Number of Edges - Total:				40
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			12
+
+################################################################################
+Iteration:						38
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Number of Edges - Subset - Segment ID:			0
+Iteration:						40
+Edge ID:						579311
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						34
+Edge ID:						466038
+Number of Edges - Total:				54
+Edge ID:						667857bset - Radius:			10
+
+Number of Edges - Total:				40
+Number of Edges - Subset - Angle:			7
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			3
+Number of Edges - Subset - Radius:			10
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Radius:			10
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			2
+
+################################################################################
+Iteration:						41
+Edge ID:						448520
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			6
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+
+################################################################################
+Iteration:						35
+Edge ID:						667814
+Number of Edges - Total:				40
+
+################################################################################
+Iteration:						42
+Number of Edges - Subset - Radius:			15
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+################################################################################
+Edge ID:						466098
+Iteration:						39
+Number of Edges - Total:				54
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						667838
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						36
+Number of Edges - Subset - Radius:			17
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						331929
+Number of Edges - Total:				40
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Radius:			16
+Number of Edges - Subset - Angle:			7
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Subset - Segment ID:			5
+################################################################################
+Iteration:						43
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			1
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Edge ID:						83642
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						37
+Number of Edges - Subset - Radius:			17
+Number of Edges - Subset - Angle:			7
+Edge ID:						667820
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Total:				40
+Number of Edges - Subset - Segment ID:			5
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						38
+Edge ID:						667851
+Number of Edges - Total:				40
+Number of Edges - Subset - Radius:			15
+Number of Edges - Subset - Angle:			9
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			6
+
+################################################################################
+Iteration:						40
+Edge ID:						271709
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			0
+
+################################################################################
+Iteration:						41
+Edge ID:						217266
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						44
+Number of Edges - Subset - Radius:			0
+Edge ID:						353726
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						42
+Number of Edges - Subset - Radius:			7
+Edge ID:						448538
+Number of Edges - Total:				54
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+
+Number of Edges - Subset - Radius:			6
+################################################################################
+Iteration:						45
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+Edge ID:						590153
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			3
+
+################################################################################
+Iteration:						39
+
+################################################################################
+Iteration:						43
+Edge ID:						87266
+Number of Edges - Total:				40
+Edge ID:						271705
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			7
+Number of Edges - Subset - Radius:			7
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						40
+
+################################################################################
+Iteration:						44
+Edge ID:						667826
+Number of Edges - Total:				40
+Edge ID:						217276
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			7
+Number of Edges - Subset - Radius:			15
+
+
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+################################################################################
+Iteration:						46
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+Edge ID:						466080
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			3
+
+################################################################################
+Number of Edges - Subset - Angle:			2
+Iteration:						45
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						35151
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						47
+Edge ID:						466101
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			10
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Radius:			15
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			2
+
+################################################################################
+Iteration:						46
+Edge ID:						213263
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			0
+
+################################################################################
+Iteration:						47
+Edge ID:						579303
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			3
+
+################################################################################
+Iteration:						48
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Edge ID:						83632
+Number of Edges - Total:				54
+
+################################################################################
+Iteration:						48
+Edge ID:						579317
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			0
+
+################################################################################
+Iteration:						49
+Number of Edges - Subset - Radius:			6
+________________________________________________________________________________
+Edge ID:						590151
+Number of Edges - Subset - Angle:			4
+Compare Parallel Segments:				Complete
+Number of Edges - Total:				54
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Time Elapsed - Final:					00:00:14
+Number of Edges - Subset - Segment ID:			1
+Number of Edges - Subset - Radius:			16
+Number of Edges - Subset - Angle:			6
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			4
+
+################################################################################
+Iteration:						49
+Edge ID:						579321
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			8
+Number of Edges - Subset - Angle:			6
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+ 
+********************************************************************************
+Iteration:					50
+Time Elapsed:					00:00:14
+********************************************************************************
+ 
+
+################################################################################
+Iteration:						50
+Edge ID:						35149
+Number of Edges - Total:				54
+ 
+********************************************************************************
+Iteration:					50
+Time Elapsed:					00:00:14
+********************************************************************************
+ 
+
+################################################################################
+Iteration:						50
+Number of Edges - Subset - Radius:			3
+Number of Edges - Subset - Angle:			2
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+
+Number of Edges - Total:				54
+Number of Edges - Subset - Segment ID:			0
+
+################################################################################
+Iteration:						51
+Number of Edges - Subset - Radius:			15
+Edge ID:						623963
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>Number of Edges - Total:				54
+Number of Edges - Subset - Segment ID:			4
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Angle:			8
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			6
+
+################################################################################
+Iteration:						51
+Edge ID:						83646
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			9
+Number of Edges - Subset - Angle:			4
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			1
+
+################################################################################
+Iteration:						52
+
+################################################################################
+Iteration:						52
+Edge ID:						579309
+Number of Edges - Total:				54
+Edge ID:						466095
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			10
+Number of Edges - Subset - Radius:			16
+Number of Edges - Subset - Angle:			1
+Number of Edges - Subset - Angle:			7
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			0
+Number of Edges - Subset - Segment ID:			4
+
+################################################################################
+Iteration:						53
+Edge ID:						87252
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			4
+
+################################################################################
+Iteration:						53
+Edge ID:						217272
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			13
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			2
+
+################################################################################
+Iteration:						54
+Edge ID:						466120
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			7
+Number of Edges - Subset - Angle:			5
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			4
+
+################################################################################
+Iteration:						54
+Edge ID:						217270
+Number of Edges - Total:				54
+Number of Edges - Subset - Radius:			14
+Number of Edges - Subset - Angle:			3
+<><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+Number of Edges - Subset - Segment ID:			2
+________________________________________________________________________________
+Compare Parallel Segments:				Complete
+Time Elapsed - Final:					00:00:15
+________________________________________________________________________________
+Compare Parallel Segments:				Complete
+Time Elapsed - Final:					00:00:15
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+package 'dplyr' was built under R version 4.0.5 

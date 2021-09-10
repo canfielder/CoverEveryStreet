@@ -194,19 +194,6 @@ short_segments <- df_test %>% pull(parallel_segments)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 # Visual
 ## Process Dataset
 ```{r}
@@ -604,7 +591,7 @@ parallel_segments_raw.df
 longSegmentSplitPoint <- function(
   long_segment, 
   short_intersect_lon, 
-  short_intersect_lon, 
+  short_intersect_lat, 
   x_points = 1e3
   ){
    # Extract longitude and latitude at short segment connection point
@@ -632,7 +619,7 @@ longSegmentSplitPoint <- function(
             intercept     = intercept, 
             edge_length   = edge_length,
             lon_intersect = short_intersect_lon, 
-            lat_intersect = short_intersect_lon,
+            lat_intersect = short_intersect_lat,
             x_points      = x_points
              ), 
           .f =  minimumDistance
