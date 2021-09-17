@@ -1,0 +1,198 @@
+starting worker pid=17084 on localhost:11163 at 08:27:01.521
+starting worker pid=8004 on localhost:11163 at 08:27:01.535
+starting worker pid=11508 on localhost:11163 at 08:27:01.538
+starting worker pid=6592 on localhost:11163 at 08:27:01.566
+starting worker pid=12560 on localhost:11163 at 08:27:01.581
+starting worker pid=3756 on localhost:11163 at 08:27:01.602
+starting worker pid=13724 on localhost:11163 at 08:27:01.603
+starting worker pid=17392 on localhost:11163 at 08:27:01.651
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 1 - Start:		00:00:18
+Cluster simple features processing - 1 - Start:		00:00:19
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 2 - Start:		00:00:19
+Cluster simple features processing - 2 - Start:		00:00:20
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 3 - Start:		00:00:21
+Cluster simple features processing - 3 - Start:		00:00:22
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 4 - Start:		00:00:23
+Cluster simple features processing - 4 - Start:		00:00:24
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 5 - Start:		00:00:24
+Cluster simple features processing - 5 - Start:		00:00:25
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 6 - Start:		00:00:26
+Cluster simple features processing - 6 - Start:		00:00:27
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 7 - Start:		00:00:28
+Cluster simple features processing - 7 - Start:		00:00:29
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 8 - Start:		00:00:31
+Cluster simple features processing - 8 - Start:		00:00:31
+Norm/orth processing
+Cluster simple features processing - 1 - Complete:		00:01:38
+Cluster simple features processing - 2 - Complete:		00:01:39
+Crop comparison network - 1 - Start:		00:01:40
+Extract simple feature geometries:			00:01:40
+Identify Edges within defined distance of cluster network:			00:01:40
+Crop comparison network - 2 - Start:		00:01:41
+Extract simple feature geometries:			00:01:41
+Identify Edges within defined distance of cluster network:			00:01:41
+Cluster simple features processing - 3 - Complete:		00:01:41
+Crop comparison network - 3 - Start:		00:01:43
+Extract simple feature geometries:			00:01:43
+Identify Edges within defined distance of cluster network:			00:01:43
+Cluster simple features processing - 4 - Complete:		00:01:44
+Crop comparison network - 4 - Start:		00:01:46
+Extract simple feature geometries:			00:01:46
+Identify Edges within defined distance of cluster network:			00:01:46
+Cluster simple features processing - 5 - Complete:		00:01:46
+Cluster simple features processing - 6 - Complete:		00:01:48
+Crop comparison network - 5 - Start:		00:01:48
+Extract simple feature geometries:			00:01:48
+Identify Edges within defined distance of cluster network:			00:01:48
+Crop comparison network - 6 - Start:		00:01:50
+Extract simple feature geometries:			00:01:50
+Identify Edges within defined distance of cluster network:			00:01:50
+Cluster simple features processing - 7 - Complete:		00:01:50
+Crop comparison network - 7 - Start:		00:01:51
+Extract simple feature geometries:			00:01:51
+Identify Edges within defined distance of cluster network:			00:01:51
+Cluster simple features processing - 8 - Complete:		00:01:52
+Crop comparison network - 8 - Start:		00:01:53
+Extract simple feature geometries:			00:01:54
+Identify Edges within defined distance of cluster network:			00:01:54
+
+
+
+
+
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Warning message:
+Warning message:
+s built under R version 4.0.5 
+Warning message:
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+package 'dplyr' was built under R version 4.0.5 
+
+rning message:
+package 'dplyr' was built under R version 4.0.5 
+
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Execution halted
+Execution halted
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Execution halted
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Execution halted
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Execution halted
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Execution halted
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Execution halted
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Execution halted

@@ -186,6 +186,7 @@ networkLinestringProcessing <- function(
     network   = network,
     orth_dist = 15
   )
+  
   if (parallel){
     # Create LINESTRING - Orthogonal
     network_orth <- makeLinestringVectorPar(
@@ -386,6 +387,79 @@ networkLinestringProcessingComplete <- function(
 
 }
 
+
+#' Compare edges to identify parallel cases
+#' 
+#' The following function compares each edge in a supplied network against all
+#' other qualifying edges, in order to identify which edges are parallel to 
+#' one another.
+#' 
+#' @param network_cluster Subset of the complete street network, reduced via a
+#'  kmeans clustering method(simple features dataframe)
+#' @param network_complete Street network of the complete area. (simple 
+#'  features dataframe) 
+#' @param dist Maximum distance an edge in the **network_complete** network
+#'  can be from an edge in the **network_cluster** network to be kept, in 
+#'  meters (numeric)
+#'
+#' @return Network reduced to only edges within a defined distance of the 
+#'  cluster subset network (simple features dataframe)
+#' 
+cropComparisonNetwork <- function(
+  network_cluster, 
+  network_complete, 
+  dist = 100,
+  verbose = 0
+  ) {
+  if (verbose >= 1) {
+    time_elapsed <- secondsToPeriodTime(start_time)
+    print(glue::glue("Extract simple feature geometries:\t\t\t\t\t\t{time_elapsed}"))
+  }
+  # Extract simple feature geometries
+  cluster_sf_geo <- network_cluster %>% dplyr::pull(geometry)
+  network_sf_geo <- network_complete %>% dplyr::pull(geometry)
+  
+  # Determine which edges in the complete network are within x distance of the cluster
+  # Allows for reduction in size of comparison network
+  
+  if (verbose >= 1) {
+    time_elapsed <- secondsToPeriodTime(start_time)
+    print(glue::glue("Identify Edges within defined distance of cluster network:\t\t{time_elapsed}"))
+  }
+  
+  edge_to_edge_test <- sf::st_is_within_distance(
+    x      = network_sf_geo, 
+    y      = cluster_sf_geo, 
+    sparse = FALSE,
+    dist   = dist
+  )
+  
+  # Determine number of network edges
+  n_edges_network <- dim(edge_to_edge_test)[1]
+  
+  # If any edge in the network is within x distance of any edge in the 
+  # cluster subset, select True.
+  
+  if (verbose >= 1) {
+    time_elapsed <- secondsToPeriodTime(start_time)
+    print(glue::glue("Reduce matrix to yes/no vector:\t\t\t{time_elapsed}"))
+  }
+  
+  keep_edge <- apply(
+    X      = edge_to_edge_test, 
+    MARGIN = 1, 
+    FUN    = any
+  )
+  
+  # Assign output vector to comparison network dataframe
+  network_complete$near_cluster <- keep_edge
+  
+  # reduce to only edges within x distance from any cluster edge
+  network_complete %>% 
+    dplyr::filter(near_cluster)
+}
+
+
 #' Compare edges to identify parallel cases
 #' 
 #' The following function compares each edge in a supplied network against all
@@ -408,7 +482,7 @@ networkLinestringProcessingComplete <- function(
 compareParallelEdges <- function(
   network,
   network_orth,
-  network_complete = NA, 
+  network_compare = NA, 
   k = 6,
   start_time = NA, 
   verbose = 0 
@@ -421,19 +495,21 @@ compareParallelEdges <- function(
   }
   
   if (verbose >= 1) {
-    print(glue::glue("Compare Parallel Segments: Start"))
-    print(glue::glue("Number of observations:\t\t\t\t\t{length(network$edge_id)}"))
+    time_elapsed <- secondsToPeriodTime(start_time)
+    print(glue::glue("Compare Parallel Segments - Start:\t\t\t\t\t{time_elapsed}"))
+    n_sub <- length(network$edge_id)
+    n_total <-length(network_compare$edge_id)
+    print(glue::glue("Cluster Sub-network Size:\t\t\t\t\t\t{n_sub}"))
+    print(glue::glue("Comparison Network Size:\t\t\t\t\t\t{n_total}"))
     print(glue::glue(""))
     
   }
   
   # PROCESSING ################################################################
   # Define complete network for comparison
-  if (is.data.frame(network_complete)){
-    network_complete <- network_complete
-  } else {
-    network_complete <- network
-  }
+  if (!(is.data.frame(network_compare))) {
+    network_compare <- network
+  } 
   
   # Initialize Parallel Separation columns
   network <- network %>%
@@ -477,25 +553,21 @@ compareParallelEdges <- function(
         time_elapsed <- secondsToPeriodTime(start_time)
         print(glue::glue(" "))
         print(glue::glue(strrep("*", 80)))
-        print(glue::glue('Iteration:\t\t\t\t\t{iter_counter}'))
-        print(glue::glue('Time Elapsed:\t\t\t\t\t{time_elapsed}'))
+        print(glue::glue('Iteration:\t\t\t\t\t\t\t\t{iter_counter}'))
+        print(glue::glue('Time Elapsed:\t\t\t\t\t\t\t\t{time_elapsed}'))
         print(glue::glue(strrep("*", 80)))
         print(glue::glue(" "))
       }
     }
     
     # Define comparison network for this iteration
-    if (is.data.frame(network_complete)){
-      network_compare <- network_complete
-    } else {
-      network_compare <- network
-    }
+    network_compare_iter <-  network_compare
     
     # Setup ---------------------------------------------------------------------
     if (verbose >= 2){
       print(glue::glue(""))
       print(glue::glue(strrep("#", 80)))
-      print(glue::glue('Iteration:\t\t\t\t\t\t{iter_counter}'))
+      print(glue::glue('Iteration:\t\t\t\t\t\t\t\t{iter_counter}'))
     }
     
     # Select single random row that has not been processed
@@ -517,14 +589,14 @@ compareParallelEdges <- function(
     
     # REDUCE DATASET BEFORE SHAPEFILE PROCESSES #################################
     # Subset - Radius ---------------------------------------------------------
-    network_compare <- subset_lat_lon(
-      network    = network_compare,
+    network_compare_iter <- subset_lat_lon(
+      network    = network_compare_iter,
       lat_center = center_lat,
       lon_center = center_lon,
       radius     = radius_adj
     )
     
-    n_subset <- length(network_compare$edge_id)
+    n_subset <- length(network_compare_iter$edge_id)
     
     if (verbose >= 3){
       print(glue::glue('Number of Edges - Subset - Radius:\t\t\t{n_subset}'))
@@ -553,7 +625,7 @@ compareParallelEdges <- function(
     theta_min <- theta_iter - angle_buffer
     
     # Execute subset
-    network_compare <- network_compare %>%
+    network_compare_iter <- network_compare_iter %>%
       filter(
         between(
           x     = theta,
@@ -591,10 +663,10 @@ compareParallelEdges <- function(
     # Subset - Segment ---------------------------------------------------------
     # Remove all instances of the selected segment from the network
     ## A segment won't be parallel with itself (assumption)
-    network_compare <- network_compare %>%
+    network_compare_iter <- network_compare_iter %>%
       dplyr::filter(segment_id != segment_id_iter)
     
-    n_subset <- length(network_compare$edge_id)
+    n_subset <- length(network_compare_iter$edge_id)
     
     if (verbose >= 3){
       print(glue::glue('Number of Edges - Subset - Segment ID:\t\t\t{n_subset}'))
@@ -625,7 +697,7 @@ compareParallelEdges <- function(
     # Counter for printing
     j <- 1
     
-    for (comparison_edge_idx in seq_along(network_compare$edge_id)) {
+    for (comparison_edge_idx in seq_along(network_compare_iter$edge_id)) {
       
       # Select orthogonal LINESTRING of main edge to check with comparison edge
       # intersection
@@ -634,7 +706,7 @@ compareParallelEdges <- function(
         dplyr::pull(geometry)
       
       # Select Row to compare
-      row_comp <- network_compare %>% 
+      row_comp <- network_compare_iter %>% 
         dplyr::slice(comparison_edge_idx)
       
       # Extract parameters for comparison
@@ -671,7 +743,7 @@ compareParallelEdges <- function(
           print(glue::glue("Distance:\t\t\t\t\t\t{how_close}"))
         }
         
-        if (j < length(network_compare$edge_id)) {
+        if (j < length(network_compare_iter$edge_id)) {
           print(glue::glue(strrep("- ", 40)))
         }
       }
@@ -720,9 +792,9 @@ compareParallelEdges <- function(
   # Return ####################################################################
   if (verbose >= 1) {
     time_elapsed <- secondsToPeriodTime(start_time)
+    print(glue::glue(""))
     print(glue::glue(strrep("_", 80)))
-    print(glue::glue("Compare Parallel Segments:\t\t\t\tComplete"))
-    print(glue::glue('Time Elapsed - Final:\t\t\t\t\t{time_elapsed}'))
+    print(glue::glue("Compare Parallel Segments - Complete:\t\t\t{time_elapsed}"))
   }
   
   network
@@ -737,6 +809,8 @@ compareParallelEdges <- function(
 #' @param cluster_label Cluster label
 #' @param network_w_cluster Street network which has been assigned a cluster label
 #'  in the column **.cluster** (dataframe)
+#' @param crop_compare_network Flag indicating whether to reduce the size of the 
+#' comparison network with the function **cropComparisonNetwork** (logical)
 #' @param start_time Time stamp to base all print outputs off of. Must be of
 #'  the form "YYYY-MM-DD HH:MM:SS" (double)
 #' @param verbose Flag indicating the granularity of print outputs the function
@@ -747,9 +821,10 @@ compareParallelEdges <- function(
 identifyParallelSegmentsCluster <- function(
   cluster_label,
   network_w_cluster,
+  crop_compare_network = FALSE, 
   start_time = NA, 
   verbose = 0 
-) {
+  ) {
   library(dplyr)
   
   # Establish starting time
@@ -758,12 +833,36 @@ identifyParallelSegmentsCluster <- function(
   }
   
   # PROCESSING ################################################################
+  segment_label_a <- "Cluster Sub-network processing"
+  segment_label_b <- "Cluster simple features processing"
+  segment_label_c <- "Reduce comparison network - latitude/longitude"
+  segment_label_d <- "Reduce comparison network - simple features"
+  
+  if (verbose >= 1){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time)
+    print(glue::glue("{segment_label_a} - {cluster_label} - Start:\t\t\t\t{elapsed_time}"))
+  }
+  
+  if (verbose >= 2){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time)
+    print(glue::glue("{segment_label_b} - {cluster_label} - Start:\t\t\t\t{elapsed_time}"))
+  }
+  
+  print(glue::glue("Norm/orth processing"))
   # Simple features processing
   network_norm_orth <- networkLinestringProcessing(
     network_w_cluster, 
     parallel = FALSE
   )
   
+  if (verbose >= 2){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time)
+    print(glue::glue("{segment_label_b} - {cluster_label} - Complete:\t\t\t{elapsed_time}"))
+  }
+
   # Define complete network
   network_complete <- network_norm_orth[["normal"]] %>% 
     dplyr::select(-.cluster)
@@ -775,13 +874,91 @@ identifyParallelSegmentsCluster <- function(
   network_orth <- network_norm_orth[["orthogonal"]] %>% 
     dplyr::filter(.cluster == cluster_label)
   
+  # Reduce Comparison Network -------------------------------------------------
+  ## Latitude / Longitude
+  if (verbose >= 2){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time)
+    print(glue::glue("{segment_label_c} - {cluster_label} - Start:\t\t{elapsed_time}"))
+  }
+  
+  # Define latitude/longitude bounding box of cluster area
+  geom_cluster <- network %>% dplyr::pull(geometry)
+  bbox_cluster <- sf::st_bbox(geom_cluster)
+  
+  # Determine center latitude/longitude point
+  lon_center <- mean(c(bbox_cluster[1] , bbox_cluster[3]))
+  lat_center <- mean(c(bbox_cluster[2], bbox_cluster[4]))
+  
+  # Determine distance from bbox corner to center
+  bbox_corner_to_center <- sqrt(
+    (lon_center - bbox_cluster[1])^2 + (lat_center - bbox_cluster[2])^2
+    )
+  
+  # Determine latitude/longitude subset radius
+  deg_to_m_conv <- 1.11e5
+  dist_adj_factor <- 1.25
+  subset_radius = (bbox_corner_to_center * dist_adj_factor * deg_to_m_conv)
+  
+  # Subset complete network to within radius of bbox center point
+  network_compare <- subset_lat_lon(
+    network    = network_complete, 
+    lat_center = lat_center, 
+    lon_center = lon_center, 
+    radius     = subset_radius
+  )
+  
+  if (verbose >= 2){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time)
+    print(glue::glue("{segment_label_c} - {cluster_label} - Complete:\t\t{elapsed_time}"))
+  }
+  
+  
+  # Reduce Complete Network to Radius around Cluster
+  if (crop_compare_network) {
+    if (verbose >= 2){
+      end_time <- Sys.time()
+      elapsed_time <- secondsToPeriodTime(start_time)
+      print(glue::glue("{segment_label_d} - {cluster_label} - Start:\t\t{elapsed_time}"))
+      print(glue::glue("Number of Cluster Edges - {cluster_label}:\t\t\t\t\t\t{length(network$edge_id)}"))
+      print(glue::glue("Number of Comparison Edges - {cluster_label}:\t\t\t\t\t\t{length(network_compare$edge_id)}"))
+    }
+    
+    network_compare <- cropComparisonNetwork(
+      network_cluster  = network,
+      network_complete = network_compare,
+      dist             = 100, 
+      verbose          = verbose
+      )
+    
+    if (verbose >= 2){
+      end_time <- Sys.time()
+      elapsed_time <- secondsToPeriodTime(start_time)
+      print(glue::glue("{segment_label_d} - {cluster_label} - Complete:\t{elapsed_time}"))
+    }
+  } else{
+    if (verbose >= 2){
+      end_time <- Sys.time()
+      elapsed_time <- secondsToPeriodTime(start_time)
+      print(glue::glue("{segment_label_d} - {cluster_label} - Step Skipped:\t\t{elapsed_time}"))
+    }
+  }
+
+  
+  if (verbose >= 1){
+    end_time <- Sys.time()
+    elapsed_time <- secondsToPeriodTime(start_time)
+    print(glue::glue("{segment_label_a} - {cluster_label} - Complete:\t\t\t\t{elapsed_time}"))
+  }
+  
   # COMPARE || EDGES ##########################################################
   compareParallelEdges(
-    network          = network,
-    network_orth     = network_orth,
-    network_complete = network_complete, 
-    start_time       = start_time, 
-    verbose          = verbose
+    network         = network,
+    network_orth    = network_orth,
+    network_compare = network_compare, 
+    start_time      = start_time, 
+    verbose         = verbose
   )
   
 }
@@ -794,18 +971,24 @@ identifyParallelSegmentsCluster <- function(
 #' 
 #' @param network Street network (simple features dataframe)
 #' @param k Number of cores to use for parallel process (integer)
+#' @param crop_compare_network Flag indicating whether to reduce the size of the 
+#' comparison network with the function **cropComparisonNetwork** (logical)
 #' @param start_time Time stamp to base all print outputs off of. Must be of
 #'  the form "YYYY-MM-DD HH:MM:SS" (double)
 #' @param verbose Flag indicating the granularity of print outputs the function
 #'  generates. The larger the number, the more granular (integer) 
+#' @log_progress Flag indicating if a log file should be kept of the parallel 
+#'  processing progress (logical)
 #'  
 #' @return Street network with a new column of listing the segments connected
 #
 identifyParallelSegmentsPar <- function(
   network, 
   k = 6, 
+  crop_compare_network = FALSE,
   start_time = NA, 
-  verbose = 0
+  verbose = 0,
+  log_progress = FALSE
   ) {
 
   # Establish starting time
@@ -838,6 +1021,7 @@ identifyParallelSegmentsPar <- function(
   
   # PARALLEL CLUSTER PROCESSNG ################################################
   segment_label <- "Parallel Cluster Processing"
+  
   if (verbose >= 1){
     end_time <- Sys.time()
     elapsed_time <- secondsToPeriodTime(start_time)
@@ -845,13 +1029,13 @@ identifyParallelSegmentsPar <- function(
   }
   
   # Define dataset variables and required sub-functions for export to cluster
-  cluster_data <- c("network.list", "k")
+  cluster_data <- c("network.list", "k", "start_time")
   cluster_functions <- c(
     "exportParallelEdgeResults", "preProcessingParallelIdentification", 
     "makeLinestring", "makeLinestringVector", "networkClusters",
     "secondsToPeriodTime", "compareParallelEdges", 
     "networkLinestringProcessing", "lineStringLength", "subset_lat_lon", 
-    "line_length"
+    "line_length", "cropComparisonNetwork"
   )
   cluster_variables <- c(cluster_data, cluster_functions)
   
@@ -860,8 +1044,12 @@ identifyParallelSegmentsPar <- function(
   file_name <- glue::glue("identifyParallelSegmentsPar_{file_dt}.log")
   file_path <- file.path("./..", "parallel_processing_logs", file_name)
   # print(file_path)
-  cl <- parallel::makeCluster(k,  outfile = file_path)
-  # cl <- parallel::makeCluster(k)
+  if (log_progress) {
+    cl <- parallel::makeCluster(k,  outfile = file_path)
+  } else {
+    cl <- parallel::makeCluster(k)
+  }
+
   
   # Export required variables to cluster
   parallel::clusterExport(
@@ -872,12 +1060,13 @@ identifyParallelSegmentsPar <- function(
   
   # Execute parallel implementation of segment labeling
   network.mtx <- parallel::parSapply(
-    cl                = cl, 
-    X                 = cluster_labels, 
-    FUN               = identifyParallelSegmentsCluster,
-    network_w_cluster = network_w_cluster,
-    start_time        = start_time,
-    verbose           = verbose
+    cl                   = cl, 
+    X                    = cluster_labels, 
+    FUN                  = identifyParallelSegmentsCluster,
+    crop_compare_network = crop_compare_network,
+    network_w_cluster    = network_w_cluster,
+    start_time           = start_time,
+    verbose              = verbose
   )
   
   # Stop cluster
@@ -890,13 +1079,6 @@ identifyParallelSegmentsPar <- function(
   }
   
   # PROCESS CLUSTER OUTPUTS ###################################################
-  segment_label <- "Compile Cluster Outputs"
-  if (verbose >= 1){
-    end_time <- Sys.time()
-    elapsed_time <- secondsToPeriodTime(start_time)
-    print(glue::glue("{segment_label} - Start:\t{elapsed_time}"))
-  }
-
   # Compile network matrix dataframes
   network <- compileParSapplyOutput(
     network.mtx = network.mtx, 
@@ -904,13 +1086,6 @@ identifyParallelSegmentsPar <- function(
     start_time  = start_time, 
     verbose     = verbose
   )
-
-  if (verbose >= 1){
-    end_time <- Sys.time()
-    elapsed_time <- secondsToPeriodTime(start_time, end_time)
-    print(glue::glue("{segment_label} - Complete:\t{elapsed_time}"))
-  }
-
   # Return ####################################################################
   network
   

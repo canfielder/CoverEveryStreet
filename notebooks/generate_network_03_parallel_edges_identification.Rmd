@@ -53,13 +53,13 @@ print(osm_query_date)
 
 # Subset
 ```{r subset_network}
-SUBSET_NETWORK <- TRUE
+SUBSET_NETWORK <- FALSE
 
 if (SUBSET_NETWORK) {
   # Define subsetting Parameters
   center_lat <- 35.242974
   center_lon <- -80.794735
-  radius     <- 4e3
+  radius     <- 1e4
 
   # Execute
   network.df <- subset_lat_lon(
@@ -87,10 +87,12 @@ if (SUBSET_NETWORK){
 # Label Parallel Segments for Each Edge ID
 ```{r label_parallel_segments}
 network.df <- identifyParallelSegmentsPar(
-  network    = network.df,
-  k          = 6, 
-  start_time = NA, 
-  verbose    = 3
+  network              = network.df,
+  k                    = 8, 
+  crop_compare_network = TRUE,
+  start_time           = NA, 
+  verbose              = 2,
+  log_progress         = TRUE
 )
 
 print(glue::glue("Segments labeled: {length(network.df$edge_id)}"))

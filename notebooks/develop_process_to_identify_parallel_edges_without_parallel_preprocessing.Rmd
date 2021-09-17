@@ -60,7 +60,7 @@ if (SUBSET_NETWORK) {
   # Define subsetting Parameters
   center_lat <- 35.242974
   center_lon <- -80.794735
-  radius     <- 1e3
+  radius     <- 3e3
 
   # Execute
   network.df <- subset_lat_lon(
@@ -148,7 +148,6 @@ if (SUBSET_NETWORK){
 # print(glue::glue("Time Elapsed: {time_elapsed}"))
 ```
 
-
 # identifyParallelSegmentsClusterLabel
 ## Function Inputs
 ```{r}
@@ -158,6 +157,7 @@ verbose <- 2
 
 print(glue::glue("Function inputs defined."))
 ```
+
 ## Assign Cluster Numbers
 ```{r}
 # Assign cluster number
@@ -172,9 +172,305 @@ identifyParallelSegmentsCluster(
   cluster_label     = 1,
   network_w_cluster = network_w_cluster.df,
   start_time        = NA, 
-  verbose           = 1 
+  verbose           = 2 
 ) 
 ```
+
+# Determine Best Method to Subset Comparison Network
+## Filter Cluster Subset Comparison Data by Bounding Box Limits
+**TO DO**: Test with colored network visuals for each step
+ * Full network
+ * Select cluster
+ * Lat/lon reduction
+  * To set distance, find distance between center lat lon and any of the corners. This should be the max distance for the radius subset. 
+  * Add a buffer/safety zone around it
+  * Buffer should just be the distance threshold for st_within_dist
+ * St_witihin_distance box
+ 
+ 
+### Process Network
+```{r}
+network_norm_orth <- networkLinestringProcessing(
+  network_w_cluster.df,
+  parallel = FALSE
+)
+
+network_norm <- network_norm_orth[['normal']]
+```
+
+#### Plot
+```{r}
+p <- plotStreets(network_w_cluster.df, ".cluster")
+plotly::ggplotly(p)
+```
+
+### Determine Bounding Box
+```{r}
+cluster_label <- network_w_cluster.df %>% 
+  dplyr::slice_sample(n = 1) %>% 
+  dplyr::pull(.cluster) 
+
+network_norm_cluster <- network_norm %>% 
+  dplyr::filter(.cluster == cluster_label)
+
+sf_geo_cluster<- network_norm_cluster %>% dplyr::pull(geometry)
+
+geom_bbox <- sf::st_bbox(sf_geo_cluster)
+```
+
+#### Plot
+```{r}
+network_norm_cluster_id <- network_norm %>% 
+  mutate(highlight = if_else(.cluster == cluster_label, "a", "b")
+         )
+p <- plotStreets(network_norm_cluster_id, "highlight")
+plotly::ggplotly(p)
+```
+
+### Subset by Latitude / Longitude
+#### Determine Longest Distance
+```{r}
+lon_center <- mean(c(geom_bbox[1] , geom_bbox[3]))
+lat_center <- mean(c(geom_bbox[2], geom_bbox[4]))
+
+bbox_corner_to_center <- sqrt((lon_center - geom_bbox[1])^2 + (lat_center - geom_bbox[2])^2)
+```
+
+#### Determine Subsetted Network (Lat/Lon)
+```{r}
+print(glue::glue("Number of rows - compare - pre:\t\t{length(network_w_cluster.df$edge_id)}"))
+print(glue::glue("Number of rows - cluster:\t\t{length(network_norm_cluster$edge_id)}"))
+
+deg_to_m_conv <- 1.11e5
+dist_adj_factor <- 1.2
+  
+network_compare_lat_lon <- subset_lat_lon(
+  network = network_norm, 
+  lat_center = lat_center, 
+  lon_center = lon_center, 
+  radius = (bbox_corner_to_center * dist_adj_factor * deg_to_m_conv)
+  )
+
+print(glue::glue("Number of rows - compare - post:\t{length(network_compare_lat_lon$edge_id)}"))
+```
+#### Plot
+##### Lat/Lon Subset Area
+```{r}
+edge_cluster <- network_norm_cluster %>% pull(edge_id)
+edge_lat_lon <- network_compare_lat_lon %>% pull(edge_id)
+# edge_within <- network_compare_within %>% pull(edge_id)
+
+network_norm_w_highlight <- network_norm %>% 
+  mutate(
+    highlight = case_when(
+      # edge_id %in% edge_cluster ~ "a",
+      # edge_id %in% edge_within ~ "b",
+      edge_id %in% edge_lat_lon ~ "c",
+      TRUE ~ "d"
+    )
+  )
+
+p <- plotStreets(network_norm_w_highlight, "highlight")
+plotly::ggplotly(p)
+```
+
+##### Cluster and Lat/Lon Subset Area
+```{r}
+edge_cluster <- network_norm_cluster %>% pull(edge_id)
+edge_lat_lon <- network_compare_lat_lon %>% pull(edge_id)
+# edge_within <- network_compare_within %>% pull(edge_id)
+
+network_norm_w_highlight <- network_norm %>% 
+  mutate(
+    highlight = case_when(
+      edge_id %in% edge_cluster ~ "a",
+      # edge_id %in% edge_within ~ "b",
+      edge_id %in% edge_lat_lon ~ "c",
+      TRUE ~ "d"
+    )
+  )
+
+p <- plotStreets(network_norm_w_highlight, "highlight")
+plotly::ggplotly(p)
+```
+
+### Determine Subsetted Network - st_within
+```{r}
+network_compare_within <- cropComparisonNetwork(
+  network_cluster  = network_norm_cluster,
+  network_complete = network_compare_lat_lon,
+  dist             = 150,
+  verbose          = 0
+  )
+
+print(glue::glue("Number of rows - subset - within:\t{length(network_compare_within$edge_id)}"))
+```
+
+### Plot Different Network Subsetting methods
+```{r}
+edge_cluster <- network_norm_cluster %>% pull(edge_id)
+edge_within <- network_compare_within %>% pull(edge_id)
+edge_lat_lon <- network_compare_lat_lon %>% pull(edge_id)
+
+
+network_norm_w_highlight <- network_norm %>% 
+  mutate(
+    highlight = case_when(
+      edge_id %in% edge_cluster ~ "a",
+      edge_id %in% edge_within ~ "b",
+      edge_id %in% edge_lat_lon ~ "c",
+      TRUE ~ "d"
+    )
+  )
+
+p <- plotStreets(network_norm_w_highlight, "highlight")
+
+plotly::ggplotly(p)
+```
+
+```{r}
+print(glue::glue("Number of rows - compare - pre:\t\t{length(network_w_cluster.df$edge_id)}"))
+print(glue::glue("Number of rows - cluster:\t\t{length(network_norm_cluster$edge_id)}"))
+
+network_compare_lat_lon <- subset_lat_lon(
+  network = network_norm, 
+  lat_center = lat_center, 
+  lon_center = 
+  lon_center, 
+  radius = 4e3 * 1.1 
+  )
+
+print(glue::glue("Number of rows - compare - post:\t{length(network_compare_lat_lon$edge_id)}"))
+
+edge_id_cluster <- network_norm_cluster$edge_id
+edge_id_compare <- network_compare_lat_lon$edge_id
+
+test <- all(edge_id_cluster %in% edge_id_compare)
+print(glue::glue("All custer edges in compare network:\t{test}"))
+```
+
+```{r}
+network_sf_geo <- network_compare_lat_lon %>% pull(geometry)
+cluster_sf_geo <- network_norm_cluster %>% pull(geometry)
+dist <- 100
+
+edge_to_edge_test <- sf::st_is_within_distance(
+  x      = network_sf_geo, 
+  y      = cluster_sf_geo, 
+  sparse = FALSE,
+  dist   = dist
+)
+
+  
+  # Determine number of network edges
+n_edges_network <- dim(edge_to_edge_test)[1]
+  
+keep_edge <- apply(
+  X      = edge_to_edge_test, 
+  MARGIN = 1, 
+  FUN    = any
+)
+
+print(glue::glue("Number of edges to keep:\t\t{sum(keep_edge)}"))
+
+network_compare_lat_lon$keep <- keep_edge
+
+edge_id_compare_2 <- network_compare_lat_lon %>% 
+  filter(keep) %>% 
+  pull()
+
+edge_id_cluster %in% edge_id_compare_2
+```
+
+
+```{r}
+# network_norm_orth <- networkLinestringProcessing(
+#   network_w_cluster.df, 
+#   parallel = FALSE
+# )
+# 
+# # Extract complete network
+# network_complete <- network_norm_orth[['normal']]
+# 
+# # Reduce to cluster
+# cluster_label <- 1
+# network <- network_complete %>% 
+#   dplyr::filter(.cluster == cluster_label)
+```
+
+### Filter Comparison Dataframe
+```{r}
+# # Extract simple feature geometries
+# cluster_sf_geo <- network %>% dplyr::pull(geometry)
+# network_sf_geo <- network_complete %>% dplyr::pull(geometry)
+# 
+# # Determine which edges in the complete network are within x distance of the cluster
+# # Allows for reduction in size of comparison network
+# edge_to_edge_test <- sf::st_is_within_distance(
+#   network_sf_geo,
+#   cluster_sf_geo, 
+#   sparse = FALSE,
+#   dist = 100
+#   )
+# 
+# # Determine number of network edges
+# n_edges_network <- dim(edge_to_edge_test)[1]
+# 
+# # If any edge in the network is within x distance of any edge in the 
+# # cluster subset, select True.
+# keep_edge <- apply(
+#   X      = edge_to_edge_test, 
+#   MARGIN = 1, 
+#   FUN    = any
+#   )
+# 
+# # Assign output vector to comparison network dataframe
+# network_complete$near_cluster <- keep_edge
+# 
+# # reduce to only edges within x distance from any cluster edge
+# network_complete_crop <- network_complete %>% 
+#   dplyr::filter(near_cluster)
+# 
+# network_complete_crop
+```
+
+```{r}
+# cropComparisonNetwork <- function(network, network_complete, dist = 100) {
+#   # Extract simple feature geometries
+#   cluster_sf_geo <- network %>% dplyr::pull(geometry)
+#   network_sf_geo <- network_complete %>% dplyr::pull(geometry)
+#   
+#   # Determine which edges in the complete network are within x distance of the cluster
+#   # Allows for reduction in size of comparison network
+#   edge_to_edge_test <- sf::st_is_within_distance(
+#     x      = network_sf_geo, 
+#     y      = cluster_sf_geo, 
+#     sparse = FALSE,
+#     dist   = dist
+#     )
+# 
+#   # Determine number of network edges
+#   n_edges_network <- dim(edge_to_edge_test)[1]
+#   
+#   # If any edge in the network is within x distance of any edge in the 
+#   # cluster subset, select True.
+#   keep_edge <- apply(
+#     X      = edge_to_edge_test, 
+#     MARGIN = 1, 
+#     FUN    = any
+#     )
+# 
+#   # Assign output vector to comparison network dataframe
+#   network_complete$near_cluster <- keep_edge
+#   
+#   # reduce to only edges within x distance from any cluster edge
+#   network_complete %>% 
+#     dplyr::filter(near_cluster)
+# }
+# 
+# cropComparisonNetwork(network, network_complete)
+```
+
 
 # Implement Parallel Methods
 ## Set up Cluster
@@ -186,7 +482,7 @@ cluster_functions <- c(
   "makeLinestring", "makeLinestringVector", "networkClusters",
   "secondsToPeriodTime", "compareParallelEdges", 
   "networkLinestringProcessing", "lineStringLength", "subset_lat_lon", 
-  "line_length"
+  "line_length", "cropComparisonNetwork"
 )
 cluster_variables <- c(cluster_data, cluster_functions)
 
@@ -235,10 +531,10 @@ network %>%
 ## Function
 ```{r}
 identifyParallelSegmentsPar(
-  network    = network.df, 
-  k          = 6, 
-  start_time = NA, 
-  verbose    = verbose
+  network      = network.df %>% dplyr::slice_sample(prop = 0.5), 
+  k            = 6, 
+  start_time   = NA, 
+  verbose      = 1,
+  log_progress = TRUE
 )
 ```
-

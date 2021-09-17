@@ -1,0 +1,184 @@
+starting worker pid=20688 on localhost:11039 at 22:42:40.359
+starting worker pid=15076 on localhost:11039 at 22:42:40.396
+starting worker pid=12536 on localhost:11039 at 22:42:40.416
+starting worker pid=2796 on localhost:11039 at 22:42:40.465
+starting worker pid=9804 on localhost:11039 at 22:42:40.497
+starting worker pid=7136 on localhost:11039 at 22:42:40.500
+starting worker pid=3032 on localhost:11039 at 22:42:40.567
+starting worker pid=9600 on localhost:11039 at 22:42:40.593
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 1 - Start:					00:00:06
+
+Attaching package: 'dplyr'
+
+Cluster simple features processing - 1 - Start:					00:00:06
+Norm/orth processing
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 2 - Start:					00:00:06
+Cluster simple features processing - 2 - Start:					00:00:06
+Norm/orth processing
+Cluster Sub-network processing - 3 - Start:					00:00:06
+Cluster simple features processing - 3 - Start:					00:00:06
+Norm/orth processing
+Cluster Sub-network processing - 4 - Start:					00:00:06
+Cluster simple features processing - 4 - Start:					00:00:06
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 6 - Start:					00:00:06
+Cluster simple features processing - 6 - Start:					00:00:06
+Norm/orth processing
+Cluster Sub-network processing - 5 - Start:					00:00:06
+Cluster simple features processing - 5 - Start:					00:00:06
+Norm/orth processing
+Cluster Sub-network processing - 7 - Start:					00:00:06
+Cluster simple features processing - 7 - Start:					00:00:07
+Norm/orth processing
+Cluster Sub-network processing - 8 - Start:					00:00:06
+Cluster simple features processing - 8 - Start:					00:00:07
+Norm/orth processing
+Cluster simple features processing - 2 - Complete:				00:00:10
+Cluster simple features processing - 3 - Complete:				00:00:10
+Cluster simple features processing - 1 - Complete:				00:00:10
+Cluster simple features processing - 4 - Complete:				00:00:10
+Reduce comparison network - latitude/longitude - 2 - Start:			00:00:10
+Reduce comparison network - latitude/longitude - 1 - Start:			00:00:10Reduce comparison network - latitude/longitude - 3 - Start:			00:00:10
+
+Reduce comparison network - latitude/longitude - 4 - Start:			00:00:10
+Cluster simple features processing - 6 - Complete:				00:00:10
+Cluster simple features processing - 5 - Complete:				00:00:10
+Reduce comparison network - latitude/longitude - 6 - Start:			00:00:10
+Reduce comparison network - latitude/longitude - 5 - Start:			00:00:11
+Reduce comparison network - latitude/longitude - 1 - Complete:		00:00:11
+Reduce comparison network - latitude/longitude - 3 - Complete:		00:00:11
+Reduce comparison network - latitude/longitude - 2 - Complete:		00:00:11
+Reduce comparison network - latitude/longitude - 4 - Complete:		00:00:11
+Cluster simple features processing - 7 - Complete:				00:00:11
+Cluster simple features processing - 8 - Complete:				00:00:11
+Reduce comparison network - latitude/longitude - 6 - Complete:		00:00:11
+Reduce comparison network - latitude/longitude - 7 - Start:			00:00:11
+Reduce comparison network - latitude/longitude - 8 - Start:			00:00:11
+Reduce comparison network - latitude/longitude - 5 - Complete:		00:00:11
+Reduce comparison network - latitude/longitude - 7 - Complete:		00:00:11
+Reduce comparison network - latitude/longitude - 8 - Complete:		00:00:11
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+In addition: Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Execution halted
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+In addition: Warning message:
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+package 'dplyr' was built under R version 4.0.5 
+In addition: Execution halted
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+In addition: ted
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+m connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Execution halted
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Execution halted
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+In addition: Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Execution halted
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+In addition: Warning message:
+ze(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+package 'dplyr' was built under R version 4.0.5 
+In addition: Execution halted
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Execution halted

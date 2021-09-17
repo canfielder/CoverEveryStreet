@@ -1,0 +1,136 @@
+starting worker pid=12816 on localhost:11802 at 22:38:56.750
+starting worker pid=20588 on localhost:11802 at 22:38:56.770
+starting worker pid=1604 on localhost:11802 at 22:38:56.825
+starting worker pid=19684 on localhost:11802 at 22:38:56.856
+starting worker pid=18860 on localhost:11802 at 22:38:56.884
+starting worker pid=9688 on localhost:11802 at 22:38:56.942
+starting worker pid=6804 on localhost:11802 at 22:38:56.981
+starting worker pid=10308 on localhost:11802 at 22:38:57.018
+
+Attaching package: 'dplyr'
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 3 - Start:					00:00:06
+Cluster simple features processing - 3 - Start:		00:00:07
+Norm/orth processing
+Cluster Sub-network processing - 4 - Start:					00:00:06
+Cluster simple features processing - 4 - Start:		00:00:07
+Norm/orth processing
+Cluster Sub-network processing - 5 - Start:					00:00:06
+Cluster simple features processing - 5 - Start:		00:00:07
+Norm/orth processing
+Cluster Sub-network processing - 7 - Start:					00:00:06
+Cluster simple features processing - 7 - Start:		00:00:07
+Norm/orth processing
+Cluster Sub-network processing - 6 - Start:					00:00:06
+Cluster simple features processing - 6 - Start:		00:00:07
+Norm/orth processing
+Cluster Sub-network processing - 8 - Start:					00:00:06
+Cluster simple features processing - 8 - Start:		00:00:07
+Cluster Sub-network processing - 2 - Start:					00:00:06
+Norm/orth processing
+Cluster Sub-network processing - 1 - Start:					00:00:06
+Cluster simple features processing - 2 - Start:		00:00:07
+Cluster simple features processing - 1 - Start:		00:00:07
+Norm/orth processing
+Norm/orth processing
+Cluster simple features processing - 3 - Complete:		00:00:10
+Cluster simple features processing - 5 - Complete:		00:00:10
+Reduce comparison network - latitude/longitude - 3 - Start:		00:00:10
+Cluster simple features processing - 4 - Complete:		00:00:11
+Cluster simple features processing - 6 - Complete:		00:00:11
+Reduce comparison network - latitude/longitude - 5 - Start:		00:00:11
+Reduce comparison network - latitude/longitude - 4 - Start:		00:00:11
+Reduce comparison network - latitude/longitude - 6 - Start:		00:00:11
+Cluster simple features processing - 1 - Complete:		00:00:11
+Cluster simple features processing - 8 - Complete:		00:00:11
+Cluster simple features processing - 2 - Complete:		00:00:11
+Cluster simple features processing - 7 - Complete:		00:00:11
+Reduce comparison network - latitude/longitude - 1 - Start:		00:00:11
+Reduce comparison network - latitude/longitude - 8 - Start:		00:00:11
+Reduce comparison network - latitude/longitude - 7 - Start:		00:00:11
+Reduce comparison network - latitude/longitude - 2 - Start:		00:00:11

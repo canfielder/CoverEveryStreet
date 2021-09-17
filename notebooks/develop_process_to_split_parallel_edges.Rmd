@@ -98,6 +98,8 @@ if (SUBSET_NETWORK){
 # Check Segments with Multiple Edges
 ## Generate Parallel Edge Pairs 
 ```{r}
+network.df
+
 parallel_edge_pairs <- network.df %>% 
   select(edge_id, segment_id, parallel_edges, parallel_segments) %>% 
   unnest(cols = parallel_segments) %>% 
@@ -150,33 +152,6 @@ parallel_segments.df <- segment_breakdown %>%
 parallel_segments.df %>% head(2)
 ```
 
-### Scratch Work
-```{r}
-df_test <- x %>%
-  filter(segment_id == "l0sztiy7lq")
-
-df_test
-
-long_id <- df_test %>% pull(segment_id)
-
-short_segments <- df_test %>% pull(parallel_segments) %>% unlist()
-
-short_segments
-
-segment_sets.df <- as.data.frame(
-  x = t(combn(short_segments, 2)) 
-  ) %>% 
-  mutate(long_segment = long_id) %>%
-  rename(
-    short_segment_1 = V1,
-    short_segment_2 = V2
-    ) %>% 
-  select(long_segment, everything())
-
-
-segment_sets.df
-```
-
 ### Function - List All Possible Short Segment Pairs
 ```{r}
 shortSegmentPairs <- function(segments.lst){
@@ -188,8 +163,6 @@ shortSegmentPairs <- function(segments.lst){
     short_segment_2 = V2
     )
 }
-
-short_segments <- df_test %>% pull(parallel_segments)
 ```
 
 
@@ -277,7 +250,7 @@ plotly::ggplotly(p)
 # Verify segments are adjacent
 verifyAdjacentSegments <- function(segment_1, segment_2){
   
-  segment_1_adj <- segment_map.v[segment_1][[1]]
+  segment_1_adj <- segment_map[segment_1][[1]]
   
   segment_2 %in% segment_1_adj
   
@@ -318,8 +291,6 @@ parallel_segments.df
 
 ### Remove Short Segments Which Are Not Adjacent
 ```{r}
-segment_map.v <- deframe(segment_map)
-
 parallel_segments.df <- parallel_segments.df %>% 
   mutate(
     short_is_adjacent = purrr::pmap_lgl(
@@ -331,19 +302,24 @@ parallel_segments.df <- parallel_segments.df %>%
       )
   ) %>% 
   filter(short_is_adjacent)
+
+parallel_segments.df
 ```
 
 ## Determine Slice Point on Long Segment
 ### Define Example Parameters
 Parkwood @ Barry
 ```{r}
-# Defined parameters of 
 s1 <- '2dx94g7bo2'
 s2 <- 'heyaz2jzyv'
 l_seg <- 'l0sztiy7lq'
 l_edge_id <- '769046'
 
-s3 <- intersect(segment_map.v[s1][[1]], segment_map.v[s2][[1]])
+s3 <- intersect(segment_map[s1][[1]], segment_map[s2][[1]])
+
+length(segment_map)
+
+length(unique(network.df$segment_id))
 ```
 
 ### Create Node and Edges Databases

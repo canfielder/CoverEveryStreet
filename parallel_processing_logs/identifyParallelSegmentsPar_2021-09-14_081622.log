@@ -1,0 +1,158 @@
+starting worker pid=14608 on localhost:11593 at 08:16:23.072
+starting worker pid=14616 on localhost:11593 at 08:16:23.105
+starting worker pid=11004 on localhost:11593 at 08:16:23.105
+starting worker pid=12692 on localhost:11593 at 08:16:23.119
+starting worker pid=11128 on localhost:11593 at 08:16:23.113
+starting worker pid=13896 on localhost:11593 at 08:16:23.136
+starting worker pid=16564 on localhost:11593 at 08:16:23.140
+starting worker pid=12412 on localhost:11593 at 08:16:23.224
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - Start:		00:00:20
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - Start:		00:00:22
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - Start:		00:00:24
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - Start:		00:00:26
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - Start:		00:00:28
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - Start:		00:00:30
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - Start:		00:00:33
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - Start:		00:00:36
+Norm/orth processing
+Crop complete network
+Crop complete network
+Crop complete network
+Crop complete network
+Crop complete network
+Crop complete network
+Crop complete network
+Crop complete network
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+In addition: Warning message:
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Execution halted
+In addition: Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+In addition: Execution halted
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+m connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+In addition: Execution halted
+Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+In addition: Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+In addition: Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Execution halted
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+In addition: Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Execution halted
+Execution halted
+Error in unserialize(node$con) : error reading from connection
+Calls: <Anonymous> ... doTryCatch -> recvData -> recvData.SOCKnode -> unserialize
+In addition: Warning message:
+package 'dplyr' was built under R version 4.0.5 
+Execution halted

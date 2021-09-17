@@ -1,0 +1,138 @@
+starting worker pid=22260 on localhost:11711 at 23:03:32.311
+starting worker pid=21608 on localhost:11711 at 23:03:32.329
+starting worker pid=22280 on localhost:11711 at 23:03:32.360
+starting worker pid=13220 on localhost:11711 at 23:03:32.409
+starting worker pid=5492 on localhost:11711 at 23:03:32.446
+starting worker pid=7500 on localhost:11711 at 23:03:32.472
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 1 - Start:				00:00:06
+Cluster simple features processing - 1 - Start:				00:00:06
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 2 - Start:				00:00:06
+Cluster simple features processing - 2 - Start:				00:00:07
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 3 - Start:				00:00:07
+Cluster simple features processing - 3 - Start:				00:00:08
+Norm/orth processing
+Cluster Sub-network processing - 4 - Start:				00:00:07
+Cluster simple features processing - 4 - Start:				00:00:08
+Norm/orth processing
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: 'dplyr'
+
+The following objects are masked from 'package:stats':
+
+    filter, lag
+
+The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union
+
+Cluster Sub-network processing - 5 - Start:				00:00:08
+Cluster simple features processing - 5 - Start:				00:00:09
+Norm/orth processing
+Cluster Sub-network processing - 6 - Start:				00:00:08
+Cluster simple features processing - 6 - Start:				00:00:09
+Norm/orth processing
+Cluster simple features processing - 1 - Complete:			00:00:29
+Reduce comparison network - latitude/longitude - 1 - Start:		00:00:30
+Cluster simple features processing - 2 - Complete:			00:00:30
+Reduce comparison network - latitude/longitude - 2 - Start:		00:00:31
+Cluster simple features processing - 3 - Complete:			00:00:31
+Cluster simple features processing - 4 - Complete:			00:00:31
+Reduce comparison network - latitude/longitude - 3 - Start:		00:00:32
+Reduce comparison network - latitude/longitude - 4 - Start:		00:00:32
+Cluster simple features processing - 5 - Complete:			00:00:32
+Cluster simple features processing - 6 - Complete:			00:00:32
+Reduce comparison network - latitude/longitude - 5 - Start:		00:00:33
+Reduce comparison network - latitude/longitude - 1 - Complete:		00:00:33
+Reduce comparison network - simple features - 1 - Start:		00:00:33
+Number of Cluster Edges - 1:					11173
+Number of Comparison Edges - 1:					30399
+Extract simple feature geometries:						00:00:33
+Identify Edges within defined distance of cluster network:			00:00:33
+Reduce comparison network - latitude/longitude - 6 - Start:		00:00:33
+Reduce comparison network - latitude/longitude - 2 - Complete:		00:00:34
+Reduce comparison network - simple features - 2 - Start:		00:00:34
+Number of Cluster Edges - 2:					11328
+Number of Comparison Edges - 2:					43013
+Extract simple feature geometries:						00:00:34
+Identify Edges within defined distance of cluster network:			00:00:34
+Reduce comparison network - latitude/longitude - 3 - Complete:		00:00:34
+Reduce comparison network - simple features - 3 - Start:		00:00:34
+Number of Cluster Edges - 3:					13718
+Number of Comparison Edges - 3:					32813
+Extract simple feature geometries:						00:00:34
+Identify Edges within defined distance of cluster network:			00:00:34
+Reduce comparison network - latitude/longitude - 4 - Complete:		00:00:35
+Reduce comparison network - simple features - 4 - Start:		00:00:35
+Number of Cluster Edges - 4:					12886
+Number of Comparison Edges - 4:					37777
+Extract simple feature geometries:						00:00:35
+Identify Edges within defined distance of cluster network:			00:00:35
+Reduce comparison network - latitude/longitude - 5 - Complete:		00:00:35
+Reduce comparison network - simple features - 5 - Start:		00:00:35
+Number of Cluster Edges - 5:					13951
+Number of Comparison Edges - 5:					34839
+Extract simple feature geometries:						00:00:35
+Identify Edges within defined distance of cluster network:			00:00:35
+Reduce comparison network - latitude/longitude - 6 - Complete:		00:00:36
+Reduce comparison network - simple features - 6 - Start:		00:00:36
+Number of Cluster Edges - 6:					17028
+Number of Comparison Edges - 6:					37402
+Extract simple feature geometries:						00:00:36
+Identify Edges within defined distance of cluster network:			00:00:36

@@ -15,7 +15,7 @@
 #' @param proj Boolean indicating whether to calculate the line length as a 
 #'  3D projection (True) or 2D line (False)
 #' @param crs Projection code (numeric)
-#' @param m_to_deg_conv Assumption for convering latitude/longitude degrees 
+#' @param m_to_deg_conv Assumption for covering latitude/longitude degrees 
 #'  to meters (numeric).
 #'
 #' @return Length of the line, in meters, defined by Point 1 and 2.
