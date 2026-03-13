@@ -65,8 +65,8 @@ test:
 # ── Data management ───────────────────────────────────────────────────────────
 cache-clear:
 	@echo "🗑️  Clearing cached street networks and session data..."
-	rm -rf data/networks/*.parquet data/networks/*.gpkg
-	rm -rf data/sessions/*.parquet
+	rm -rf data/networks/*.gpkg
+	rm -rf data/sessions/*.csv
 	@echo "✅ Cache cleared. Networks will be re-fetched on next launch."
 
 # ── Cleanup ───────────────────────────────────────────────────────────────────

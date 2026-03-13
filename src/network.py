@@ -28,7 +28,7 @@ from config import (
     OSM_NETWORK_TYPE,
     WGS84_CRS,
 )
-from paths import NETWORK_CACHE_DIR
+from src.paths import NETWORK_CACHE_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ def _cache_key(place_name: str | None, bbox: tuple[float, float, float, float] |
 
 
 def _cache_path(key: str) -> Path:
-    return NETWORK_CACHE_DIR / f"network_{key}.parquet"
+    return NETWORK_CACHE_DIR / f"network_{key}.gpkg"
 
 
 def _cache_age_days(key: str) -> float | None:
@@ -74,7 +74,7 @@ def invalidate_cache(key: str) -> None:
 def list_cached_networks() -> list[dict]:
     """Return metadata for all cached networks."""
     results = []
-    for f in NETWORK_CACHE_DIR.glob("network_*.parquet"):
+    for f in NETWORK_CACHE_DIR.glob("network_*.gpkg"):
         age = _cache_age_days(f.stem.removeprefix("network_"))
         results.append({"file": f.name, "age_days": round(age, 1) if age else None})
     return results
@@ -92,14 +92,27 @@ def _build_network_gdf(G) -> gpd.GeoDataFrame:
     _, edges = ox.graph_to_gdfs(G)
     gdf = edges.reset_index()
 
-    # Filter excluded highway types
-    # highway column can be a string or a list of strings
-    def _is_excluded(hw) -> bool:
-        if isinstance(hw, list):
-            return all(t in EXCLUDE_HIGHWAY_TYPES for t in hw)
-        return hw in EXCLUDE_HIGHWAY_TYPES
+    # Filter excluded highway types.
+    # Special case: service roads that have a name are real streets (some named
+    # residential streets are tagged highway=service in OSM) — keep them.
+    # Only filter unnamed service roads (driveways, parking aisles, alleys).
+    import pandas as pd
 
-    mask_keep = ~gdf["highway"].apply(_is_excluded)
+    def _is_excluded(row) -> bool:
+        hw = row["highway"]
+        hw_types = hw if isinstance(hw, list) else [hw]
+        if not all(t in EXCLUDE_HIGHWAY_TYPES for t in hw_types):
+            return False
+        if all(t == "service" for t in hw_types):
+            name = row["name"]
+            if isinstance(name, list):
+                name = name[0] if name else None
+            # pd.notna required — np.nan is truthy in Python so `if name` alone fails
+            has_name = pd.notna(name) and bool(str(name).strip())
+            return not has_name  # keep named, exclude unnamed
+        return True
+
+    mask_keep = ~gdf.apply(_is_excluded, axis=1)
     gdf = gdf[mask_keep].copy()
 
     # Stable segment ID from OSM node IDs (reproducible across fetches)
@@ -122,6 +135,11 @@ def _build_network_gdf(G) -> gpd.GeoDataFrame:
     gdf = gdf.set_crs(WGS84_CRS, allow_override=True)
 
     logger.info("Network built: %d segments, %.1f km total", len(gdf), gdf["length_m"].sum() / 1000)
+
+    # Group edges into blocks (named street sections between cross streets)
+    from src.block_builder import build_blocks
+    gdf = build_blocks(gdf)
+
     return gdf
 
 
@@ -182,11 +200,11 @@ def get_or_fetch_network(
 
     if cache_exists(key):
         logger.info("Loading network from cache: %s", path)
-        gdf = gpd.read_parquet(path)
+        gdf = gpd.read_file(path)
         return gdf, key
 
     logger.info("Cache miss — fetching from OSM")
     gdf = fetch_network(place_name=place_name, bbox=bbox)
-    gdf.to_parquet(path, index=False)
+    gdf.to_file(path, driver="GPKG")
     logger.info("Network cached to: %s", path)
     return gdf, key

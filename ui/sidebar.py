@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from config import DEFAULT_SNAP_DISTANCE_M
+from config import DEFAULT_COVERAGE_THRESHOLD, DEFAULT_SNAP_DISTANCE_M
 
 
 def render_sidebar() -> dict:
@@ -89,6 +89,19 @@ def render_sidebar() -> dict:
             ),
         )
 
+        coverage_threshold = st.slider(
+            "Segment coverage required (%)",
+            min_value=50,
+            max_value=100,
+            value=int(DEFAULT_COVERAGE_THRESHOLD * 100),
+            step=5,
+            help=(
+                "How much of a street segment must fall within the snap distance "
+                "to count as fully walked. 95% means you need to have covered "
+                "nearly the whole block — lower this if segments are being missed."
+            ),
+        )
+
         with st.expander("Advanced"):
             force_refresh = st.checkbox(
                 "Re-download street network from OSM",
@@ -119,6 +132,7 @@ def render_sidebar() -> dict:
         "bbox": bbox,
         "uploaded_files": uploaded_files or [],
         "snap_distance": snap_distance,
+        "coverage_threshold": coverage_threshold / 100,
         "force_refresh": force_refresh,
         "reset_walks": reset_walks,
         "process": process,

@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).parent
+ROOT_DIR = Path(__file__).parent.parent  # src/ -> project root
 DATA_DIR = ROOT_DIR / "data"
 NETWORK_CACHE_DIR = DATA_DIR / "networks"
 SESSION_DIR = DATA_DIR / "sessions"

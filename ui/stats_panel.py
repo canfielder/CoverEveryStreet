@@ -16,33 +16,43 @@ def render_stats(summary: dict, tracks: list[dict] | None = None) -> None:
                     walked_km, total_km, unwalked_km.
         tracks:  Parsed track dicts (optional) for the history table.
     """
-    pct = summary["pct_walked"]
+    pct_blocks = summary["pct_walked"]
+    pct_streets = summary.get("pct_streets", 0.0)
 
     # ── Headline metrics ──────────────────────────────────────────────────────
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric(
-        "Streets Walked",
-        f"{summary['walked_segments']:,}",
-        f"of {summary['total_segments']:,} total",
+        "Streets Completed",
+        f"{summary.get('walked_streets', 0):,}",
+        f"{pct_streets:.1f}% of {summary.get('total_streets', 0):,}",
     )
     c2.metric(
-        "Distance Walked",
-        f"{summary['walked_km']:.1f} km",
-        f"{summary['unwalked_km']:.1f} km remaining",
+        "Blocks Walked",
+        f"{summary['walked_segments']:,}",
+        f"{pct_blocks:.1f}% of {summary['total_segments']:,}",
     )
     c3.metric(
-        "Coverage",
-        f"{pct:.1f}%",
+        "Distance Walked",
+        f"{summary['walked_km']:,.1f} km",
+        f"{summary['unwalked_km']:,.1f} km remaining",
     )
     c4.metric(
+        "Block Coverage",
+        f"{pct_blocks:.1f}%",
+    )
+    c5.metric(
         "Network Size",
-        f"{summary['total_km']:.1f} km",
+        f"{summary['total_km']:,.1f} km",
     )
 
-    # ── Progress bar ──────────────────────────────────────────────────────────
+    # ── Progress bars ─────────────────────────────────────────────────────────
     st.progress(
-        min(pct / 100, 1.0),
-        text=f"**{pct:.1f}%** of streets walked",
+        min(pct_streets / 100, 1.0),
+        text=f"**{pct_streets:.1f}%** of streets fully completed",
+    )
+    st.progress(
+        min(pct_blocks / 100, 1.0),
+        text=f"**{pct_blocks:.1f}%** of blocks walked",
     )
 
     # ── Walk history table ────────────────────────────────────────────────────

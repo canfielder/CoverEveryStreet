@@ -42,3 +42,22 @@ vignettes/*.pdf
 data/tl_2019_us_zcta510
 
 data/network_*.RDS
+renv/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# uv
+uv.lock
+
+# Streamlit
+.streamlit/
+
+# Cached network and session data (large generated files)
+data/networks/*.gpkg
+data/sessions/*.csv
