@@ -58,6 +58,16 @@ uv.lock
 # Streamlit
 .streamlit/
 
-# Cached network and session data (large generated files)
+# osmnx query cache
+cache/
+
+# Generated / large local data — not committed
 data/networks/*.gpkg
-data/sessions/*.csv
+data/walks.db
+data/gpx_processed/*.gpx
+
+# Inbox contents — not committed (personal GPX files)
+data/gpx_inbox/*.gpx
+
+# Published snapshot IS committed (used by viewer app)
+!data/published/*.gpkg

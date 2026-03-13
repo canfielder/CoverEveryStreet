@@ -23,9 +23,9 @@ Algorithm overview:
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from collections import defaultdict
-from itertools import combinations
 
 import geopandas as gpd
 import networkx as nx
@@ -98,8 +98,11 @@ def build_blocks(network_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     # For each street name, build a subgraph where boundary nodes are replaced
     # by per-edge virtual copies. This splits the graph at cross-street nodes
     # so each connected component is exactly one block.
+    #
+    # Block IDs are derived from a hash of the sorted constituent segment IDs
+    # so they are stable across network re-fetches as long as the underlying
+    # OSM node IDs don't change.
     edge_to_block: dict[str, str] = {}
-    block_counter = 0
 
     for name, name_gdf in gdf.groupby("name"):
         EG = nx.Graph()
@@ -113,8 +116,11 @@ def build_blocks(network_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
         )
 
         for component in nx.connected_components(EG):
-            block_id = f"b{block_counter:07d}"
-            block_counter += 1
+            seg_ids = sorted(
+                data["segment_id"]
+                for _, _, data in EG.subgraph(component).edges(data=True)
+            )
+            block_id = "b_" + hashlib.md5("|".join(seg_ids).encode()).hexdigest()[:12]
             for u, v, data in EG.subgraph(component).edges(data=True):
                 edge_to_block[data["segment_id"]] = block_id
 
