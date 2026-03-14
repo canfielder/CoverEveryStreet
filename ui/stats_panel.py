@@ -5,8 +5,6 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
-from config import ACTIVITY_COLORS, COLOR_FALLBACK
-
 
 def render_metrics(
     network_gdf,
@@ -74,6 +72,11 @@ def render_detail_tables(
         st.dataframe(pd.DataFrame(cat_rows), use_container_width=True, hide_index=True)
 
     # ── Activity history ──────────────────────────────────────────────────────
+    render_activity_table(activities)
+
+
+def render_activity_table(activities: list[dict]) -> None:
+    """Activity history table — used by the editor Activities tab."""
     if activities:
         st.subheader("Activity history")
         rows = []
@@ -86,11 +89,7 @@ def render_detail_tables(
                 "Companions": ", ".join(companions) if companions else "Solo",
                 "File": a.get("filename", "—"),
             })
-        st.dataframe(
-            pd.DataFrame(rows),
-            use_container_width=True,
-            hide_index=True,
-        )
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
 
 def render_stats(

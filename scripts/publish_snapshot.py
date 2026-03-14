@@ -56,14 +56,25 @@ def publish(
     )
 
     PUBLISHED_DIR.mkdir(parents=True, exist_ok=True)
+    history_dir = PUBLISHED_DIR / "history"
+    history_dir.mkdir(exist_ok=True)
+
+    now = datetime.now(tz=timezone.utc)
+    timestamp = now.strftime("%Y%m%d_%H%M%S")
+
     out_path = PUBLISHED_DIR / "map_data.gpkg"
     gdf.to_file(out_path, driver="GPKG")
     print(f"Wrote: {out_path}")
 
+    # Timestamped archive copy for local rollback
+    archive_path = history_dir / f"map_data_{timestamp}.gpkg"
+    gdf.to_file(archive_path, driver="GPKG")
+    print(f"Archived: {archive_path}")
+
     n_walked = gdf["_walked"].sum()
     total = len(gdf["block_id"].unique())
     meta = {
-        "published_at": datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "published_at": now.strftime("%Y-%m-%d %H:%M UTC"),
         "n_walked_blocks": int(n_walked),
         "total_blocks": int(total),
         "pct_walked": round(n_walked / total * 100, 1) if total else 0.0,
@@ -71,8 +82,14 @@ def publish(
     }
     meta_path = PUBLISHED_DIR / "meta.json"
     meta_path.write_text(json.dumps(meta, indent=2))
+
+    # Timestamped archive copy of meta
+    archive_meta = history_dir / f"meta_{timestamp}.json"
+    archive_meta.write_text(json.dumps(meta, indent=2))
+
     print(f"Wrote: {meta_path}")
     print(f"Summary: {n_walked}/{total} blocks walked ({meta['pct_walked']}%)")
+    print(f"\nTo roll back: cp {archive_path} {out_path}")
 
 
 def _parse_bbox(s: str) -> tuple:

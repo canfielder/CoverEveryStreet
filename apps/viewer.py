@@ -12,6 +12,11 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
+from pathlib import Path
+
+# Ensure project root is on sys.path so src.*, config resolve correctly
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import folium
 import geopandas as gpd
@@ -21,7 +26,6 @@ from streamlit_folium import st_folium
 from config import (
     ACTIVITY_COLORS,
     COLOR_FALLBACK,
-    COLOR_GPX_TRACK,
     COLOR_UNWALKED,
     MAP_TILES,
     MAP_ZOOM_START,
@@ -111,7 +115,8 @@ def main() -> None:
         walked = walked.copy()
         walked["_color"] = walked.apply(_edge_color, axis=1)
         for color, group in walked.groupby("_color"):
-            _fields = [c for c in ["block_id", "name", "block_length_m", "_walk_date", "_activity_type"] if c in group.columns]
+            _all = ["block_id", "name", "block_length_m", "_walk_date", "_activity_type"]
+            _fields = [c for c in _all if c in group.columns]
             folium.GeoJson(
                 group.__geo_interface__,
                 name=_color_label(color),

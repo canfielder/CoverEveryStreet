@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import folium
 import geopandas as gpd
-import pandas as pd
 
 from config import (
     ACTIVITY_COLORS,
@@ -28,6 +27,7 @@ def build_map(
     network_gdf: gpd.GeoDataFrame,
     walked_blocks: dict[str, dict],
     tracks: list[dict] | None = None,
+    color_by_activity: bool = True,
 ) -> folium.Map:
     """
     Build a Folium map showing block coverage.
@@ -71,8 +71,12 @@ def build_map(
     # ── Unwalked layer ────────────────────────────────────────────────────────
     unwalked = gdf[~gdf["_walked"]]
     if not unwalked.empty:
-        _fields = [c for c in ["block_id", "name", "block_length_m", "highway"] if c in unwalked.columns]
-        _aliases = {"block_id": "Block ID", "name": "Street", "block_length_m": "Block length (m)", "highway": "Type"}
+        _cols = ["block_id", "name", "block_length_m", "highway"]
+        _fields = [c for c in _cols if c in unwalked.columns]
+        _aliases = {
+            "block_id": "Block ID", "name": "Street",
+            "block_length_m": "Block length (m)", "highway": "Type",
+        }
         folium.GeoJson(
             unwalked.__geo_interface__,
             name="Unwalked Streets",
@@ -89,25 +93,41 @@ def build_map(
             ),
         ).add_to(m)
 
-    # ── Walked layers (one FeatureGroup per color category) ───────────────────
+    # ── Walked layers ─────────────────────────────────────────────────────────
     walked = gdf[gdf["_walked"]].copy()
     if not walked.empty:
-        walked["_color"] = walked.apply(_edge_color, axis=1)
+        _all = ["block_id", "name", "block_length_m", "_walk_date", "_activity_type", "_companions"]
+        _fields = [c for c in _all if c in walked.columns]
+        _aliases = {
+            "block_id": "Block ID", "name": "Street",
+            "block_length_m": "Block length (m)",
+            "_walk_date": "First walked", "_activity_type": "Activity",
+            "_companions": "Companions",
+        }
 
-        # Group by color to minimize number of GeoJson layers
-        for color, group in walked.groupby("_color"):
-            category = _color_label(color)
-            _fields = [c for c in ["block_id", "name", "block_length_m", "_walk_date", "_activity_type", "_companions"] if c in group.columns]
-            _aliases = {
-                "block_id": "Block ID", "name": "Street",
-                "block_length_m": "Block length (m)",
-                "_walk_date": "First walked", "_activity_type": "Activity",
-                "_companions": "Companions",
-            }
+        if color_by_activity:
+            walked["_color"] = walked.apply(_edge_color, axis=1)
+            for color, group in walked.groupby("_color"):
+                folium.GeoJson(
+                    group.__geo_interface__,
+                    name=_color_label(color),
+                    style_function=lambda _, c=color: {"color": c, "weight": 4, "opacity": 0.9},
+                    highlight_function=lambda _: _HIGHLIGHT,
+                    tooltip=folium.GeoJsonTooltip(
+                        fields=_fields,
+                        aliases=[_aliases.get(f, f) for f in _fields],
+                    ),
+                    popup=folium.GeoJsonPopup(
+                        fields=_fields,
+                        aliases=[_aliases.get(f, f) for f in _fields],
+                    ),
+                ).add_to(m)
+        else:
+            walked_color = ACTIVITY_COLORS.get(("walk", frozenset()), "#22c55e")
             folium.GeoJson(
-                group.__geo_interface__,
-                name=category,
-                style_function=lambda _, c=color: {"color": c, "weight": 4, "opacity": 0.9},
+                walked.__geo_interface__,
+                name="Walked Streets",
+                style_function=lambda _: {"color": walked_color, "weight": 4, "opacity": 0.9},
                 highlight_function=lambda _: _HIGHLIGHT,
                 tooltip=folium.GeoJsonTooltip(
                     fields=_fields,

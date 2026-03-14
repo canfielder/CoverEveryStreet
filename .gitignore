@@ -71,4 +71,6 @@ data/gpx_inbox/*.gpx
 
 # Published snapshot IS committed (used by viewer app)
 !data/published/*.gpkg
+# History archives are local-only rollback — not committed
+data/published/history/
 !data/published/meta.json

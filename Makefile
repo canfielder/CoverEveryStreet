@@ -1,7 +1,6 @@
-.PHONY: help install install-dev sync lock launch lint test clean cache-clear
+.PHONY: help install install-dev sync lock editor viewer launch publish lint test clean cache-clear
 
 # ── Variables ─────────────────────────────────────────────────────────────────
-APP       := app.py
 VENV      := .venv
 PYTHON    := $(VENV)/bin/python
 UV        := uv
@@ -14,7 +13,10 @@ help:
 	@echo "  make install-dev   🔧 Create venv and install dependencies (dev + prod)"
 	@echo "  make sync          🔄 Sync venv to match pyproject.toml (uv sync)"
 	@echo "  make lock          🔒 Regenerate uv.lock from pyproject.toml"
-	@echo "  make launch        🚀 Launch the Streamlit app"
+	@echo "  make editor        ✏️  Launch the editor app (local)"
+	@echo "  make viewer        🗺️  Launch the viewer app (local preview)"
+	@echo "  make launch        🚀 Launch the editor (alias for make editor)"
+	@echo "  make publish       📸 Publish map snapshot  (PLACE=\"Charlotte, NC\")"
 	@echo "  make lint          🧹 Lint and format with ruff"
 	@echo "  make test          🧪 Run tests with pytest"
 	@echo "  make cache-clear   🗑️  Delete cached street networks and session data"
@@ -45,10 +47,26 @@ lock:
 	@echo "✅ Lock file updated."
 
 # ── App ───────────────────────────────────────────────────────────────────────
-launch:
-	@echo "🚀 Launching Walk Every Street Streamlit app..."
+editor:
+	@echo "✏️  Launching Walk Every Street Editor..."
 	@echo "   Open http://localhost:8501 in your browser"
-	$(UV) run streamlit run $(APP)
+	$(UV) run streamlit run apps/editor.py
+
+viewer:
+	@echo "🗺️  Launching Walk Every Street Viewer..."
+	@echo "   Open http://localhost:8501 in your browser"
+	$(UV) run streamlit run apps/viewer.py
+
+launch: editor
+
+# ── Publish ───────────────────────────────────────────────────────────────────
+PLACE ?= Charlotte, North Carolina
+
+publish:
+	@echo "📸 Publishing map snapshot for: $(PLACE)"
+	$(UV) run python -m scripts.publish_snapshot --place "$(PLACE)"
+	@echo "✅ Snapshot written to data/published/"
+	@echo "   Commit with: git add data/published/ && git commit -m 'publish map snapshot'"
 
 # ── Code quality ──────────────────────────────────────────────────────────────
 lint:
