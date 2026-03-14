@@ -8,7 +8,8 @@ Data flow:
   1. Init database (creates tables if needed).
   2. Sidebar: area selection + settings.
   3. Load street network from disk cache or fetch fresh from OSM.
-  4. Scan GPX inbox for new files → show pending panel for user review.
+  4. Scan GPX inbox for new files (cached in session_state — only re-scans on
+     page load or after processing, not on every map click).
   5. After processing, fetch walked blocks from DB (date-filtered).
   6. Render single-color Folium map + Activities tab.
 """
@@ -92,8 +93,10 @@ def main() -> None:
         "block_count": n_unique_blocks,
     }
 
-    # ── Inbox scan ─────────────────────────────────────────────────────────────
-    pending = scan_inbox()
+    # ── Inbox scan (cached — skip on map click reruns) ─────────────────────────
+    if "pending" not in st.session_state:
+        st.session_state["pending"] = scan_inbox()
+    pending = st.session_state["pending"]
 
     if pending:
         render_pending_panel(

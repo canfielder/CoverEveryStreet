@@ -114,6 +114,7 @@ def render_pending_panel(
     progress.empty()
     if ingested:
         st.success(f"✅ Ingested {ingested} activity/activities. Refreshing map…")
+        st.session_state.pop("pending", None)  # force re-scan on next run
         st.rerun()
 
     return ingested
