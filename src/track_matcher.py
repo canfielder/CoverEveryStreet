@@ -1,130 +1,121 @@
 """
 GPS track-to-block matching.
 
-Matches GPS tracks to street blocks (not individual edges). A block is
-marked as walked only if the fraction of the block's total length that
-falls within snap_distance_m of the track meets coverage_threshold.
-When a block is walked, ALL of its edges are marked walked.
+Matches a GPS track to street blocks. For each block, computes the
+coverage ratio (0.0–1.0): fraction of the block's total length that
+falls within snap_distance_m of the track.
+
+Returns (block_id, activity_id, coverage_ratio, "auto") tuples ready
+for bulk-insert into block_walks.
 """
 
 from __future__ import annotations
 
 import logging
 from collections import defaultdict
-from datetime import datetime
 
 import geopandas as gpd
-import numpy as np
 import shapely
 
-from config import DEFAULT_COVERAGE_THRESHOLD, DEFAULT_SNAP_DISTANCE_M, METRIC_CRS, WGS84_CRS
+from config import DEFAULT_SNAP_DISTANCE_M, METRIC_CRS, WGS84_CRS
 
 logger = logging.getLogger(__name__)
 
 
-def match_tracks_to_segments(
+def match_track_to_blocks(
     network_gdf: gpd.GeoDataFrame,
-    tracks: list[dict],
+    track: dict,
+    activity_id: int,
     snap_distance_m: float = DEFAULT_SNAP_DISTANCE_M,
-    coverage_threshold: float = DEFAULT_COVERAGE_THRESHOLD,
-) -> gpd.GeoDataFrame:
+) -> list[tuple[str, int, float, str]]:
     """
-    Mark street edges as walked based on block-level GPS coverage.
-
-    Algorithm:
-      1. Project network and tracks to EPSG:3857 (metres).
-      2. Build a Shapely STRtree spatial index over all edge geometries.
-      3. For each track, buffer the track line by snap_distance_m.
-      4. Query the STRtree for candidate edges that intersect the buffer.
-      5. For each candidate edge, compute the length of the edge that
-         falls inside the buffer and accumulate it per block.
-      6. For each block where covered_length / block_length >= threshold,
-         mark ALL edges in that block as walked.
+    Match a single GPS track against all blocks in the network.
 
     Args:
-        network_gdf:        Edge GDF with block_id and block_length_m columns.
-        tracks:             Parsed track dicts from src.gpx_parser.
-        snap_distance_m:    Buffer radius in metres around the GPS track.
-        coverage_threshold: Fraction of block length (0–1) required to count
-                            as walked. Default 0.95 (95%).
+        network_gdf:     Edge GDF with block_id and block_length_m columns.
+        track:           Parsed track dict from src.gpx_parser.
+        activity_id:     DB id for the activity owning this track.
+        snap_distance_m: Buffer radius in metres around the GPS track.
 
     Returns:
-        network_gdf with new columns:
-            walked      (bool)
-            walk_date   (datetime | None)
-            walk_count  (int)
+        List of (block_id, activity_id, coverage_ratio, "auto") tuples
+        for every block where coverage_ratio > 0.
     """
-    if not tracks:
-        result = network_gdf.copy()
-        result["walked"] = False
-        result["walk_date"] = None
-        result["walk_count"] = 0
-        return result
-
-    # Project to metric CRS for accurate distance calculations
+    # Project network to metric CRS
     net_proj = network_gdf.to_crs(METRIC_CRS)
     geoms = net_proj.geometry.values
     block_ids = network_gdf["block_id"].values
     block_lengths = network_gdf["block_length_m"].values
 
-    # Build positional index: block_id → list of row indices into geoms
-    block_to_indices: dict[str, list[int]] = defaultdict(list)
+    # block_id → representative block_length_m (all edges in a block share the same value)
+    block_length_map: dict[str, float] = {}
     for i, bid in enumerate(block_ids):
-        block_to_indices[bid].append(i)
+        if bid not in block_length_map:
+            block_length_map[bid] = float(block_lengths[i])
 
-    # Build spatial index once for all edges
+    # Spatial index over all edge geometries
     tree = shapely.STRtree(geoms)
 
-    n = len(network_gdf)
-    walk_count = np.zeros(n, dtype=int)
-    walk_dates: list[datetime | None] = [None] * n
+    # Project track
+    track_proj = (
+        gpd.GeoSeries([track["track_line"]], crs=WGS84_CRS)
+        .to_crs(METRIC_CRS)
+        .iloc[0]
+    )
+    track_buffer = track_proj.buffer(snap_distance_m)
 
-    for track in tracks:
-        start_time = track.get("start_time")
+    # Accumulate covered length per block
+    block_covered: dict[str, float] = defaultdict(float)
+    for idx in tree.query(track_buffer, predicate="intersects"):
+        seg = geoms[idx]
+        if seg.length == 0:
+            continue
+        covered = seg.intersection(track_buffer).length
+        if covered > 0:
+            block_covered[block_ids[idx]] += covered
 
-        # Project track to metric CRS
-        track_proj = (
-            gpd.GeoSeries([track["track_line"]], crs=WGS84_CRS)
-            .to_crs(METRIC_CRS)
-            .iloc[0]
+    # Build result tuples — include ALL blocks with any coverage > 0
+    results: list[tuple[str, int, float, str]] = []
+    for bid, covered_length in block_covered.items():
+        total_length = block_length_map.get(bid, 0.0)
+        if total_length <= 0:
+            continue
+        ratio = min(covered_length / total_length, 1.0)
+        results.append((bid, activity_id, ratio, "auto"))
+
+    logger.debug(
+        "Activity %d: matched %d blocks (snap=%.0fm)",
+        activity_id, len(results), snap_distance_m,
+    )
+    return results
+
+
+def match_tracks_to_blocks(
+    network_gdf: gpd.GeoDataFrame,
+    tracks_with_ids: list[tuple[dict, int]],
+    snap_distance_m: float = DEFAULT_SNAP_DISTANCE_M,
+) -> list[tuple[str, int, float, str]]:
+    """
+    Match multiple GPS tracks against the network.
+
+    Args:
+        network_gdf:      Edge GDF with block_id and block_length_m columns.
+        tracks_with_ids:  List of (track_dict, activity_id) pairs.
+        snap_distance_m:  Buffer radius in metres.
+
+    Returns:
+        Flat list of (block_id, activity_id, coverage_ratio, "auto") tuples
+        for all tracks combined.
+    """
+    all_results: list[tuple[str, int, float, str]] = []
+    for track, activity_id in tracks_with_ids:
+        all_results.extend(
+            match_track_to_blocks(network_gdf, track, activity_id, snap_distance_m)
         )
 
-        # Buffer = "everywhere I walked"
-        track_buffer = track_proj.buffer(snap_distance_m)
-
-        # Accumulate covered length per block from candidate edges
-        block_covered: dict[str, float] = defaultdict(float)
-        candidate_idxs = tree.query(track_buffer, predicate="intersects")
-
-        for idx in candidate_idxs:
-            seg = geoms[idx]
-            if seg.length == 0:
-                continue
-            covered = seg.intersection(track_buffer).length
-            if covered > 0:
-                block_covered[block_ids[idx]] += covered
-
-        # Mark blocks that meet the coverage threshold
-        for bid, covered_length in block_covered.items():
-            indices = block_to_indices[bid]
-            # All edges in a block share the same block_length_m
-            total_length = block_lengths[indices[0]]
-            if total_length > 0 and covered_length / total_length >= coverage_threshold:
-                for idx in indices:
-                    walk_count[idx] += 1
-                    if start_time is not None:
-                        if walk_dates[idx] is None or start_time < walk_dates[idx]:
-                            walk_dates[idx] = start_time
-
-    result = network_gdf.copy()
-    result["walked"] = walk_count > 0
-    result["walk_count"] = walk_count
-    result["walk_date"] = walk_dates
-
-    walked_blocks = len({bid for i, bid in enumerate(block_ids) if walk_count[i] > 0})
-    walked_km = result.loc[result["walked"], "length_m"].sum() / 1000
+    walked_blocks = len({r[0] for r in all_results})
     logger.info(
-        "Walked %d blocks (%.1f km) from %d track(s) | snap=%.0fm threshold=%.0f%%",
-        walked_blocks, walked_km, len(tracks), snap_distance_m, coverage_threshold * 100,
+        "Matched %d track(s) → %d block assignments | snap=%.0fm",
+        len(tracks_with_ids), walked_blocks, snap_distance_m,
     )
-    return result
+    return all_results

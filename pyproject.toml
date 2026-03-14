@@ -18,6 +18,7 @@ dependencies = [
     "folium>=0.15",
     "pandas>=2.0",
     "fiona>=1.9",
+    "fit2gpx>=0.0.7",
 ]
 
 [project.optional-dependencies]

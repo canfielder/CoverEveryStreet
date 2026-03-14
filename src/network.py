@@ -24,7 +24,6 @@ import osmnx as ox
 from config import (
     EXCLUDE_HIGHWAY_TYPES,
     METRIC_CRS,
-    NETWORK_CACHE_TTL_DAYS,
     OSM_NETWORK_TYPE,
     WGS84_CRS,
 )
@@ -60,8 +59,7 @@ def _cache_age_days(key: str) -> float | None:
 
 
 def cache_exists(key: str) -> bool:
-    age = _cache_age_days(key)
-    return age is not None and age < NETWORK_CACHE_TTL_DAYS
+    return _cache_path(key).exists()
 
 
 def invalidate_cache(key: str) -> None:

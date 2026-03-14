@@ -291,14 +291,19 @@ def get_block_assignments(block_id: str, path: Path = DB_PATH) -> list[dict]:
     with _db(path) as conn:
         rows = conn.execute(
             """SELECT bw.activity_id, bw.coverage_ratio, bw.source,
-                      a.track_name, a.start_time, a.activity_type, a.companions
+                      a.filename, a.track_name, a.start_time, a.activity_type, a.companions
                FROM block_walks bw
                JOIN activities a ON a.id = bw.activity_id
                WHERE bw.block_id = ?
                ORDER BY a.start_time""",
             (block_id,),
         ).fetchall()
-    return [dict(r) for r in rows]
+    result = []
+    for r in rows:
+        d = dict(r)
+        d["companions"] = json.loads(d["companions"] or "[]")
+        result.append(d)
+    return result
 
 
 # ── Network change reconciliation ─────────────────────────────────────────────
