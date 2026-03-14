@@ -1,0 +1,9 @@
+streamlit>=1.32
+streamlit-folium>=0.18
+osmnx>=1.9
+geopandas>=0.14
+shapely>=2.0
+gpxpy>=1.6
+folium>=0.15
+pandas>=2.0
+fiona>=1.9
