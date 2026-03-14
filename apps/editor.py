@@ -160,7 +160,10 @@ def main() -> None:
         selected_block_id = st.session_state.get("selected_block_id")
         with col_right:
             if selected_block_id:
-                render_block_inspector(selected_block_id, network_gdf, activities, walked_blocks)
+                render_block_inspector(
+                    selected_block_id, network_gdf, activities, walked_blocks,
+                    coverage_threshold=cfg["coverage_threshold"],
+                )
             else:
                 st.caption("Click a block on the map to inspect it.")
 

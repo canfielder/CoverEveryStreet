@@ -28,6 +28,7 @@ def render_block_inspector(
     network_gdf: gpd.GeoDataFrame,
     activities: list[dict],
     walked_blocks: dict[str, dict],
+    coverage_threshold: float = 0.80,
 ) -> None:
     """Render the block inspector in the right column."""
 
@@ -43,7 +44,7 @@ def render_block_inspector(
 
     col_title, col_close = st.columns([5, 1])
     with col_title:
-        st.markdown(f"**Block Inspector**")
+        st.markdown("**Block Inspector**")
         st.caption(f"{block_name}  ·  {block_id}" + (f"  ·  {block_len:.0f} m" if block_len else ""))
     with col_close:
         if st.button("✕", key="inspector_close", help="Close inspector"):
@@ -51,14 +52,25 @@ def render_block_inspector(
             st.rerun()  # fragment-only: UI change only
 
     # ── Existing assignments ──────────────────────────────────────────────────
-    assignments = db.get_block_assignments(block_id)
+    all_assignments = db.get_block_assignments(block_id)
+    assignments = [a for a in all_assignments if a["coverage_ratio"] >= coverage_threshold]
+    partial_matches = sorted(
+        [a for a in all_assignments if a["coverage_ratio"] < coverage_threshold],
+        key=lambda a: a["coverage_ratio"],
+        reverse=True,
+    )
 
     if assignments:
         st.markdown("**Assignments**")
         for asgn in assignments:
             _render_assignment_row(block_id, asgn)
+    elif partial_matches:
+        st.markdown("**Partial matches**")
+        st.caption(f"Below {coverage_threshold * 100:.0f}% threshold — click Assign to confirm.")
+        for asgn in partial_matches:
+            _render_partial_match_row(block_id, asgn)
     else:
-        st.caption("No activities assigned to this block yet.")
+        st.caption("No activities matched this block.")
 
     st.divider()
 
@@ -111,6 +123,23 @@ def _render_assignment_row(block_id: str, asgn: dict) -> None:
     with col_btn:
         if st.button("Remove", key=f"remove_{block_id}_{asgn['activity_id']}"):
             db.remove_block_walk(block_id, asgn["activity_id"], source)
+            st.rerun(scope="app")  # walked_blocks changed → full rerun
+
+
+def _render_partial_match_row(block_id: str, asgn: dict) -> None:
+    date_str = (asgn["start_time"] or "")[:10]
+    name = asgn.get("track_name") or asgn.get("filename") or f"Activity {asgn['activity_id']}"
+    coverage = asgn.get("coverage_ratio", 0.0)
+
+    col_info, col_btn = st.columns([4, 1])
+    with col_info:
+        st.markdown(
+            f"**{name}**  \n"
+            f"{date_str}  ·  {coverage * 100:.0f}% coverage"
+        )
+    with col_btn:
+        if st.button("Assign", key=f"partial_{block_id}_{asgn['activity_id']}"):
+            db.insert_manual_block_walk(block_id, asgn["activity_id"])
             st.rerun(scope="app")  # walked_blocks changed → full rerun
 
 
