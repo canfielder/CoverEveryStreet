@@ -48,7 +48,7 @@ def render_block_inspector(
     with col_close:
         if st.button("✕", key="inspector_close", help="Close inspector"):
             st.session_state["selected_block_id"] = None
-            st.rerun()
+            st.rerun()  # fragment-only: UI change only
 
     # ── Existing assignments ──────────────────────────────────────────────────
     assignments = db.get_block_assignments(block_id)
@@ -76,7 +76,7 @@ def render_block_inspector(
         )
         if st.button("Assign", key=f"inspector_assign_{block_id}"):
             db.insert_manual_block_walk(block_id, options[chosen_label])
-            st.rerun()
+            st.rerun(scope="app")  # walked_blocks changed → full rerun
     else:
         st.caption("No activities available.")
 
@@ -111,7 +111,7 @@ def _render_assignment_row(block_id: str, asgn: dict) -> None:
     with col_btn:
         if st.button("Remove", key=f"remove_{block_id}_{asgn['activity_id']}"):
             db.remove_block_walk(block_id, asgn["activity_id"], source)
-            st.rerun()
+            st.rerun(scope="app")  # walked_blocks changed → full rerun
 
 
 def _activity_label(a: dict) -> str:

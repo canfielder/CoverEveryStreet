@@ -9,7 +9,7 @@ description = "Track and visualize progress walking every street in a city using
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
 dependencies = [
-    "streamlit>=1.32",
+    "streamlit>=1.37",
     "streamlit-folium>=0.18",
     "osmnx>=1.9",
     "geopandas>=0.14",

@@ -28,17 +28,15 @@ def build_map(
     network_gdf: gpd.GeoDataFrame,
     walked_blocks: dict[str, dict],
     tracks: list[dict] | None = None,
-    highlighted_block_id: str | None = None,
 ) -> folium.Map:
     """
     Build a Folium map showing block coverage.
 
     Args:
-        network_gdf:          Edge GDF with block_id, name, block_length_m columns.
-        walked_blocks:        {block_id: {activity_type, companions, walk_date, source}}
-                              from database.get_walked_blocks().
-        tracks:               Parsed track dicts (optional) — drawn as orange lines.
-        highlighted_block_id: Block ID to highlight in yellow (selected in inspector).
+        network_gdf:   Edge GDF with block_id, name, block_length_m columns.
+        walked_blocks: {block_id: {activity_type, companions, walk_date, source}}
+                       from database.get_walked_blocks().
+        tracks:        Parsed track dicts (optional) — drawn as orange lines.
 
     Returns:
         Configured folium.Map ready for st_folium().
@@ -119,15 +117,6 @@ def build_map(
                     fields=_fields,
                     aliases=[_aliases.get(f, f) for f in _fields],
                 ),
-            ).add_to(m)
-
-    # ── Selected block highlight ──────────────────────────────────────────────
-    if highlighted_block_id:
-        sel = gdf[gdf["block_id"] == highlighted_block_id]
-        if not sel.empty:
-            folium.GeoJson(
-                sel.__geo_interface__,
-                style_function=lambda _: {"color": "#facc15", "weight": 7, "opacity": 1.0},
             ).add_to(m)
 
     # ── GPX track overlays ────────────────────────────────────────────────────

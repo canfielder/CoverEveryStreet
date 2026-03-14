@@ -126,20 +126,15 @@ def main() -> None:
     tab_map, tab_stats = st.tabs(["Map", "Stats"])
 
     with tab_map:
-        selected_block_id = st.session_state.get("selected_block_id")
-
-        # ── Main Folium map ────────────────────────────────────────────────────
-        _map_key = (id(network_gdf), frozenset(walked_blocks.keys()), selected_block_id)
+        # ── Main Folium map (cached until walked_blocks changes) ───────────────
+        _map_key = (id(network_gdf), frozenset(walked_blocks.keys()))
         if st.session_state.get("_map_cache_key") != _map_key:
-            st.session_state["_folium_map"] = build_map(
-                network_gdf,
-                walked_blocks=walked_blocks,
-                highlighted_block_id=selected_block_id,
-            )
+            st.session_state["_folium_map"] = build_map(network_gdf, walked_blocks=walked_blocks)
             st.session_state["_map_cache_key"] = _map_key
         folium_map = st.session_state["_folium_map"]
-        col_ratio = [3, 2] if selected_block_id else [4, 1]
-        col_map, col_right = st.columns(col_ratio)
+
+        # Fixed column ratio — changing ratio forces st_folium to relayout
+        col_map, col_right = st.columns([3, 2])
 
         with col_map:
             map_data = st_folium(
@@ -150,7 +145,9 @@ def main() -> None:
                 key="main_map",
             )
 
-        # Detect click → select single block
+        # Detect click → update selected_block_id in session_state immediately.
+        # st_folium already triggers a full rerun on click, so we update session
+        # state here and read it below — no extra st.rerun() needed.
         clicked = map_data.get("last_object_clicked") if map_data else None
         if clicked and isinstance(clicked, dict):
             lat, lng = clicked.get("lat"), clicked.get("lng")
@@ -159,8 +156,9 @@ def main() -> None:
                 found_block = _find_nearest_block(lat, lng, network_gdf)
                 if found_block:
                     st.session_state["selected_block_id"] = found_block
-                    st.rerun()
 
+        # Read after click detection so the inspector appears in the same pass
+        selected_block_id = st.session_state.get("selected_block_id")
         with col_right:
             if selected_block_id:
                 render_block_inspector(selected_block_id, network_gdf, activities, walked_blocks)
