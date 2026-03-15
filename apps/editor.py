@@ -32,6 +32,7 @@ from streamlit_folium import st_folium
 import src.database as db
 from src.inbox import scan_inbox
 from src.network import _cache_age_days, get_or_fetch_network
+from ui.batch_panel import render_batch_panel
 from ui.block_inspector import render_block_inspector
 from ui.map_view import build_map
 from ui.pending_panel import render_pending_panel
@@ -129,6 +130,18 @@ def main() -> None:
     tab_map, tab_activities = st.tabs(["Map", "Activities"])
 
     with tab_map:
+        # ── Mode toggle ────────────────────────────────────────────────────────
+        batch_mode = st.toggle("Batch assign mode", key="batch_mode", value=False)
+
+        # Clear stale state when leaving batch mode
+        if not batch_mode and st.session_state.get("batch_selected_blocks"):
+            st.session_state["batch_selected_blocks"] = set()
+
+        # Ensure batch set exists
+        if "batch_selected_blocks" not in st.session_state:
+            st.session_state["batch_selected_blocks"] = set()
+
+        # ── Map ────────────────────────────────────────────────────────────────
         _map_key = (id(network_gdf), frozenset(walked_blocks.keys()))
         if st.session_state.get("_map_cache_key") != _map_key:
             st.session_state["_folium_map"] = build_map(
@@ -147,7 +160,15 @@ def main() -> None:
                 returned_objects=["last_object_clicked"],
                 key="main_map",
             )
+            if batch_mode:
+                n_sel = len(st.session_state.get("batch_selected_blocks", set()))
+                if n_sel:
+                    noun = "block" if n_sel == 1 else "blocks"
+                    st.caption(f"☑ {n_sel} {noun} selected · click again to deselect")
+                else:
+                    st.caption("Click blocks on the map to add them to the selection.")
 
+        # ── Click handling — mode-aware ────────────────────────────────────────
         clicked = map_data.get("last_object_clicked") if map_data else None
         if clicked and isinstance(clicked, dict):
             lat, lng = clicked.get("lat"), clicked.get("lng")
@@ -155,17 +176,32 @@ def main() -> None:
                 st.session_state["_last_click"] = (lat, lng)
                 found_block = _find_nearest_block(lat, lng, network_gdf)
                 if found_block:
-                    st.session_state["selected_block_id"] = found_block
+                    if batch_mode:
+                        batch = st.session_state["batch_selected_blocks"]
+                        if found_block in batch:
+                            batch.discard(found_block)
+                        else:
+                            batch.add(found_block)
+                    else:
+                        st.session_state["selected_block_id"] = found_block
 
-        selected_block_id = st.session_state.get("selected_block_id")
+        # ── Right column — mode-aware ──────────────────────────────────────────
         with col_right:
-            if selected_block_id:
-                render_block_inspector(
-                    selected_block_id, network_gdf, activities, walked_blocks,
-                    coverage_threshold=cfg["coverage_threshold"],
+            if batch_mode:
+                render_batch_panel(
+                    selected_block_ids=st.session_state["batch_selected_blocks"],
+                    network_gdf=network_gdf,
+                    activities=activities,
                 )
             else:
-                st.caption("Click a block on the map to inspect it.")
+                selected_block_id = st.session_state.get("selected_block_id")
+                if selected_block_id:
+                    render_block_inspector(
+                        selected_block_id, network_gdf, activities, walked_blocks,
+                        coverage_threshold=cfg["coverage_threshold"],
+                    )
+                else:
+                    st.caption("Click a block on the map to inspect it.")
 
     with tab_activities:
         render_activity_table(activities)

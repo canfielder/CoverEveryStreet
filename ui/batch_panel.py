@@ -53,7 +53,7 @@ def render_batch_panel(
         for bid in selected_block_ids:
             db.insert_manual_block_walk(bid, activity_id)
         st.session_state["batch_selected_blocks"] = set()
-        st.rerun()
+        st.rerun(scope="app")  # walked_blocks changed → full rerun
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -63,13 +63,13 @@ def _render_selected_list(selected_block_ids: set[str], network_gdf: gpd.GeoData
         block_edges = network_gdf[network_gdf["block_id"] == bid]
         if not block_edges.empty and "name" in block_edges.columns:
             names = block_edges["name"].dropna().unique()
-            label = names[0] if len(names) > 0 else bid
+            street_name = names[0] if len(names) > 0 else "—"
         else:
-            label = bid
+            street_name = "—"
 
         col_name, col_btn = st.columns([4, 1])
         with col_name:
-            st.caption(label)
+            st.markdown(f"☑ **{street_name}**  \n{bid}")
         with col_btn:
             if st.button("✕", key=f"batch_remove_{bid}", help="Remove from selection"):
                 st.session_state["batch_selected_blocks"].discard(bid)

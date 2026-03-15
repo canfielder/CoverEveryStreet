@@ -48,8 +48,8 @@ ACTIVITY_COLORS: dict[tuple, str] = {
     ("run",  frozenset(["kelsey"])):   "#ec4899",  # run+Kelsey  — pink
 }
 
-COLOR_UNWALKED = "#94a3b8"  # gray
-COLOR_FALLBACK = "#f97316"  # orange — any category not explicitly mapped
+COLOR_UNWALKED  = "#94a3b8"  # gray
+COLOR_FALLBACK  = "#f97316"  # orange — any category not explicitly mapped
 COLOR_GPX_TRACK = "#f97316"
 
 # ── Map Display ───────────────────────────────────────────────────────────────
