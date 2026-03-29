@@ -17,21 +17,23 @@ def render_metrics(
         .drop_duplicates("block_id")
         .copy()
     )
+    METERS_TO_MILES = 0.000621371
+
     total_blocks = len(blocks)
-    total_km = blocks["block_length_m"].sum() / 1000
+    total_mi = blocks["block_length_m"].sum() * METERS_TO_MILES
 
     walked_ids = set(walked_blocks.keys())
     walked_mask = blocks["block_id"].isin(walked_ids)
     n_walked = walked_mask.sum()
-    walked_km = blocks.loc[walked_mask, "block_length_m"].sum() / 1000
-    unwalked_km = total_km - walked_km
+    walked_mi = blocks.loc[walked_mask, "block_length_m"].sum() * METERS_TO_MILES
+    remaining_mi = total_mi - walked_mi
     pct = (n_walked / total_blocks * 100) if total_blocks else 0.0
 
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Blocks Walked", f"{n_walked:,}", f"{pct:.1f}% of {total_blocks:,}")
-    c2.metric("Distance Walked", f"{walked_km:,.1f} km", f"{unwalked_km:,.1f} km remaining")
+    c2.metric("Miles Walked", f"{walked_mi:,.1f} mi", f"{remaining_mi:,.1f} mi remaining")
     c3.metric("Total Activities", f"{len(activities):,}")
-    c4.metric("Network Size", f"{total_km:,.1f} km")
+    c4.metric("Network Size", f"{total_mi:,.1f} mi")
 
     st.progress(min(pct / 100, 1.0), text=f"**{pct:.1f}%** of blocks walked")
 
@@ -62,11 +64,11 @@ def render_detail_tables(
             key = (atype, companions)
             label = _category_label(key)
             category_counts[label] = category_counts.get(label, 0) + 1
-            block_km = blocks.loc[blocks["block_id"] == bid, "block_length_m"].sum() / 1000
-            category_km[label] = category_km.get(label, 0.0) + block_km
+            block_mi = blocks.loc[blocks["block_id"] == bid, "block_length_m"].sum() * 0.000621371
+            category_km[label] = category_km.get(label, 0.0) + block_mi
 
         cat_rows = [
-            {"Category": lbl, "Blocks": cnt, "Distance (km)": f"{category_km.get(lbl, 0):.1f}"}
+            {"Category": lbl, "Blocks": cnt, "Distance (mi)": f"{category_km.get(lbl, 0):.1f}"}
             for lbl, cnt in sorted(category_counts.items(), key=lambda x: -x[1])
         ]
         st.dataframe(pd.DataFrame(cat_rows), use_container_width=True, hide_index=True)
