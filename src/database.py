@@ -20,6 +20,14 @@ logger = logging.getLogger(__name__)
 
 # ── Schema ────────────────────────────────────────────────────────────────────
 
+_SCHEMA_VERSION = 1  # increment when adding to _MIGRATIONS
+
+_MIGRATIONS: list[tuple[int, str]] = [
+    # (target_version, SQL statement)
+    # Example for future use:
+    # (2, "ALTER TABLE activities ADD COLUMN notes TEXT"),
+]
+
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS activities (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,10 +86,28 @@ def _db(path: Path = DB_PATH):
 
 
 def init_db(path: Path = DB_PATH) -> None:
-    """Create tables if they don't exist. Safe to call on every app start."""
+    """Create tables if they don't exist and apply pending migrations. Safe to call on every app start."""
     with _db(path) as conn:
         conn.executescript(_SCHEMA)
+        _apply_migrations(conn)
     logger.info("Database initialised: %s", path)
+
+
+def _apply_migrations(conn: sqlite3.Connection) -> None:
+    """Apply any pending migrations inside an existing _db() context."""
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL)"
+    )
+    row = conn.execute("SELECT version FROM schema_version").fetchone()
+    current = row["version"] if row else 0
+    if current == 0:
+        conn.execute("INSERT INTO schema_version (version) VALUES (0)")
+
+    for version, sql in _MIGRATIONS:
+        if version > current:
+            conn.execute(sql)
+            conn.execute("UPDATE schema_version SET version = ?", (version,))
+            logger.info("Applied migration to schema version %d", version)
 
 
 # ── Activities ────────────────────────────────────────────────────────────────
